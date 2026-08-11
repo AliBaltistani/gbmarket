@@ -33,6 +33,7 @@ export default function AdminSettings() {
         storeName: settings.store_name || '',
         storeTagline: settings.store_tagline || '',
         logoPreview: settings.logo_url || '/placeholder.png',
+        faviconPreview: settings.favicon_url || '/vite.svg',
 
         // Contact Info
         contactEmail: settings.contact_email || '',
@@ -58,6 +59,7 @@ export default function AdminSettings() {
     });
 
     const logoInputRef = useRef(null);
+    const faviconInputRef = useRef(null);
     const heroImageInputRef = useRef(null);
 
     // Tab items configuration
@@ -83,6 +85,15 @@ export default function AdminSettings() {
         }
     };
 
+    const handleFaviconChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const previewUrl = URL.createObjectURL(file);
+            setFormData(prev => ({ ...prev, faviconPreview: previewUrl }));
+            toast.success('Favicon preview updated!');
+        }
+    };
+
     const handleHeroImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -104,6 +115,14 @@ export default function AdminSettings() {
                 finalLogoUrl = data.url;
             }
 
+            let finalFaviconUrl = formData.faviconPreview;
+            if (faviconInputRef.current && faviconInputRef.current.files[0]) {
+                const fd = new FormData();
+                fd.append('image', faviconInputRef.current.files[0]);
+                const { data } = await api.post('/upload', fd);
+                finalFaviconUrl = data.url;
+            }
+
             let finalHeroImageUrl = formData.heroImagePreview;
             if (heroImageInputRef.current && heroImageInputRef.current.files[0]) {
                 const fd = new FormData();
@@ -116,6 +135,7 @@ export default function AdminSettings() {
                 store_name: formData.storeName,
                 store_tagline: formData.storeTagline,
                 logo_url: finalLogoUrl,
+                favicon_url: finalFaviconUrl,
                 contact_email: formData.contactEmail,
                 contact_phone: formData.contactPhone,
                 contact_address: formData.contactAddress,
@@ -132,7 +152,12 @@ export default function AdminSettings() {
 
             await updateSettings(payload);
             toast.success('Settings saved successfully!');
-            setFormData(prev => ({ ...prev, logoPreview: finalLogoUrl, heroImagePreview: finalHeroImageUrl }));
+            setFormData(prev => ({
+                ...prev,
+                logoPreview: finalLogoUrl,
+                heroImagePreview: finalHeroImageUrl,
+                faviconPreview: finalFaviconUrl
+            }));
         } catch (error) {
             toast.error(error.response?.data?.error || error.message);
         } finally {
@@ -282,6 +307,43 @@ export default function AdminSettings() {
                                                 >
                                                     <UploadCloud className="w-3.5 h-3.5" />
                                                     <span>Replace Logo</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Favicon Upload Area */}
+                                    <div className="space-y-2 pt-2 border-t border-[#E8DEC8]">
+                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                            Store Favicon
+                                        </label>
+                                        <input
+                                            type="file"
+                                            ref={faviconInputRef}
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={handleFaviconChange}
+                                        />
+                                        <div className="flex flex-col sm:flex-row items-center gap-5 p-5 bg-[#F5EFE0]/40 border border-[#E8DEC8] rounded-2xl">
+                                            <div className="w-16 h-16 rounded-xl bg-white border border-[#E8DEC8] p-2 flex items-center justify-center shrink-0 shadow-xs">
+                                                <img
+                                                    src={formData.faviconPreview}
+                                                    alt="Store Favicon Preview"
+                                                    className="max-h-full max-w-full object-contain"
+                                                />
+                                            </div>
+                                            <div className="space-y-2 text-center sm:text-left flex-1">
+                                                <h4 className="text-xs font-bold text-[#3A2E1F]">Browser Tab Icon</h4>
+                                                <p className="text-[11px] text-[#3A2E1F]/60">
+                                                    Ideal size: 32x32px or 64x64px. SVG, PNG or ICO.
+                                                </p>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => faviconInputRef.current?.click()}
+                                                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-xs rounded-full shadow-xs transition-all"
+                                                >
+                                                    <UploadCloud className="w-3.5 h-3.5" />
+                                                    <span>Upload Favicon</span>
                                                 </button>
                                             </div>
                                         </div>

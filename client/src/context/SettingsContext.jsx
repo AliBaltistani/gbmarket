@@ -24,6 +24,19 @@ export const SettingsProvider = ({ children }) => {
         fetchSettings();
     }, []);
 
+    // Sync favicon changes to DOM head
+    useEffect(() => {
+        if (settings.favicon_url) {
+            let link = document.querySelector("link[rel*='icon']");
+            if (!link) {
+                link = document.createElement('link');
+                link.rel = 'icon';
+                document.head.appendChild(link);
+            }
+            link.href = settings.favicon_url;
+        }
+    }, [settings.favicon_url]);
+
     const updateSettings = async (newSettings) => {
         try {
             const { data } = await api.put('/settings', newSettings);
