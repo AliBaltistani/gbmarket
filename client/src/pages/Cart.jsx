@@ -6,7 +6,7 @@ import { useCart } from '../context/CartContext';
 export default function Cart() {
     const { cartItems, updateQuantity, removeItem, clearCart } = useCart();
 
-    const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const subtotal = cartItems.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0);
     const shippingFee = subtotal >= 3000 || subtotal === 0 ? 0 : 250;
     const grandTotal = subtotal + shippingFee;
 
@@ -60,7 +60,7 @@ export default function Cart() {
                                     </div>
 
                                     <div className="col-span-2 text-center text-xs font-semibold text-[#3A2E1F] hidden sm:block">
-                                        Rs. {item.price.toLocaleString()}
+                                        Rs. {(item.price || 0).toLocaleString()}
                                     </div>
 
                                     <div className="col-span-2 flex items-center justify-center">
@@ -77,7 +77,7 @@ export default function Cart() {
 
                                     <div className="col-span-2 text-right font-heading font-extrabold text-sm text-[#3A2E1F] w-full sm:w-auto flex sm:block justify-between items-center border-t sm:border-0 pt-2 sm:pt-0">
                                         <span className="sm:hidden text-xs text-[#3A2E1F]/60">Total:</span>
-                                        <span>Rs. {(item.price * item.quantity).toLocaleString()}</span>
+                                        <span>Rs. {((item.price || 0) * (item.quantity || 1)).toLocaleString()}</span>
                                     </div>
                                 </div>
                             ))}

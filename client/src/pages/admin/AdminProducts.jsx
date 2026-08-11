@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Plus,
     Search,
@@ -11,7 +11,8 @@ import {
     ChevronLeft,
     ChevronRight,
     Sparkles,
-    AlertCircle
+    AlertCircle,
+    Loader2
 } from 'lucide-react';
 import {
     SlideOver,
@@ -19,22 +20,20 @@ import {
     AdminEmptyState,
     AdminSkeletonTable
 } from '../../components/admin/AdminComponents';
+import { getProducts, createProduct, updateProduct, deleteProduct, uploadImage } from '../../api/products';
+import { getCategories } from '../../api/categories';
+import toast from 'react-hot-toast';
 
 export default function AdminProducts() {
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
 
-    // Dummy Products List
-    const [products, setProducts] = useState([
-        { id: 1, name: 'Premium Hunza Dried Apricots', slug: 'hunza-dried-apricots', category: 'Dried Apricots', basePrice: 1200, stock: 45, isFeatured: true, image: 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&q=80&w=300' },
-        { id: 2, name: 'Gilgit Organic Walnuts (In Shell)', slug: 'gilgit-organic-walnuts', category: 'Walnuts', basePrice: 1800, stock: 3, isFeatured: true, image: 'https://images.unsplash.com/photo-1543208541-0961a29a8c3d?auto=format&fit=crop&q=80&w=300' },
-        { id: 3, name: 'Kaghan Raw Almond Kernels', slug: 'raw-almond-kernels', category: 'Almonds', basePrice: 2200, stock: 28, isFeatured: false, image: 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&q=80&w=300' },
-        { id: 4, name: 'Skardu Salted Roasted Cashews', slug: 'salted-roasted-cashews', category: 'Cashews', basePrice: 2600, stock: 2, isFeatured: true, image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=300' },
-        { id: 5, name: 'Sun-Dried Organic Fig (Anjeer)', slug: 'sun-dried-organic-fig', category: 'Figs', basePrice: 1950, stock: 15, isFeatured: false, image: 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&q=80&w=300' },
-        { id: 6, name: 'Premium Saudi Ajwa Dates', slug: 'saudi-ajwa-dates', category: 'Dates', basePrice: 3200, stock: 60, isFeatured: true, image: 'https://images.unsplash.com/photo-1543208541-0961a29a8c3d?auto=format&fit=crop&q=80&w=300' },
-        { id: 7, name: 'Mountain Mix Dry Fruit Box', slug: 'mountain-mix-dry-fruit-box', category: 'Mixed Nuts', basePrice: 2990, stock: 12, isFeatured: true, image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=300' },
-        { id: 8, name: 'Gilgit Green Raisins (Kishmish)', slug: 'green-raisins', category: 'Raisins', basePrice: 950, stock: 4, isFeatured: false, image: 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&q=80&w=300' },
-    ]);
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const fileInputRef = useRef(null);
 
     // Modal / SlideOver Form State
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -43,51 +42,69 @@ export default function AdminProducts() {
     // Product Form Input Values
     const [formData, setFormData] = useState({
         name: '',
-        category: 'Almonds',
+        category_id: '',
         basePrice: '',
         stock: '',
         description: '',
         isFeatured: false,
-        weightOptions: [{ label: '250g', price: '' }, { label: '500g', price: '' }]
+        weightOptions: [{ label: '500g', price: '' }]
     });
 
     // Delete Confirm Dialog State
-    const [deleteProduct, setDeleteProduct] = useState(null);
+    const [deleteProductItem, setDeleteProductItem] = useState(null);
+
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const loadData = async () => {
+        setIsLoading(true);
+        try {
+            const [prods, cats] = await Promise.all([getProducts(), getCategories()]);
+            setProducts(prods);
+            setCategories(cats);
+        } catch (err) {
+            toast.error('Failed to load products or categories');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // Filter products by search
     const filteredProducts = products.filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchTerm.toLowerCase())
+        (p.category_name && p.category_name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     // Handle Form Open (Add vs Edit)
     const handleOpenForm = (prod = null) => {
+        setImageFile(null);
         if (prod) {
             setEditingProduct(prod);
             setFormData({
                 name: prod.name,
-                category: prod.category,
-                basePrice: prod.basePrice,
+                category_id: prod.category_id || (categories.length > 0 ? categories[0].id : ''),
+                basePrice: prod.base_price,
                 stock: prod.stock,
-                description: 'Authentic organic sun-dried product sourced directly from Gilgit-Baltistan farms.',
-                isFeatured: prod.isFeatured,
-                weightOptions: [
-                    { label: '250g', price: prod.basePrice },
-                    { label: '500g', price: Math.round(prod.basePrice * 1.9) },
-                    { label: '1kg', price: Math.round(prod.basePrice * 3.6) }
-                ]
+                description: prod.description || '',
+                isFeatured: prod.is_featured === 1,
+                weightOptions: prod.weight_options && prod.weight_options.length > 0
+                    ? prod.weight_options
+                    : [{ label: '500g', price: '' }]
             });
+            setImagePreview(prod.image_url);
         } else {
             setEditingProduct(null);
             setFormData({
                 name: '',
-                category: 'Almonds',
+                category_id: categories.length > 0 ? categories[0].id : '',
                 basePrice: '',
                 stock: '',
                 description: '',
                 isFeatured: false,
-                weightOptions: [{ label: '250g', price: '' }, { label: '500g', price: '' }]
+                weightOptions: [{ label: '1kg', price: '' }, { label: '500g', price: '' }]
             });
+            setImagePreview(null);
         }
         setIsFormOpen(true);
     };
@@ -95,7 +112,7 @@ export default function AdminProducts() {
     const handleAddWeightOption = () => {
         setFormData({
             ...formData,
-            weightOptions: [...formData.weightOptions, { label: '1kg', price: '' }]
+            weightOptions: [...formData.weightOptions, { label: '250g', price: '' }]
         });
     };
 
@@ -106,30 +123,64 @@ export default function AdminProducts() {
         });
     };
 
-    const handleSaveProduct = (e) => {
-        e.preventDefault();
-        if (editingProduct) {
-            setProducts(products.map(p => p.id === editingProduct.id ? { ...p, ...formData, basePrice: Number(formData.basePrice), stock: Number(formData.stock) } : p));
-        } else {
-            const newProd = {
-                id: Date.now(),
-                name: formData.name,
-                slug: formData.name.toLowerCase().replace(/\s+/g, '-'),
-                category: formData.category,
-                basePrice: Number(formData.basePrice),
-                stock: Number(formData.stock),
-                isFeatured: formData.isFeatured,
-                image: 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&q=80&w=300'
-            };
-            setProducts([newProd, ...products]);
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
         }
-        setIsFormOpen(false);
     };
 
-    const handleDeleteConfirm = () => {
-        if (deleteProduct) {
-            setProducts(products.filter(p => p.id !== deleteProduct.id));
-            setDeleteProduct(null);
+    const handleSaveProduct = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            let imageUrl = editingProduct ? editingProduct.image_url : null;
+            if (imageFile) {
+                const uploadRes = await uploadImage(imageFile);
+                imageUrl = uploadRes.url;
+            }
+
+            const payload = {
+                name: formData.name,
+                slug: formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
+                category_id: Number(formData.category_id),
+                base_price: Number(formData.basePrice),
+                stock: Number(formData.stock),
+                description: formData.description,
+                image_url: imageUrl,
+                is_featured: formData.isFeatured ? 1 : 0,
+                weight_options: formData.weightOptions.map(opt => ({ label: opt.label, price: Number(opt.price) }))
+            };
+
+            if (editingProduct) {
+                await updateProduct(editingProduct.id, payload);
+                toast.success('Product updated successfully');
+            } else {
+                await createProduct(payload);
+                toast.success('Product created successfully');
+            }
+
+            setIsFormOpen(false);
+            loadData();
+        } catch (err) {
+            toast.error(err.response?.data?.error || 'Failed to save product');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (deleteProductItem) {
+            try {
+                await deleteProduct(deleteProductItem.id);
+                toast.success('Product deleted');
+                loadData();
+            } catch (err) {
+                toast.error('Failed to delete product');
+            } finally {
+                setDeleteProductItem(null);
+            }
         }
     };
 
@@ -148,14 +199,13 @@ export default function AdminProducts() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    {/* Skeleton Preview Toggle */}
                     <button
                         type="button"
-                        onClick={() => setIsLoading(!isLoading)}
+                        onClick={loadData}
                         className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-[#FFFDF9] border border-[#E8DEC8] hover:bg-[#F5EFE0] text-[#3A2E1F] transition-all"
                     >
                         <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#F5A623]' : 'text-[#D97706]'}`} />
-                        <span>Skeleton State</span>
+                        <span>Refresh</span>
                     </button>
 
                     {/* Add Product Button */}
@@ -222,7 +272,7 @@ export default function AdminProducts() {
                                                 {/* Image + Name */}
                                                 <td className="py-3.5 px-4 flex items-center gap-3">
                                                     <img
-                                                        src={p.image}
+                                                        src={p.image_url || 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&q=80&w=300'}
                                                         alt={p.name}
                                                         className="w-11 h-11 rounded-xl object-cover border border-[#E8DEC8] bg-[#F5EFE0] shrink-0"
                                                     />
@@ -235,13 +285,13 @@ export default function AdminProducts() {
                                                 {/* Category */}
                                                 <td className="py-3.5 px-4">
                                                     <span className="px-2.5 py-1 bg-[#F5EFE0] text-[#D97706] rounded-full text-[11px] font-bold border border-[#E8DEC8]">
-                                                        {p.category}
+                                                        {p.category_name}
                                                     </span>
                                                 </td>
 
                                                 {/* Price */}
                                                 <td className="py-3.5 px-4 font-extrabold text-sm text-[#3A2E1F]">
-                                                    Rs. {p.basePrice.toLocaleString()}
+                                                    Rs. {p.base_price.toLocaleString()}
                                                 </td>
 
                                                 {/* Stock (Red highlight if < 5) */}
@@ -260,7 +310,7 @@ export default function AdminProducts() {
 
                                                 {/* Featured Toggle */}
                                                 <td className="py-3.5 px-4">
-                                                    {p.isFeatured ? (
+                                                    {p.is_featured ? (
                                                         <span className="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full text-[11px] font-bold border border-emerald-200">
                                                             <Check className="w-3 h-3" /> Featured
                                                         </span>
@@ -282,7 +332,7 @@ export default function AdminProducts() {
                                                         </button>
                                                         <button
                                                             type="button"
-                                                            onClick={() => setDeleteProduct(p)}
+                                                            onClick={() => setDeleteProductItem(p)}
                                                             className="p-2 bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white rounded-xl transition-colors"
                                                             title="Delete Product"
                                                         >
@@ -299,7 +349,7 @@ export default function AdminProducts() {
 
                         {/* Pagination Controls */}
                         <div className="flex flex-col sm:flex-row justify-between items-center pt-4 border-t border-[#E8DEC8] gap-4 text-xs font-semibold text-[#3A2E1F]/70">
-                            <span>Showing 1 - {filteredProducts.length} of {filteredProducts.length} products</span>
+                            <span>Showing 1 - {filteredProducts.length} of {products.length} products</span>
                             <div className="flex items-center gap-1">
                                 <button type="button" disabled className="p-2 rounded-lg border border-[#E8DEC8] opacity-50 cursor-not-allowed">
                                     <ChevronLeft className="w-4 h-4" />
@@ -338,18 +388,13 @@ export default function AdminProducts() {
                         <div className="space-y-1.5">
                             <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Category</label>
                             <select
-                                value={formData.category}
-                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                value={formData.category_id}
+                                onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
                                 className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                             >
-                                <option value="Almonds">Almonds</option>
-                                <option value="Walnuts">Walnuts</option>
-                                <option value="Cashews">Cashews</option>
-                                <option value="Dried Apricots">Dried Apricots</option>
-                                <option value="Dates">Dates</option>
-                                <option value="Figs">Figs</option>
-                                <option value="Mixed Nuts">Mixed Nuts</option>
-                                <option value="Raisins">Raisins</option>
+                                {categories.map(c => (
+                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                ))}
                             </select>
                         </div>
 
@@ -358,6 +403,7 @@ export default function AdminProducts() {
                             <input
                                 required
                                 type="number"
+                                min="0"
                                 value={formData.stock}
                                 onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                                 placeholder="e.g. 50"
@@ -371,6 +417,7 @@ export default function AdminProducts() {
                         <input
                             required
                             type="number"
+                            min="0"
                             value={formData.basePrice}
                             onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
                             placeholder="e.g. 1500"
@@ -378,7 +425,7 @@ export default function AdminProducts() {
                         />
                     </div>
 
-                    {/* Repeatable Weight Options */}
+                    {/* Form Controls */}
                     <div className="space-y-3 p-4 bg-[#F5EFE0]/40 rounded-2xl border border-[#E8DEC8]">
                         <div className="flex justify-between items-center">
                             <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Weight / Packaging Sizes</label>
@@ -395,6 +442,7 @@ export default function AdminProducts() {
                             <div key={i} className="flex items-center gap-2">
                                 <input
                                     type="text"
+                                    required
                                     value={opt.label}
                                     onChange={(e) => {
                                         const newOpts = [...formData.weightOptions];
@@ -406,6 +454,8 @@ export default function AdminProducts() {
                                 />
                                 <input
                                     type="number"
+                                    required
+                                    min="0"
                                     value={opt.price}
                                     onChange={(e) => {
                                         const newOpts = [...formData.weightOptions];
@@ -428,13 +478,29 @@ export default function AdminProducts() {
                         ))}
                     </div>
 
-                    {/* Image Dropzone Placeholder */}
+                    {/* Image Dropzone */}
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Product Photo</label>
-                        <div className="border-2 border-dashed border-[#E8DEC8] rounded-2xl p-6 text-center bg-[#F5EFE0]/20 hover:bg-[#F5EFE0]/40 transition-colors cursor-pointer space-y-2">
-                            <UploadCloud className="w-8 h-8 text-[#D97706] mx-auto" />
-                            <p className="text-xs font-bold text-[#3A2E1F]">Drag and drop product image here</p>
-                            <p className="text-[10px] text-[#3A2E1F]/60">Supports PNG, JPG, WEBP up to 5MB</p>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            ref={fileInputRef}
+                            className="hidden"
+                            onChange={handleImageChange}
+                        />
+                        <div
+                            onClick={() => fileInputRef.current.click()}
+                            className="border-2 border-dashed border-[#E8DEC8] rounded-2xl p-6 text-center bg-[#F5EFE0]/20 hover:bg-[#F5EFE0]/40 transition-colors cursor-pointer space-y-2 relative overflow-hidden"
+                        >
+                            {imagePreview ? (
+                                <img src={imagePreview} alt="Preview" className="h-32 object-contain mx-auto rounded-lg" />
+                            ) : (
+                                <>
+                                    <UploadCloud className="w-8 h-8 text-[#D97706] mx-auto" />
+                                    <p className="text-xs font-bold text-[#3A2E1F]">Click to upload image</p>
+                                    <p className="text-[10px] text-[#3A2E1F]/60">Supports PNG, JPG, WEBP up to 5MB</p>
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -465,14 +531,17 @@ export default function AdminProducts() {
                         <button
                             type="button"
                             onClick={() => setIsFormOpen(false)}
-                            className="w-1/2 py-3 bg-[#F5EFE0] hover:bg-[#E8DEC8] text-[#3A2E1F] font-bold text-xs rounded-full transition-colors"
+                            disabled={isSubmitting}
+                            className="w-1/2 py-3 bg-[#F5EFE0] hover:bg-[#E8DEC8] text-[#3A2E1F] font-bold text-xs rounded-full transition-colors disabled:opacity-50"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="w-1/2 py-3 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-xs rounded-full transition-colors shadow-md"
+                            disabled={isSubmitting}
+                            className="w-1/2 flex items-center justify-center gap-2 py-3 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-xs rounded-full transition-colors shadow-md disabled:opacity-50"
                         >
+                            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                             {editingProduct ? 'Update Product' : 'Save Product'}
                         </button>
                     </div>
@@ -481,11 +550,11 @@ export default function AdminProducts() {
 
             {/* DELETE CONFIRM DIALOG */}
             <ConfirmDialog
-                isOpen={!!deleteProduct}
-                onClose={() => setDeleteProduct(null)}
+                isOpen={!!deleteProductItem}
+                onClose={() => setDeleteProductItem(null)}
                 onConfirm={handleDeleteConfirm}
                 title="Delete Product"
-                message={`Are you sure you want to delete "${deleteProduct?.name}"?`}
+                message={`Are you sure you want to delete "${deleteProductItem?.name}"?`}
                 warningNote="This action cannot be undone and will permanently remove the item from the storefront catalog."
             />
 

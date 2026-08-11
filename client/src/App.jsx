@@ -20,6 +20,8 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminCategories from './pages/admin/AdminCategories';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
 
 // Storefront Layout Component
 function StorefrontLayout() {
@@ -37,31 +39,35 @@ function StorefrontLayout() {
 function App() {
   return (
     <Router>
-      <Routes>
-        {/* Admin Login - Standalone Page */}
-        <Route path="/admin/login" element={<AdminLogin />} />
+      <AuthProvider>
+        <Routes>
+          {/* Admin Login - Standalone Page */}
+          <Route path="/admin/login" element={<AdminLogin />} />
 
-        {/* Admin Dashboard & Management Routes wrapped in AdminLayout */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="products" element={<AdminProducts />} />
-          <Route path="orders" element={<AdminOrders />} />
-          <Route path="categories" element={<AdminCategories />} />
-        </Route>
+          {/* Protected Admin Routes */}
+          <Route path="/admin" element={<ProtectedAdminRoute />}>
+            <Route element={<AdminLayout />}>
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="products" element={<AdminProducts />} />
+              <Route path="orders" element={<AdminOrders />} />
+              <Route path="categories" element={<AdminCategories />} />
+            </Route>
+          </Route>
 
-        {/* Storefront Routes wrapped in Storefront Layout */}
-        <Route element={<StorefrontLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/product/:slug" element={<ProductDetail />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/order-confirmation" element={<OrderConfirmation />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-        </Route>
-      </Routes>
+          {/* Storefront Routes wrapped in Storefront Layout */}
+          <Route element={<StorefrontLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/product/:slug" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order-confirmation" element={<OrderConfirmation />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
     </Router>
   );
 }

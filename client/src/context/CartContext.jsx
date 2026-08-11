@@ -33,9 +33,9 @@ export const CartProvider = ({ children }) => {
                 slug: product.slug,
                 product_name: product.name,
                 image: product.images?.[0] || product.image_url,
-                weight_option: weightOption.label,
-                price: weightOption.price,
-                quantity: quantity
+                weight_option: weightOption?.label || 'Standard',
+                price: weightOption?.price || product.base_price || product.basePrice || 0,
+                quantity: quantity || 1
             }];
         });
         toast.success(`Added ${quantity} x ${product.name} to cart.`);

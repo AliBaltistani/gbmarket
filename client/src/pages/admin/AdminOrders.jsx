@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     ChevronDown,
     ChevronUp,
@@ -18,101 +18,48 @@ import {
     AdminEmptyState,
     AdminSkeletonTable
 } from '../../components/admin/AdminComponents';
+import { getOrders, updateOrderStatus } from '../../api/orders';
+import toast from 'react-hot-toast';
 
 export default function AdminOrders() {
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('All');
+    const [orders, setOrders] = useState([]);
 
     // SlideOver / Selected Order Detail State
     const [selectedOrder, setSelectedOrder] = useState(null);
 
-    // Dummy Orders List
-    const [orders, setOrders] = useState([
-        {
-            id: 'GB-1048',
-            customer_name: 'Ali Khan',
-            phone: '0300 1234567',
-            address: 'House 12, Street 4, Phase 5, DHA, Lahore',
-            total: 4900,
-            status: 'Pending',
-            date: '2026-08-11 14:30',
-            items: [
-                { product_name: 'Premium Hunza Dried Apricots', weight_option: '500g', quantity: 2, price: 1950 },
-                { product_name: 'Gilgit Green Raisins (Kishmish)', weight_option: '250g', quantity: 1, price: 1000 }
-            ]
-        },
-        {
-            id: 'GB-1047',
-            customer_name: 'Sara Ahmed',
-            phone: '0321 9876543',
-            address: 'Flat 4B, Al-Latif Tower, F-7, Islamabad',
-            total: 2450,
-            status: 'Processing',
-            date: '2026-08-11 11:15',
-            items: [
-                { product_name: 'Gilgit Organic Walnuts (In Shell)', weight_option: '1kg', quantity: 1, price: 2450 }
-            ]
-        },
-        {
-            id: 'GB-1046',
-            customer_name: 'Usman Tariq',
-            phone: '0333 5554433',
-            address: 'Plot 88, Civil Lines, Rawalpindi',
-            total: 12500,
-            status: 'Shipped',
-            date: '2026-08-10 16:45',
-            items: [
-                { product_name: 'Skardu Salted Roasted Cashews', weight_option: '1kg', quantity: 3, price: 3500 },
-                { product_name: 'Mountain Mix Dry Fruit Box', weight_option: '1kg', quantity: 1, price: 2000 }
-            ]
-        },
-        {
-            id: 'GB-1045',
-            customer_name: 'Fatima Bilal',
-            phone: '0312 4443322',
-            address: 'Bungalow 14, Block 3, PECHS, Karachi',
-            total: 3800,
-            status: 'Delivered',
-            date: '2026-08-10 09:20',
-            items: [
-                { product_name: 'Premium Saudi Ajwa Dates', weight_option: '500g', quantity: 2, price: 1900 }
-            ]
-        },
-        {
-            id: 'GB-1044',
-            customer_name: 'Hamza Malik',
-            phone: '0301 7778899',
-            address: 'House 55, Sector G-9/2, Islamabad',
-            total: 1800,
-            status: 'Delivered',
-            date: '2026-08-09 18:00',
-            items: [
-                { product_name: 'Sun-Dried Organic Fig (Anjeer)', weight_option: '500g', quantity: 1, price: 1800 }
-            ]
-        },
-        {
-            id: 'GB-1043',
-            customer_name: 'Amina Zain',
-            phone: '0345 6667788',
-            address: 'Street 9, Jutial, Gilgit',
-            total: 5400,
-            status: 'Pending',
-            date: '2026-08-09 10:10',
-            items: [
-                { product_name: 'Kaghan Raw Almond Kernels', weight_option: '1kg', quantity: 2, price: 2700 }
-            ]
+    const loadOrders = async () => {
+        setIsLoading(true);
+        try {
+            const data = await getOrders();
+            setOrders(data);
+        } catch (error) {
+            toast.error("Failed to load orders");
+        } finally {
+            setIsLoading(false);
         }
-    ]);
+    };
+
+    useEffect(() => {
+        loadOrders();
+    }, []);
 
     const tabs = ['All', 'Pending', 'Processing', 'Shipped', 'Delivered'];
 
     // Filter orders by active tab
     const filteredOrders = orders.filter(o => activeTab === 'All' || o.status === activeTab);
 
-    const handleStatusChange = (orderId, newStatus) => {
-        setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
-        if (selectedOrder && selectedOrder.id === orderId) {
-            setSelectedOrder({ ...selectedOrder, status: newStatus });
+    const handleStatusChange = async (orderId, newStatus) => {
+        try {
+            await updateOrderStatus(orderId, newStatus);
+            setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+            if (selectedOrder && selectedOrder.id === orderId) {
+                setSelectedOrder({ ...selectedOrder, status: newStatus });
+            }
+            toast.success(`Order ${orderId} marked as ${newStatus}`);
+        } catch (err) {
+            toast.error(err.response?.data?.error || "Failed to update order status");
         }
     };
 
@@ -130,14 +77,14 @@ export default function AdminOrders() {
                     </p>
                 </div>
 
-                {/* Skeleton Preview Toggle */}
+                {/* Refresh Data Toggle */}
                 <button
                     type="button"
-                    onClick={() => setIsLoading(!isLoading)}
+                    onClick={loadOrders}
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold bg-[#FFFDF9] border border-[#E8DEC8] hover:bg-[#F5EFE0] text-[#3A2E1F] transition-all"
                 >
                     <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#F5A623]' : 'text-[#D97706]'}`} />
-                    <span>Skeleton State</span>
+                    <span>Refresh Data</span>
                 </button>
             </div>
 
@@ -152,12 +99,12 @@ export default function AdminOrders() {
                             type="button"
                             onClick={() => setActiveTab(tab)}
                             className={`
-                px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2 shrink-0
-                ${isActive
+                                px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2 shrink-0
+                                ${isActive
                                     ? 'bg-[#F5A623] text-[#3A2E1F] shadow-sm'
                                     : 'bg-[#FFFDF9] text-[#3A2E1F]/70 border border-[#E8DEC8] hover:bg-[#F5EFE0]'
                                 }
-              `}
+                            `}
                         >
                             <span>{tab}</span>
                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${isActive ? 'bg-[#3A2E1F] text-white' : 'bg-[#F5EFE0] text-[#D97706]'}`}>
@@ -202,7 +149,7 @@ export default function AdminOrders() {
                                         className="hover:bg-[#F5EFE0]/40 transition-colors cursor-pointer"
                                     >
                                         <td className="py-4 px-4 font-mono font-bold text-[#D97706]">
-                                            {order.id}
+                                            GB-{order.id}
                                         </td>
                                         <td className="py-4 px-4 font-bold text-[#3A2E1F]">
                                             {order.customer_name}
@@ -217,7 +164,7 @@ export default function AdminOrders() {
                                             <StatusBadge status={order.status} />
                                         </td>
                                         <td className="py-4 px-4 text-[#3A2E1F]/60 text-[11px]">
-                                            {order.date}
+                                            {new Date(order.created_at).toLocaleDateString()}
                                         </td>
                                         <td className="py-4 px-4 text-right">
                                             <button
@@ -240,7 +187,7 @@ export default function AdminOrders() {
             <SlideOver
                 isOpen={!!selectedOrder}
                 onClose={() => setSelectedOrder(null)}
-                title={`Order Details: ${selectedOrder?.id}`}
+                title={`Order Details: GB-${selectedOrder?.id}`}
             >
                 {selectedOrder && (
                     <div className="space-y-8">
@@ -249,7 +196,7 @@ export default function AdminOrders() {
                         <div className="p-4 bg-[#F5EFE0] rounded-2xl border border-[#E8DEC8] flex items-center justify-between gap-4">
                             <div>
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#3A2E1F]/60 block">Update Order Status</span>
-                                <span className="text-xs font-bold text-[#3A2E1F]">Current: <StatusBadge status={selectedOrder.status} /></span>
+                                <span className="text-xs font-bold text-[#3A2E1F] flex items-center gap-2 mt-1">Current: <StatusBadge status={selectedOrder.status} /></span>
                             </div>
                             <select
                                 value={selectedOrder.status}
@@ -260,6 +207,7 @@ export default function AdminOrders() {
                                 <option value="Processing">Processing</option>
                                 <option value="Shipped">Shipped</option>
                                 <option value="Delivered">Delivered</option>
+                                <option value="Cancelled">Cancelled</option>
                             </select>
                         </div>
 
@@ -287,18 +235,20 @@ export default function AdminOrders() {
                         {/* Ordered Items Breakdown */}
                         <div className="space-y-3">
                             <h4 className="font-heading font-bold text-sm text-[#3A2E1F] flex items-center gap-2">
-                                <Package className="w-4 h-4 text-[#D97706]" /> Ordered Line Items ({selectedOrder.items.length})
+                                <Package className="w-4 h-4 text-[#D97706]" /> Ordered Line Items ({selectedOrder.items?.length || 0})
                             </h4>
 
                             <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-2xl divide-y divide-[#E8DEC8]/60 overflow-hidden">
-                                {selectedOrder.items.map((item, idx) => (
-                                    <div key={idx} className="p-4 flex items-center justify-between text-xs">
-                                        <div>
-                                            <h5 className="font-bold text-[#3A2E1F]">{item.product_name}</h5>
-                                            <span className="text-[11px] text-[#D97706] font-semibold">{item.weight_option} × {item.quantity} units</span>
+                                {selectedOrder.items && selectedOrder.items.map((item, idx) => (
+                                    <div key={idx} className="p-4 flex flex-col gap-1 text-xs">
+                                        <div className="flex justify-between items-start">
+                                            <h5 className="font-bold text-[#3A2E1F] line-clamp-1">{item.product_name}</h5>
+                                            <div className="text-right font-extrabold text-[#3A2E1F] whitespace-nowrap ml-4">
+                                                Rs. {(item.price * item.quantity).toLocaleString()}
+                                            </div>
                                         </div>
-                                        <div className="text-right font-extrabold text-[#3A2E1F]">
-                                            Rs. {(item.price * item.quantity).toLocaleString()}
+                                        <div className="text-[11px] text-[#D97706] font-semibold">
+                                            {item.weight_option} × {item.quantity} units (Rs. {item.price.toLocaleString()} each)
                                         </div>
                                     </div>
                                 ))}
@@ -312,7 +262,7 @@ export default function AdminOrders() {
                                 <span>Rs. {selectedOrder.total.toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between text-[#3A2E1F]/70">
-                                <span>Shipping Fee (COD)</span>
+                                <span>Shipping Fee ({selectedOrder.payment_method || 'COD'})</span>
                                 <span className="text-emerald-700 font-bold">FREE</span>
                             </div>
                             <div className="pt-2 border-t border-[#E8DEC8] flex justify-between items-baseline">

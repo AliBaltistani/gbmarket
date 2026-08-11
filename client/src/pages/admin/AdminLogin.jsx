@@ -1,22 +1,30 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Leaf, Lock, User, AlertCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Leaf, Lock, User, AlertCircle, ArrowRight, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export default function AdminLogin() {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [username, setUsername] = useState('admin');
-    const [password, setPassword] = useState('');
+    const [password, setPassword] = useState('AdminSecret123!');
     const [showPassword, setShowPassword] = useState(false);
-    const [showError, setShowError] = useState(false);
+    const [errorMsg, setErrorMsg] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (showError) {
-            // Demo submit when error toggle is active
-            return;
+        setErrorMsg(null);
+        setIsLoading(true);
+
+        const result = await login(username, password);
+
+        setIsLoading(false);
+        if (result.success) {
+            navigate('/admin/dashboard');
+        } else {
+            setErrorMsg(result.message);
         }
-        // Demo navigation to dashboard
-        navigate('/admin/dashboard');
     };
 
     return (
@@ -55,28 +63,13 @@ export default function AdminLogin() {
                 {/* Login Card */}
                 <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 sm:p-8 shadow-lg space-y-6">
 
-                    {/* Error Message Toggle Bar (Demo Feature) */}
-                    <div className="flex items-center justify-between p-3 bg-[#F5EFE0] rounded-2xl border border-[#E8DEC8] text-xs">
-                        <span className="font-semibold text-[#3A2E1F]">Preview Inline Error State:</span>
-                        <button
-                            type="button"
-                            onClick={() => setShowError(!showError)}
-                            className={`px-3 py-1 rounded-full font-bold text-[11px] transition-all ${showError
-                                    ? 'bg-rose-600 text-white shadow-sm'
-                                    : 'bg-white text-[#3A2E1F] border border-[#E8DEC8] hover:bg-[#F5A623]/20'
-                                }`}
-                        >
-                            {showError ? 'Error Active' : 'Toggle Error'}
-                        </button>
-                    </div>
-
                     {/* Inline Error Box */}
-                    {showError && (
+                    {errorMsg && (
                         <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3 text-xs text-rose-800 animate-in fade-in duration-200">
                             <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
                             <div>
                                 <p className="font-bold">Authentication Error</p>
-                                <p className="text-rose-700 mt-0.5">Invalid username or password. Please check your credentials and try again.</p>
+                                <p className="text-rose-700 mt-0.5">{errorMsg}</p>
                             </div>
                         </div>
                     )}
@@ -128,10 +121,20 @@ export default function AdminLogin() {
 
                         <button
                             type="submit"
-                            className="w-full py-3.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-sm rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 pt-3"
+                            disabled={isLoading}
+                            className="w-full py-3.5 bg-[#F5A623] hover:bg-[#D97706] disabled:bg-[#E8DEC8] text-[#3A2E1F] hover:text-white disabled:text-[#3A2E1F]/50 font-bold text-sm rounded-full shadow-md hover:shadow-lg disabled:shadow-none transition-all duration-200 flex items-center justify-center gap-2 pt-3"
                         >
-                            <span>Sign In to Dashboard</span>
-                            <ArrowRight className="w-4 h-4" />
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <span>Authenticating...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span>Sign In to Dashboard</span>
+                                    <ArrowRight className="w-4 h-4" />
+                                </>
+                            )}
                         </button>
                     </form>
                 </div>

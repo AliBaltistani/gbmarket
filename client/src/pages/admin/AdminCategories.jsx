@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Plus,
     Trash2,
@@ -7,7 +7,8 @@ import {
     Package,
     Layers,
     Edit3,
-    Check
+    Check,
+    Loader2
 } from 'lucide-react';
 import {
     Modal,
@@ -15,24 +16,16 @@ import {
     AdminEmptyState,
     AdminSkeletonTable
 } from '../../components/admin/AdminComponents';
+import { getCategories, createCategory, deleteCategory } from '../../api/categories';
+import toast from 'react-hot-toast';
 
 export default function AdminCategories() {
-    const [isLoading, setIsLoading] = useState(false);
-
-    // Dummy Categories List
-    const [categories, setCategories] = useState([
-        { id: 1, name: 'Almonds', slug: 'almonds', productCount: 8, icon: '🥜' },
-        { id: 2, name: 'Walnuts', slug: 'walnuts', productCount: 6, icon: '🌰' },
-        { id: 3, name: 'Cashews', slug: 'cashews', productCount: 5, icon: '🥜' },
-        { id: 4, name: 'Dried Apricots', slug: 'dried-apricots', productCount: 9, icon: '🍑' },
-        { id: 5, name: 'Dates', slug: 'dates', productCount: 7, icon: '🌴' },
-        { id: 6, name: 'Figs', slug: 'figs', productCount: 4, icon: '🫐' },
-        { id: 7, name: 'Mixed Nuts', slug: 'mixed-nuts', productCount: 3, icon: '📦' },
-        { id: 8, name: 'Raisins', slug: 'raisins', productCount: 2, icon: '🍇' },
-    ]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [categories, setCategories] = useState([]);
 
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [categoryName, setCategoryName] = useState('');
 
     // Delete Dialog State
@@ -41,25 +34,53 @@ export default function AdminCategories() {
     // Auto-generate Slug helper
     const autoSlug = categoryName ? categoryName.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-') : '';
 
-    const handleAddCategory = (e) => {
-        e.preventDefault();
-        if (!categoryName) return;
-        const newCategory = {
-            id: Date.now(),
-            name: categoryName,
-            slug: autoSlug || 'new-category',
-            productCount: 0,
-            icon: '🏷️'
-        };
-        setCategories([...categories, newCategory]);
-        setCategoryName('');
-        setIsModalOpen(false);
+    const loadData = async () => {
+        setIsLoading(true);
+        try {
+            const data = await getCategories();
+            setCategories(data);
+        } catch (error) {
+            toast.error("Failed to load categories");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const handleDeleteConfirm = () => {
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const handleAddCategory = async (e) => {
+        e.preventDefault();
+        if (!categoryName) return;
+        setIsSubmitting(true);
+        try {
+            await createCategory({
+                name: categoryName,
+                slug: autoSlug || 'new-category'
+            });
+            toast.success("Category created successfully");
+            setCategoryName('');
+            setIsModalOpen(false);
+            loadData();
+        } catch (err) {
+            toast.error(err.response?.data?.error || "Failed to create category");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleDeleteConfirm = async () => {
         if (deleteCat) {
-            setCategories(categories.filter(c => c.id !== deleteCat.id));
-            setDeleteCat(null);
+            try {
+                await deleteCategory(deleteCat.id);
+                toast.success("Category deleted");
+                loadData();
+            } catch (err) {
+                toast.error(err.response?.data?.error || "Failed to delete category");
+            } finally {
+                setDeleteCat(null);
+            }
         }
     };
 
@@ -78,14 +99,13 @@ export default function AdminCategories() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    {/* Skeleton Preview Toggle */}
                     <button
                         type="button"
-                        onClick={() => setIsLoading(!isLoading)}
+                        onClick={loadData}
                         className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-[#FFFDF9] border border-[#E8DEC8] hover:bg-[#F5EFE0] text-[#3A2E1F] transition-all"
                     >
                         <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#F5A623]' : 'text-[#D97706]'}`} />
-                        <span>Skeleton State</span>
+                        <span>Refresh Data</span>
                     </button>
 
                     {/* Add Category Button */}
@@ -123,7 +143,7 @@ export default function AdminCategories() {
                         >
                             <div className="flex items-start justify-between">
                                 <div className="w-12 h-12 rounded-2xl bg-[#F5EFE0] flex items-center justify-center text-2xl border border-[#E8DEC8]">
-                                    {cat.icon}
+                                    {cat.icon || '📦'}
                                 </div>
                                 <button
                                     type="button"
@@ -147,7 +167,7 @@ export default function AdminCategories() {
                             <div className="pt-3 border-t border-[#E8DEC8] flex items-center justify-between text-xs font-semibold text-[#3A2E1F]/70">
                                 <span className="flex items-center gap-1.5">
                                     <Package className="w-3.5 h-3.5 text-[#D97706]" />
-                                    <span>{cat.productCount} Linked Products</span>
+                                    <span>{cat.productCount || 0} Linked Products</span>
                                 </span>
                             </div>
                         </div>
@@ -190,15 +210,18 @@ export default function AdminCategories() {
                         <button
                             type="button"
                             onClick={() => setIsModalOpen(false)}
-                            className="w-1/2 py-2.5 bg-[#F5EFE0] hover:bg-[#E8DEC8] text-[#3A2E1F] font-bold text-xs rounded-full transition-colors"
+                            disabled={isSubmitting}
+                            className="w-1/2 py-2.5 bg-[#F5EFE0] hover:bg-[#E8DEC8] text-[#3A2E1F] font-bold text-xs rounded-full transition-colors disabled:opacity-50"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="w-1/2 py-2.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-xs rounded-full transition-colors shadow-md"
+                            disabled={isSubmitting}
+                            className="w-1/2 flex items-center justify-center gap-2 py-2.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-xs rounded-full transition-colors shadow-md disabled:opacity-50"
                         >
-                            Save Category
+                            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                            <span>Save Category</span>
                         </button>
                     </div>
                 </form>

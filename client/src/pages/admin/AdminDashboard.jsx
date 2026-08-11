@@ -13,54 +13,55 @@ import {
     Eye,
     Sliders
 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { getOrders } from '../../api/orders';
+import { getProducts } from '../../api/products';
 
 export default function AdminDashboard() {
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [stats, setStats] = useState([]);
+    const [recentOrders, setRecentOrders] = useState([]);
 
-    // 4 Stat Cards Dummy Data
-    const stats = [
-        {
-            title: 'Total Orders',
-            value: '148',
-            change: '+12.5%',
-            isPositive: true,
-            icon: ShoppingBag,
-            color: 'bg-[#F5A623]/20 text-[#D97706]',
-        },
-        {
-            title: 'Total Revenue',
-            value: 'Rs. 485,200',
-            change: '+18.2%',
-            isPositive: true,
-            icon: DollarSign,
-            color: 'bg-emerald-100 text-emerald-700',
-        },
-        {
-            title: 'Total Products',
-            value: '10',
-            change: 'Active in catalog',
-            isPositive: true,
-            icon: Package,
-            color: 'bg-blue-100 text-blue-700',
-        },
-        {
-            title: 'Low Stock Alert',
-            value: '2 Items',
-            change: 'Action needed',
-            isPositive: false,
-            icon: AlertTriangle,
-            color: 'bg-rose-100 text-rose-700',
-        },
-    ];
+    React.useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                const [ordersData, productsData] = await Promise.all([
+                    getOrders(),
+                    getProducts()
+                ]);
 
-    // 5 Recent Orders Dummy Data
-    const recentOrders = [
-        { id: 'GB-1048', customer: 'Ali Khan', total: 'Rs. 4,900', status: 'Pending', date: '2026-08-11' },
-        { id: 'GB-1047', customer: 'Sara Ahmed', total: 'Rs. 2,450', status: 'Processing', date: '2026-08-11' },
-        { id: 'GB-1046', customer: 'Usman Tariq', total: 'Rs. 12,500', status: 'Shipped', date: '2026-08-10' },
-        { id: 'GB-1045', customer: 'Fatima Bilal', total: 'Rs. 3,800', status: 'Delivered', date: '2026-08-10' },
-        { id: 'GB-1044', customer: 'Hamza Malik', total: 'Rs. 1,800', status: 'Delivered', date: '2026-08-09' },
-    ];
+                // Calculate stats
+                const totalOrders = ordersData.length;
+                const totalRevenue = ordersData.reduce((sum, order) => sum + (order.total || 0), 0);
+                const totalProducts = productsData.length;
+                const lowStockCount = productsData.filter(p => p.stock < 5).length;
+
+                setStats([
+                    { title: 'Total Orders', value: totalOrders.toString(), change: 'Lifetime total', isPositive: true, icon: ShoppingBag, color: 'bg-[#F5A623]/20 text-[#D97706]' },
+                    { title: 'Total Revenue', value: `Rs. ${totalRevenue.toLocaleString()}`, change: 'Lifetime gross', isPositive: true, icon: DollarSign, color: 'bg-emerald-100 text-emerald-700' },
+                    { title: 'Total Products', value: totalProducts.toString(), change: 'Active in catalog', isPositive: true, icon: Package, color: 'bg-blue-100 text-blue-700' },
+                    { title: 'Low Stock Alert', value: `${lowStockCount} Items`, change: lowStockCount > 0 ? 'Action needed' : 'Stock healthy', isPositive: lowStockCount === 0, icon: AlertTriangle, color: lowStockCount > 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700' },
+                ]);
+
+                // Map recent 5 orders
+                const latest5 = ordersData.slice(0, 5).map(o => ({
+                    id: `GB-${o.id}`,
+                    customer: o.customer_name,
+                    total: `Rs. ${o.total.toLocaleString()}`,
+                    status: o.status,
+                    date: new Date(o.created_at).toLocaleDateString()
+                }));
+                setRecentOrders(latest5);
+            } catch (err) {
+                toast.error('Failed to load dashboard data');
+                console.error(err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, []);
 
     const getStatusBadge = (status) => {
         switch (status) {
@@ -91,18 +92,12 @@ export default function AdminDashboard() {
                     </p>
                 </div>
 
-                {/* Skeleton Preview Toggle */}
-                <button
-                    type="button"
-                    onClick={() => setIsLoading(!isLoading)}
-                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all border ${isLoading
-                            ? 'bg-[#3A2E1F] text-white border-[#3A2E1F] shadow-sm'
-                            : 'bg-[#FFFDF9] text-[#3A2E1F] border-[#E8DEC8] hover:bg-[#F5EFE0]'
-                        }`}
-                >
-                    <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#F5A623]' : 'text-[#D97706]'}`} />
-                    <span>{isLoading ? 'Showing Skeleton State' : 'Preview Skeleton Loader'}</span>
-                </button>
+                {isLoading && (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all border bg-[#FFFDF9] text-[#3A2E1F] border-[#E8DEC8]">
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#F5A623]" />
+                        <span>Syncing Data...</span>
+                    </div>
+                )}
             </div>
 
             {/* 1. STAT CARDS GRID */}

@@ -1,11 +1,38 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const db = require('./db/db'); // Load database connection
+const path = require('path');
+const fs = require('fs');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const db = require('./db/db');
+const requireAdmin = require('./middleware/requireAdmin');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Set up /uploads directory and static serving
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+app.use('/uploads', express.static(uploadDir));
+
+// Multer config
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, uploadDir),
+    filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+});
+const upload = multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) cb(null, true);
+        else cb(new Error('Only images are allowed'));
+    }
+});
 
 // Helper function to build dynamic queries
 const parseJSON = (str) => {
@@ -14,6 +41,44 @@ const parseJSON = (str) => {
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'GBMarket API is running' });
+});
+
+// ==========================================
+// AUTH & UPLOAD ENDPOINTS
+// ==========================================
+
+// POST /api/auth/login
+app.post('/api/auth/login', (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const user = db.prepare('SELECT * FROM admin_users WHERE username = ?').get(username);
+
+        if (!user || !bcrypt.compareSync(password, user.password_hash)) {
+            return res.status(401).json({ error: 'Invalid username or password' });
+        }
+
+        const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET || 'secret-jwt-key', { expiresIn: '7d' });
+        res.json({ token, username: user.username });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// GET /api/auth/me
+app.get('/api/auth/me', requireAdmin, (req, res) => {
+    res.json({ username: req.admin.username });
+});
+
+// POST /api/upload
+app.post('/api/upload', requireAdmin, upload.single('image'), (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: 'No image provided' });
+        // Return full URL assuming backend runs on same host/port 5000 in dev
+        const imageUrl = `http://localhost:${process.env.PORT || 5000}/uploads/${req.file.filename}`;
+        res.status(201).json({ url: imageUrl });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
 });
 
 // ==========================================
@@ -31,7 +96,7 @@ app.get('/api/categories', (req, res) => {
 });
 
 // POST /api/categories
-app.post('/api/categories', (req, res) => {
+app.post('/api/categories', requireAdmin, (req, res) => {
     try {
         const { name, slug } = req.body;
         if (!name || !slug) return res.status(400).json({ error: 'Name and slug are required' });
@@ -45,7 +110,7 @@ app.post('/api/categories', (req, res) => {
 });
 
 // DELETE /api/categories/:id
-app.delete('/api/categories/:id', (req, res) => {
+app.delete('/api/categories/:id', requireAdmin, (req, res) => {
     try {
         const { id } = req.params;
         const stmt = db.prepare('DELETE FROM categories WHERE id = ?');
@@ -123,7 +188,7 @@ app.get('/api/products/:slug', (req, res) => {
 });
 
 // POST /api/products
-app.post('/api/products', (req, res) => {
+app.post('/api/products', requireAdmin, (req, res) => {
     try {
         const {
             name, slug, description, category_id, image_url, base_price, stock, weight_options, is_featured
@@ -149,7 +214,7 @@ app.post('/api/products', (req, res) => {
 });
 
 // PUT /api/products/:id
-app.put('/api/products/:id', (req, res) => {
+app.put('/api/products/:id', requireAdmin, (req, res) => {
     try {
         const { id } = req.params;
         const {
@@ -179,7 +244,7 @@ app.put('/api/products/:id', (req, res) => {
 });
 
 // DELETE /api/products/:id
-app.delete('/api/products/:id', (req, res) => {
+app.delete('/api/products/:id', requireAdmin, (req, res) => {
     try {
         const { id } = req.params;
         const stmt = db.prepare('DELETE FROM products WHERE id = ?');
@@ -197,7 +262,7 @@ app.delete('/api/products/:id', (req, res) => {
 // ==========================================
 
 // GET /api/orders
-app.get('/api/orders', (req, res) => {
+app.get('/api/orders', requireAdmin, (req, res) => {
     try {
         const orders = db.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
 
@@ -258,7 +323,7 @@ app.post('/api/orders', (req, res) => {
 });
 
 // PATCH /api/orders/:id/status
-app.patch('/api/orders/:id/status', (req, res) => {
+app.patch('/api/orders/:id/status', requireAdmin, (req, res) => {
     try {
         const { id } = req.params;
         const { status } = req.body;

@@ -13,11 +13,13 @@ import {
     UserCircle,
     Bell
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export default function AdminLayout() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
+    const { logout, adminUsername } = useAuth();
 
     const navItems = [
         { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
@@ -27,7 +29,7 @@ export default function AdminLayout() {
     ];
 
     const handleLogout = () => {
-        // Visual logout redirect
+        logout();
         navigate('/admin/login');
     };
 
@@ -134,7 +136,7 @@ export default function AdminLayout() {
                     <div className="flex items-center gap-3 p-2 bg-[#FFFDF9]/60 rounded-2xl border border-[#E8DEC8]">
                         <UserCircle className="w-8 h-8 text-[#D97706]" />
                         <div className="flex flex-col text-xs overflow-hidden">
-                            <span className="font-bold text-[#3A2E1F] truncate">Store Admin</span>
+                            <span className="font-bold text-[#3A2E1F] truncate">{adminUsername || 'Store Admin'}</span>
                             <span className="text-[10px] text-[#3A2E1F]/60 truncate">admin@gbmarket.pk</span>
                         </div>
                     </div>
@@ -157,7 +159,7 @@ export default function AdminLayout() {
                 <header className="hidden md:flex items-center justify-between bg-[#FFFDF9] border-b border-[#E8DEC8] px-8 py-4 sticky top-0 z-30 shadow-xs">
                     <div>
                         <h2 className="font-heading font-bold text-lg text-[#3A2E1F]">Admin Dashboard</h2>
-                        <p className="text-xs text-[#3A2E1F]/60">Welcome back, admin!</p>
+                        <p className="text-xs text-[#3A2E1F]/60">Welcome back, {adminUsername || 'admin'}!</p>
                     </div>
 
                     <div className="flex items-center gap-4">
@@ -172,10 +174,10 @@ export default function AdminLayout() {
                         <div className="h-6 w-px bg-[#E8DEC8]" />
 
                         <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-[#F5A623]/20 border border-[#F5A623] flex items-center justify-center font-extrabold text-xs text-[#D97706]">
-                                A
+                            <div className="w-8 h-8 rounded-full bg-[#F5A623]/20 border border-[#F5A623] flex items-center justify-center font-extrabold text-xs text-[#D97706] uppercase">
+                                {(adminUsername || 'A').charAt(0)}
                             </div>
-                            <span className="text-xs font-bold text-[#3A2E1F]">admin</span>
+                            <span className="text-xs font-bold text-[#3A2E1F] capitalize">{adminUsername || 'admin'}</span>
                         </div>
                     </div>
                 </header>
