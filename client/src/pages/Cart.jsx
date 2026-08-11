@@ -45,7 +45,7 @@ export default function Cart() {
                             {cartItems.map((item) => (
                                 <div key={`${item.product_id}-${item.weight_option}`} className="flex flex-col sm:grid sm:grid-cols-12 items-center gap-4 py-4 border-b border-[#E8DEC8]/60 last:border-0">
                                     <div className="col-span-6 flex items-center gap-4 w-full">
-                                        <img src={item.image} alt={item.product_name} className="w-20 h-20 rounded-2xl object-cover border border-[#E8DEC8] bg-[#F5EFE0]" />
+                                        <img src={item.image} alt={item.product_name} className="w-20 h-20 rounded-2xl object-cover border border-[#E8DEC8] bg-[#F5EFE0]" onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.png'; }} />
                                         <div className="space-y-1">
                                             <Link to={`/product/${item.slug}`} className="font-heading font-bold text-sm text-[#3A2E1F] hover:text-[#D97706]">
                                                 {item.product_name}

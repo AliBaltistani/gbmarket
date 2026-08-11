@@ -28,7 +28,7 @@ function StorefrontLayout() {
   return (
     <div className="min-h-screen bg-[#FFFDF9] text-[#3A2E1F] font-body flex flex-col antialiased selection:bg-[#F5A623] selection:text-[#3A2E1F]">
       <Header />
-      <main className="flex-grow pt-24 px-4 sm:px-6 lg:px-8">
+      <main className="flex-grow pt-2 px-4 sm:px-6 lg:px-8">
         <Outlet />
       </main>
       <Footer />

@@ -159,7 +159,7 @@ export default function Checkout() {
                         {cartItems.map((item) => (
                             <div key={`${item.product_id}-${item.weight_option}`} className="flex items-start gap-4">
                                 <div className="relative">
-                                    <img src={item.image} alt={item.product_name} className="w-14 h-14 rounded-xl object-cover border border-[#E8DEC8] bg-white" />
+                                    <img src={item.image} alt={item.product_name} className="w-14 h-14 rounded-xl object-cover border border-[#E8DEC8] bg-white" onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.png'; }} />
                                     <span className="absolute -top-2 -right-2 w-5 h-5 bg-[#3A2E1F] text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-white">
                                         {item.quantity}
                                     </span>

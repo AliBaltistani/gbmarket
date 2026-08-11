@@ -272,9 +272,10 @@ export default function AdminProducts() {
                                                 {/* Image + Name */}
                                                 <td className="py-3.5 px-4 flex items-center gap-3">
                                                     <img
-                                                        src={p.image_url || 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&q=80&w=300'}
+                                                        src={p.image_url || '/placeholder.png'}
                                                         alt={p.name}
                                                         className="w-11 h-11 rounded-xl object-cover border border-[#E8DEC8] bg-[#F5EFE0] shrink-0"
+                                                        onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.png'; }}
                                                     />
                                                     <div>
                                                         <span className="font-bold text-sm text-[#3A2E1F] block line-clamp-1">{p.name}</span>

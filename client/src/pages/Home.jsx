@@ -111,7 +111,7 @@ export default function Home() {
                             {newArrivals.map((item) => (
                                 <Link key={item.id} to={`/product/${item.slug}`} className="group bg-[#F5EFE0]/50 p-3 rounded-2xl border border-[#E8DEC8] hover:bg-[#F5EFE0] transition-all text-center flex flex-col items-center">
                                     <div className="w-20 h-20 rounded-xl overflow-hidden mb-2 bg-white">
-                                        <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                                        <img src={item.image_url || '/placeholder.png'} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.png'; }} />
                                     </div>
                                     <span className="text-xs font-bold text-[#3A2E1F] line-clamp-1 group-hover:text-[#D97706]">{item.name}</span>
                                     <span className="text-xs font-semibold text-[#D97706] mt-0.5">Rs. {item.base_price}</span>

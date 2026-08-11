@@ -115,7 +115,7 @@ export default function ProductDetail() {
                 {/* Left: Image Gallery */}
                 <div className="space-y-4">
                     <div className="aspect-4/3 sm:aspect-square bg-[#F5EFE0] border border-[#E8DEC8] rounded-3xl overflow-hidden shadow-sm relative">
-                        <img src={selectedImage} alt={product.name} className="w-full h-full object-cover transition-all duration-300" />
+                        <img src={selectedImage} alt={product.name} className="w-full h-full object-cover transition-all duration-300" onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.png'; }} />
                         <span className="absolute top-4 left-4 px-3 py-1 bg-[#F5A623] text-[#3A2E1F] font-bold text-xs rounded-full shadow-sm">
                             100% Organic
                         </span>
