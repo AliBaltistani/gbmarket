@@ -1,0 +1,227 @@
+import React, { useState } from 'react';
+import {
+    ShoppingBag,
+    DollarSign,
+    Package,
+    AlertTriangle,
+    ArrowUpRight,
+    ArrowDownRight,
+    Clock,
+    CheckCircle2,
+    Truck,
+    RefreshCw,
+    Eye,
+    Sliders
+} from 'lucide-react';
+
+export default function AdminDashboard() {
+    const [isLoading, setIsLoading] = useState(false);
+
+    // 4 Stat Cards Dummy Data
+    const stats = [
+        {
+            title: 'Total Orders',
+            value: '148',
+            change: '+12.5%',
+            isPositive: true,
+            icon: ShoppingBag,
+            color: 'bg-[#F5A623]/20 text-[#D97706]',
+        },
+        {
+            title: 'Total Revenue',
+            value: 'Rs. 485,200',
+            change: '+18.2%',
+            isPositive: true,
+            icon: DollarSign,
+            color: 'bg-emerald-100 text-emerald-700',
+        },
+        {
+            title: 'Total Products',
+            value: '10',
+            change: 'Active in catalog',
+            isPositive: true,
+            icon: Package,
+            color: 'bg-blue-100 text-blue-700',
+        },
+        {
+            title: 'Low Stock Alert',
+            value: '2 Items',
+            change: 'Action needed',
+            isPositive: false,
+            icon: AlertTriangle,
+            color: 'bg-rose-100 text-rose-700',
+        },
+    ];
+
+    // 5 Recent Orders Dummy Data
+    const recentOrders = [
+        { id: 'GB-1048', customer: 'Ali Khan', total: 'Rs. 4,900', status: 'Pending', date: '2026-08-11' },
+        { id: 'GB-1047', customer: 'Sara Ahmed', total: 'Rs. 2,450', status: 'Processing', date: '2026-08-11' },
+        { id: 'GB-1046', customer: 'Usman Tariq', total: 'Rs. 12,500', status: 'Shipped', date: '2026-08-10' },
+        { id: 'GB-1045', customer: 'Fatima Bilal', total: 'Rs. 3,800', status: 'Delivered', date: '2026-08-10' },
+        { id: 'GB-1044', customer: 'Hamza Malik', total: 'Rs. 1,800', status: 'Delivered', date: '2026-08-09' },
+    ];
+
+    const getStatusBadge = (status) => {
+        switch (status) {
+            case 'Pending':
+                return 'bg-amber-100 text-amber-800 border-amber-300';
+            case 'Processing':
+                return 'bg-blue-100 text-blue-800 border-blue-300';
+            case 'Shipped':
+                return 'bg-purple-100 text-purple-800 border-purple-300';
+            case 'Delivered':
+                return 'bg-emerald-100 text-emerald-800 border-emerald-300';
+            default:
+                return 'bg-gray-100 text-gray-800 border-gray-300';
+        }
+    };
+
+    return (
+        <div className="space-y-8 max-w-7xl mx-auto">
+
+            {/* HEADER & LOADING SKELETON TOGGLE */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#E8DEC8] pb-4">
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold font-heading text-[#3A2E1F]">
+                        Store Overview
+                    </h1>
+                    <p className="text-xs text-[#3A2E1F]/70">
+                        Real-time metrics and order activity from your GBMarket store
+                    </p>
+                </div>
+
+                {/* Skeleton Preview Toggle */}
+                <button
+                    type="button"
+                    onClick={() => setIsLoading(!isLoading)}
+                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all border ${isLoading
+                            ? 'bg-[#3A2E1F] text-white border-[#3A2E1F] shadow-sm'
+                            : 'bg-[#FFFDF9] text-[#3A2E1F] border-[#E8DEC8] hover:bg-[#F5EFE0]'
+                        }`}
+                >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#F5A623]' : 'text-[#D97706]'}`} />
+                    <span>{isLoading ? 'Showing Skeleton State' : 'Preview Skeleton Loader'}</span>
+                </button>
+            </div>
+
+            {/* 1. STAT CARDS GRID */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {isLoading
+                    ? [...Array(4)].map((_, i) => (
+                        <div key={i} className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 shadow-sm animate-pulse space-y-4">
+                            <div className="flex justify-between items-center">
+                                <div className="h-4 bg-[#E8DEC8] rounded w-1/2"></div>
+                                <div className="w-10 h-10 bg-[#F5EFE0] rounded-2xl"></div>
+                            </div>
+                            <div className="h-8 bg-[#E8DEC8] rounded w-3/4"></div>
+                            <div className="h-3 bg-[#E8DEC8] rounded w-1/3"></div>
+                        </div>
+                    ))
+                    : stats.map((stat, idx) => {
+                        const Icon = stat.icon;
+                        return (
+                            <div key={idx} className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs font-bold text-[#3A2E1F]/70 uppercase tracking-wider">
+                                        {stat.title}
+                                    </span>
+                                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${stat.color}`}>
+                                        <Icon className="w-5 h-5" />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div className="text-2xl sm:text-3xl font-extrabold font-heading text-[#3A2E1F]">
+                                        {stat.value}
+                                    </div>
+                                    <div className="flex items-center gap-1 mt-1 text-xs font-semibold">
+                                        {stat.isPositive ? (
+                                            <span className="text-emerald-700 flex items-center gap-0.5">
+                                                <ArrowUpRight className="w-3.5 h-3.5" />
+                                                {stat.change}
+                                            </span>
+                                        ) : (
+                                            <span className="text-rose-700 flex items-center gap-0.5">
+                                                <ArrowDownRight className="w-3.5 h-3.5" />
+                                                {stat.change}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+            </div>
+
+            {/* 2. RECENT ORDERS TABLE */}
+            <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+                <div className="flex items-center justify-between border-b border-[#E8DEC8] pb-4">
+                    <div>
+                        <h2 className="font-heading font-bold text-xl text-[#3A2E1F]">Recent Orders</h2>
+                        <p className="text-xs text-[#3A2E1F]/60">Latest transactions placed across the storefront</p>
+                    </div>
+                    <span className="text-xs font-bold text-[#D97706] bg-[#F5EFE0] px-3 py-1 rounded-full border border-[#E8DEC8]">
+                        5 Most Recent
+                    </span>
+                </div>
+
+                {isLoading ? (
+                    <div className="space-y-4 animate-pulse">
+                        {[...Array(5)].map((_, i) => (
+                            <div key={i} className="h-12 bg-[#F5EFE0] rounded-2xl w-full"></div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-[#E8DEC8] text-[11px] font-bold uppercase tracking-wider text-[#3A2E1F]/60">
+                                    <th className="py-3 px-4">Order ID</th>
+                                    <th className="py-3 px-4">Customer Name</th>
+                                    <th className="py-3 px-4">Date</th>
+                                    <th className="py-3 px-4">Total</th>
+                                    <th className="py-3 px-4">Status</th>
+                                    <th className="py-3 px-4 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-[#E8DEC8]/60 text-xs font-semibold text-[#3A2E1F]">
+                                {recentOrders.map((order) => (
+                                    <tr key={order.id} className="hover:bg-[#F5EFE0]/40 transition-colors">
+                                        <td className="py-4 px-4 font-mono font-bold text-[#D97706]">
+                                            {order.id}
+                                        </td>
+                                        <td className="py-4 px-4 font-bold text-[#3A2E1F]">
+                                            {order.customer}
+                                        </td>
+                                        <td className="py-4 px-4 text-[#3A2E1F]/70">
+                                            {order.date}
+                                        </td>
+                                        <td className="py-4 px-4 font-extrabold">
+                                            {order.total}
+                                        </td>
+                                        <td className="py-4 px-4">
+                                            <span className={`inline-block px-3 py-1 rounded-full text-[11px] font-extrabold border ${getStatusBadge(order.status)}`}>
+                                                {order.status}
+                                            </span>
+                                        </td>
+                                        <td className="py-4 px-4 text-right">
+                                            <button
+                                                type="button"
+                                                className="p-1.5 bg-[#F5EFE0] hover:bg-[#F5A623] text-[#3A2E1F] rounded-xl transition-colors inline-flex items-center justify-center"
+                                                title="View Details"
+                                            >
+                                                <Eye className="w-4 h-4" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+
+        </div>
+    );
+}
