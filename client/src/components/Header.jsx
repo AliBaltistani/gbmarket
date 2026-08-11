@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Search, ShoppingBag, Menu, X, Leaf } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useSettings } from '../context/SettingsContext';
 
 export default function Header() {
+    const { settings } = useSettings();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const navigate = useNavigate();
@@ -37,10 +39,7 @@ export default function Header() {
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-2xl font-bold font-heading tracking-tight text-[#3A2E1F] leading-none">
-                                    GB<span className="text-[#D97706]">Market</span>
-                                </span>
-                                <span className="text-[10px] font-semibold text-[#D97706] uppercase tracking-widest leading-tight">
-                                    Organic Dry Fruits
+                                    {settings.store_name || 'GBMarket'}
                                 </span>
                             </div>
                         </Link>

@@ -82,6 +82,48 @@ app.post('/api/upload', requireAdmin, upload.single('image'), (req, res) => {
 });
 
 // ==========================================
+// SETTINGS ENDPOINTS
+// ==========================================
+
+// GET /api/settings
+app.get('/api/settings', (req, res) => {
+    try {
+        const settingsRows = db.prepare('SELECT * FROM settings').all();
+        const settingsObj = {};
+        for (let row of settingsRows) {
+            settingsObj[row.key] = row.value;
+        }
+        res.json(settingsObj);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// PUT /api/settings
+app.put('/api/settings', requireAdmin, (req, res) => {
+    try {
+        const payload = req.body;
+        const updateSetting = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value');
+
+        const trx = db.transaction(() => {
+            for (const [key, value] of Object.entries(payload)) {
+                updateSetting.run(key, typeof value === 'string' ? value : String(value));
+            }
+        });
+        trx();
+
+        const settingsRows = db.prepare('SELECT * FROM settings').all();
+        const settingsObj = {};
+        for (let row of settingsRows) {
+            settingsObj[row.key] = row.value;
+        }
+        res.json(settingsObj);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// ==========================================
 // CATEGORIES ENDPOINTS
 // ==========================================
 

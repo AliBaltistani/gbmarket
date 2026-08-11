@@ -56,8 +56,44 @@ function initDb() {
       username TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS settings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      key TEXT UNIQUE NOT NULL,
+      value TEXT
+    );
   `);
     console.log('Database schema initialized.');
+
+    // Seed Initial Settings if empty
+    const { count } = db.prepare('SELECT COUNT(*) as count FROM settings').get();
+    if (count === 0) {
+        const seedSettings = {
+            store_name: 'GBMarket',
+            store_tagline: 'Premium Dry Fruits & Nuts from the Mountains of Gilgit-Baltistan',
+            logo_url: '/placeholder.png',
+            contact_email: 'info@gbmarket.pk',
+            contact_phone: '+92 300 1234567',
+            contact_address: 'Main Bazaar, Gilgit, Gilgit-Baltistan, Pakistan',
+            hero_heading: '100% Organic & Sun-Dried Mountain Produce',
+            hero_subheading: 'Handpicked from the orchards of Hunza, Skardu, and Gilgit Valley, brought fresh to your doorstep across Pakistan.',
+            hero_image_url: 'https://images.unsplash.com/photo-1594951468249-f79a953eacc2?auto=format&fit=crop&q=80&w=1200',
+            social_facebook: 'https://facebook.com/gbmarket.pk',
+            social_instagram: 'https://instagram.com/gbmarket.pk',
+            social_whatsapp: '+92 300 1234567',
+            footer_about_text: 'GBMarket brings authentic, handpicked, sun-dried organic fruits and nuts directly from local mountain farmers of Gilgit-Baltistan to your doorstep with guaranteed purity.',
+            currency_symbol: 'Rs. ',
+            free_shipping_threshold: '5000'
+        };
+        const insertSetting = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)');
+        const trx = db.transaction(() => {
+            for (const [key, value] of Object.entries(seedSettings)) {
+                insertSetting.run(key, value);
+            }
+        });
+        trx();
+        console.log('Database settings seeded with defaults.');
+    }
 }
 
 // Automatically create tables if they don't exist

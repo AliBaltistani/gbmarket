@@ -6,8 +6,10 @@ import { ProductSkeleton, CategorySkeleton } from '../components/Skeletons';
 import { getProducts } from '../api/products';
 import { getCategories } from '../api/categories';
 import { blogPosts } from '../data/dummyData'; // Still dummy for blog
+import { useSettings } from '../context/SettingsContext';
 
 export default function Home() {
+    const { settings } = useSettings();
     const [categories, setCategories] = useState([]);
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [newArrivals, setNewArrivals] = useState([]);
@@ -55,12 +57,10 @@ export default function Home() {
                             <span>100% Organic & Sun-Dried Harvest</span>
                         </div>
                         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-heading text-[#3A2E1F] tracking-tight leading-[1.15]">
-                            Pure Mountain <br className="hidden sm:inline" />
-                            <span className="text-[#D97706]">Dry Fruits & Nuts</span> <br className="hidden sm:inline" />
-                            From Gilgit
+                            {settings.hero_heading || 'Pure Mountain Dry Fruits & Nuts'}
                         </h1>
                         <p className="text-base sm:text-lg text-[#3A2E1F]/80 max-w-xl mx-auto lg:mx-0 leading-relaxed font-body">
-                            Handpicked from the high-altitude orchards of Gilgit-Baltistan. Experience untouched purity, unmatched crispness, and rich natural oils in every bite.
+                            {settings.hero_subheading || 'Handpicked from the high-altitude orchards of Gilgit-Baltistan.'}
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
                             <Link to="/shop" className="w-full sm:w-auto px-8 py-3.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-base rounded-full shadow-md hover:shadow-lg transition-all duration-200 text-center flex items-center justify-center gap-2">
@@ -74,7 +74,7 @@ export default function Home() {
                     </div>
                     <div className="relative flex items-center justify-center">
                         <div className="w-full max-w-md aspect-square bg-[#FFFDF9] rounded-3xl p-4 shadow-xl border border-[#E8DEC8] relative transform hover:scale-[1.02] transition-transform duration-500">
-                            <img src="https://images.unsplash.com/photo-1594951468249-f79a953eacc2?auto=format&fit=crop&q=80&w=800" alt="GBMarket" className="w-full h-full object-cover rounded-2xl" />
+                            <img src={settings.hero_image_url || '/placeholder.png'} alt="Hero" className="w-full h-full object-cover rounded-2xl" onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.png'; }} />
                             <div className="absolute -bottom-4 -left-4 bg-[#3A2E1F] text-[#F5EFE0] p-4 rounded-2xl shadow-lg border border-[#F5A623]/30 flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-[#F5A623] text-[#3A2E1F] flex items-center justify-center font-bold">
                                     <Award className="w-5 h-5" />

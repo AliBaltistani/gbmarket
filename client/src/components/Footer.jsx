@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Leaf, Mail, Send, Heart, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
+import { useSettings } from '../context/SettingsContext';
 
 export default function Footer() {
+    const { settings } = useSettings();
     const handleSubmit = (e) => {
         e.preventDefault();
     };
@@ -56,15 +58,12 @@ export default function Footer() {
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-2xl font-bold font-heading text-white">
-                                    GB<span className="text-[#F5A623]">Market</span>
-                                </span>
-                                <span className="text-[10px] font-semibold text-[#F5A623] uppercase tracking-widest">
-                                    Dry Fruits & Nuts
+                                    {settings.store_name || 'GBMarket'}
                                 </span>
                             </div>
                         </Link>
                         <p className="text-sm text-[#F5EFE0]/80 leading-relaxed">
-                            Your trusted destination for handpicked organic almonds, walnuts, pistachios, pine nuts, and exotic dried fruits directly from Gilgit-Baltistan.
+                            {settings.footer_about_text || 'Your trusted destination for handpicked organic almonds, walnuts, pistachios, pine nuts, and exotic dried fruits directly from Gilgit-Baltistan.'}
                         </p>
                     </div>
 

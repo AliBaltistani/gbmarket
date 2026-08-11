@@ -124,9 +124,28 @@ curl -X POST -H "Content-Type: application/json" -d '{
 *Note: This automatically decrements product stock based on `quantity` passed.*
 
 #### Update Order Status
-\`\`\`bash
+```bash
 curl -X PATCH -H "Content-Type: application/json" -d '{
   "status": "Shipped"
 }' http://localhost:5000/api/orders/1
-\`\`\`
+```
 *Valid statuses:* `Pending`, `Processing`, `Shipped`, `Delivered`.
+
+---
+
+### 4. Settings
+
+#### Get All Settings
+```bash
+curl http://localhost:5000/api/settings
+```
+*Returns:* Flat key-value JSON object containing all core site settings like `store_name`, `contact_email`, `hero_image_url`, etc.
+
+#### Update Settings (Admin Only)
+```bash
+curl -X PUT -H "Content-Type: application/json" -H "Authorization: Bearer <jwt-token>" -d '{
+  "store_name": "GBMarket Updated",
+  "currency_symbol": "Rs."
+}' http://localhost:5000/api/settings
+```
+*Returns:* The fully updated JSON setting map representing the live state. Supports partial updates (only the submitted keys get replaced).

@@ -19,39 +19,42 @@ import {
     LayoutTemplate
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useSettings } from '../../context/SettingsContext';
+import api from '../../api/api';
 
 export default function AdminSettings() {
+    const { settings, updateSettings } = useSettings();
     const [activeTab, setActiveTab] = useState('general');
     const [isSaving, setIsSaving] = useState(false);
 
-    // Form state pre-filled with realistic store settings
+    // Form state pre-filled from global settings context
     const [formData, setFormData] = useState({
         // General
-        storeName: 'GBMarket',
-        storeTagline: 'Premium Dry Fruits & Nuts from the Mountains of Gilgit-Baltistan',
-        logoPreview: '/placeholder.png',
+        storeName: settings.store_name || '',
+        storeTagline: settings.store_tagline || '',
+        logoPreview: settings.logo_url || '/placeholder.png',
 
         // Contact Info
-        contactEmail: 'info@gbmarket.pk',
-        contactPhone: '+92 300 1234567',
-        contactAddress: 'Main Bazaar, Gilgit, Gilgit-Baltistan, Pakistan',
+        contactEmail: settings.contact_email || '',
+        contactPhone: settings.contact_phone || '',
+        contactAddress: settings.contact_address || '',
 
         // Homepage Hero
-        heroHeading: '100% Organic & Sun-Dried Mountain Produce',
-        heroSubheading: 'Handpicked from the orchards of Hunza, Skardu, and Gilgit Valley, brought fresh to your doorstep across Pakistan.',
-        heroImagePreview: 'https://images.unsplash.com/photo-1594951468249-f79a953eacc2?auto=format&fit=crop&q=80&w=1200',
+        heroHeading: settings.hero_heading || '',
+        heroSubheading: settings.hero_subheading || '',
+        heroImagePreview: settings.hero_image_url || '/placeholder.png',
 
         // Social Links
-        facebookUrl: 'https://facebook.com/gbmarket.pk',
-        instagramUrl: 'https://instagram.com/gbmarket.pk',
-        whatsappNumber: '+92 300 1234567',
+        facebookUrl: settings.social_facebook || '',
+        instagramUrl: settings.social_instagram || '',
+        whatsappNumber: settings.social_whatsapp || '',
 
         // Footer
-        footerAboutText: 'GBMarket brings authentic, handpicked, sun-dried organic fruits and nuts directly from local mountain farmers of Gilgit-Baltistan to your doorstep with guaranteed purity.',
+        footerAboutText: settings.footer_about_text || '',
 
         // Store Settings
-        currencySymbol: 'Rs. ',
-        freeShippingThreshold: '5000'
+        currencySymbol: settings.currency_symbol || '',
+        freeShippingThreshold: settings.free_shipping_threshold || ''
     });
 
     const logoInputRef = useRef(null);
@@ -89,13 +92,52 @@ export default function AdminSettings() {
         }
     };
 
-    const handleSaveSettings = (e) => {
+    const handleSaveSettings = async (e) => {
         if (e) e.preventDefault();
         setIsSaving(true);
-        setTimeout(() => {
-            setIsSaving(false);
+        try {
+            let finalLogoUrl = formData.logoPreview;
+            if (logoInputRef.current && logoInputRef.current.files[0]) {
+                const fd = new FormData();
+                fd.append('image', logoInputRef.current.files[0]);
+                const { data } = await api.post('/upload', fd);
+                finalLogoUrl = data.url;
+            }
+
+            let finalHeroImageUrl = formData.heroImagePreview;
+            if (heroImageInputRef.current && heroImageInputRef.current.files[0]) {
+                const fd = new FormData();
+                fd.append('image', heroImageInputRef.current.files[0]);
+                const { data } = await api.post('/upload', fd);
+                finalHeroImageUrl = data.url;
+            }
+
+            const payload = {
+                store_name: formData.storeName,
+                store_tagline: formData.storeTagline,
+                logo_url: finalLogoUrl,
+                contact_email: formData.contactEmail,
+                contact_phone: formData.contactPhone,
+                contact_address: formData.contactAddress,
+                hero_heading: formData.heroHeading,
+                hero_subheading: formData.heroSubheading,
+                hero_image_url: finalHeroImageUrl,
+                social_facebook: formData.facebookUrl,
+                social_instagram: formData.instagramUrl,
+                social_whatsapp: formData.whatsappNumber,
+                footer_about_text: formData.footerAboutText,
+                currency_symbol: formData.currencySymbol,
+                free_shipping_threshold: formData.freeShippingThreshold
+            };
+
+            await updateSettings(payload);
             toast.success('Settings saved successfully!');
-        }, 600);
+            setFormData(prev => ({ ...prev, logoPreview: finalLogoUrl, heroImagePreview: finalHeroImageUrl }));
+        } catch (error) {
+            toast.error(error.response?.data?.error || error.message);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (

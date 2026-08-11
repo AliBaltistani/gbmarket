@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, MessageSquare } from 'lucide-react';
+import { useSettings } from '../context/SettingsContext';
 
 export default function Contact() {
+    const { settings } = useSettings();
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -33,7 +35,7 @@ export default function Contact() {
                         Get In Touch
                     </span>
                     <h1 className="text-3xl sm:text-5xl font-extrabold font-heading text-[#3A2E1F]">
-                        Contact GBMarket Team
+                        Contact {settings.store_name || 'Us'}
                     </h1>
                     <p className="text-sm text-[#3A2E1F]/70 font-body">
                         Have a question about our dry fruit harvests, bulk corporate orders, or order status? We are here to assist!
@@ -147,7 +149,7 @@ export default function Contact() {
                                     </div>
                                     <div>
                                         <strong className="block text-[#3A2E1F] font-bold">Store Location & Warehouse</strong>
-                                        <span>Main Airport Road, Gilgit City, Gilgit-Baltistan, Pakistan</span>
+                                        <span>{settings.contact_address || 'Pakistan'}</span>
                                     </div>
                                 </div>
 
@@ -157,7 +159,7 @@ export default function Contact() {
                                     </div>
                                     <div>
                                         <strong className="block text-[#3A2E1F] font-bold">Phone & WhatsApp Support</strong>
-                                        <span>+92 345 9876543 / +92 5811 456789</span>
+                                        <span>{settings.contact_phone || ''} {settings.social_whatsapp ? `/ ${settings.social_whatsapp}` : ''}</span>
                                     </div>
                                 </div>
 
@@ -167,7 +169,7 @@ export default function Contact() {
                                     </div>
                                     <div>
                                         <strong className="block text-[#3A2E1F] font-bold">Email Addresses</strong>
-                                        <span>support@gbmarket.pk / sales@gbmarket.pk</span>
+                                        <span>{settings.contact_email || 'info@example.com'}</span>
                                     </div>
                                 </div>
 
