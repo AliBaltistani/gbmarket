@@ -11,7 +11,7 @@ import {
     X,
     Leaf,
     UserCircle,
-    Bell
+    Settings
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -26,6 +26,7 @@ export default function AdminLayout() {
         { name: 'Products', path: '/admin/products', icon: Package },
         { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },
         { name: 'Categories', path: '/admin/categories', icon: Tags },
+        { name: 'Settings', path: '/admin/settings', icon: Settings },
     ];
 
     const handleLogout = () => {

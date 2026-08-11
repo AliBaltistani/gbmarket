@@ -20,6 +20,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminCategories from './pages/admin/AdminCategories';
+import AdminSettings from './pages/admin/AdminSettings';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
 
@@ -52,6 +53,7 @@ function App() {
               <Route path="products" element={<AdminProducts />} />
               <Route path="orders" element={<AdminOrders />} />
               <Route path="categories" element={<AdminCategories />} />
+              <Route path="settings" element={<AdminSettings />} />
             </Route>
           </Route>
 
