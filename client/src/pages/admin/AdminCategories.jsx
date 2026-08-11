@@ -16,7 +16,7 @@ import {
     AdminEmptyState,
     AdminSkeletonTable
 } from '../../components/admin/AdminComponents';
-import { getCategories, createCategory, deleteCategory } from '../../api/categories';
+import { getCategories, createCategory, deleteCategory, updateCategory } from '../../api/categories';
 import toast from 'react-hot-toast';
 
 export default function AdminCategories() {
@@ -27,6 +27,7 @@ export default function AdminCategories() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [categoryName, setCategoryName] = useState('');
+    const [editCat, setEditCat] = useState(null);
 
     // Delete Dialog State
     const [deleteCat, setDeleteCat] = useState(null);
@@ -50,21 +51,42 @@ export default function AdminCategories() {
         loadData();
     }, []);
 
-    const handleAddCategory = async (e) => {
+    const handleAddCategoryClick = () => {
+        setEditCat(null);
+        setCategoryName('');
+        setIsModalOpen(true);
+    };
+
+    const handleEditCategoryClick = (cat) => {
+        setEditCat(cat);
+        setCategoryName(cat.name);
+        setIsModalOpen(true);
+    };
+
+    const handleSubmitCategory = async (e) => {
         e.preventDefault();
         if (!categoryName) return;
         setIsSubmitting(true);
         try {
-            await createCategory({
-                name: categoryName,
-                slug: autoSlug || 'new-category'
-            });
-            toast.success("Category created successfully");
+            if (editCat) {
+                await updateCategory(editCat.id, {
+                    name: categoryName,
+                    slug: autoSlug || 'new-category'
+                });
+                toast.success("Category updated successfully");
+            } else {
+                await createCategory({
+                    name: categoryName,
+                    slug: autoSlug || 'new-category'
+                });
+                toast.success("Category created successfully");
+            }
             setCategoryName('');
+            setEditCat(null);
             setIsModalOpen(false);
             loadData();
         } catch (err) {
-            toast.error(err.response?.data?.error || "Failed to create category");
+            toast.error(err.response?.data?.error || `Failed to ${editCat ? 'update' : 'create'} category`);
         } finally {
             setIsSubmitting(false);
         }
@@ -111,7 +133,7 @@ export default function AdminCategories() {
                     {/* Add Category Button */}
                     <button
                         type="button"
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={handleAddCategoryClick}
                         className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-extrabold text-xs rounded-full shadow-md transition-all"
                     >
                         <Plus className="w-4 h-4" />
@@ -132,7 +154,7 @@ export default function AdminCategories() {
                     title="No Categories Available"
                     description="Click 'Add Category' above to create your first product category."
                     actionLabel="Create Category"
-                    onAction={() => setIsModalOpen(true)}
+                    onAction={handleAddCategoryClick}
                 />
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -145,14 +167,24 @@ export default function AdminCategories() {
                                 <div className="w-12 h-12 rounded-2xl bg-[#F5EFE0] flex items-center justify-center text-2xl border border-[#E8DEC8]">
                                     {cat.icon || '📦'}
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setDeleteCat(cat)}
-                                    className="p-2 text-[#3A2E1F]/40 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors opacity-80 group-hover:opacity-100"
-                                    title="Delete Category"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleEditCategoryClick(cat)}
+                                        className="p-2 text-[#3A2E1F]/40 hover:text-[#D97706] hover:bg-[#F5EFE0] rounded-xl transition-colors opacity-80 group-hover:opacity-100"
+                                        title="Edit Category"
+                                    >
+                                        <Edit3 className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setDeleteCat(cat)}
+                                        className="p-2 text-[#3A2E1F]/40 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors opacity-80 group-hover:opacity-100"
+                                        title="Delete Category"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </div>
 
                             <div>
@@ -175,13 +207,13 @@ export default function AdminCategories() {
                 </div>
             )}
 
-            {/* ADD CATEGORY MODAL */}
+            {/* ADD/EDIT CATEGORY MODAL */}
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                title="Add New Category"
+                title={editCat ? "Edit Category" : "Add New Category"}
             >
-                <form onSubmit={handleAddCategory} className="space-y-5">
+                <form onSubmit={handleSubmitCategory} className="space-y-5">
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
                             Category Name
@@ -221,7 +253,7 @@ export default function AdminCategories() {
                             className="w-1/2 flex items-center justify-center gap-2 py-2.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-xs rounded-full transition-colors shadow-md disabled:opacity-50"
                         >
                             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                            <span>Save Category</span>
+                            <span>{editCat ? "Update Category" : "Save Category"}</span>
                         </button>
                     </div>
                 </form>

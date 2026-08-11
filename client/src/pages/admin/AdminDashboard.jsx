@@ -14,10 +14,12 @@ import {
     Sliders
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 import { getOrders } from '../../api/orders';
 import { getProducts } from '../../api/products';
 
 export default function AdminDashboard() {
+    const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
     const [stats, setStats] = useState([]);
     const [recentOrders, setRecentOrders] = useState([]);
@@ -203,6 +205,7 @@ export default function AdminDashboard() {
                                         <td className="py-4 px-4 text-right">
                                             <button
                                                 type="button"
+                                                onClick={() => navigate('/admin/orders')}
                                                 className="p-1.5 bg-[#F5EFE0] hover:bg-[#F5A623] text-[#3A2E1F] rounded-xl transition-colors inline-flex items-center justify-center"
                                                 title="View Details"
                                             >

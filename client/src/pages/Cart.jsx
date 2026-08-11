@@ -2,12 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, ArrowLeft, ShieldCheck, Truck, Lock } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useSettings } from '../context/SettingsContext';
 
 export default function Cart() {
     const { cartItems, updateQuantity, removeItem, clearCart } = useCart();
+    const { settings } = useSettings();
 
     const subtotal = cartItems.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0);
-    const shippingFee = subtotal >= 3000 || subtotal === 0 ? 0 : 250;
+    const freeShippingThreshold = settings?.free_shipping_threshold || 5000;
+    const shippingFee = subtotal >= freeShippingThreshold || subtotal === 0 ? 0 : 250;
     const grandTotal = subtotal + shippingFee;
 
     const isCartEmpty = cartItems.length === 0;
@@ -107,9 +110,9 @@ export default function Cart() {
                                         {shippingFee === 0 ? <span className="text-emerald-700 font-bold">FREE</span> : `Rs. ${shippingFee}`}
                                     </span>
                                 </div>
-                                {subtotal > 0 && subtotal < 3000 && (
+                                {subtotal > 0 && subtotal < freeShippingThreshold && (
                                     <div className="p-3 bg-[#F5EFE0]/70 rounded-2xl text-[11px] text-[#D97706] font-semibold">
-                                        Add <strong>Rs. {(3000 - subtotal).toLocaleString()}</strong> more to get <strong>Free Delivery</strong>!
+                                        Add <strong>Rs. {(freeShippingThreshold - subtotal).toLocaleString()}</strong> more to get <strong>Free Delivery</strong>!
                                     </div>
                                 )}
                                 <div className="pt-3 border-t border-[#E8DEC8] flex justify-between items-baseline">

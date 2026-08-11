@@ -28,6 +28,8 @@ export default function AdminProducts() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 6;
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
 
@@ -75,6 +77,14 @@ export default function AdminProducts() {
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (p.category_name && p.category_name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
+
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
 
     // Handle Form Open (Add vs Edit)
     const handleOpenForm = (prod = null) => {
@@ -265,7 +275,7 @@ export default function AdminProducts() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-[#E8DEC8]/60 text-xs font-semibold text-[#3A2E1F]">
-                                    {filteredProducts.map((p) => {
+                                    {paginatedProducts.map((p) => {
                                         const isLowStock = p.stock < 5;
                                         return (
                                             <tr key={p.id} className="hover:bg-[#F5EFE0]/40 transition-colors">
@@ -350,13 +360,21 @@ export default function AdminProducts() {
 
                         {/* Pagination Controls */}
                         <div className="flex flex-col sm:flex-row justify-between items-center pt-4 border-t border-[#E8DEC8] gap-4 text-xs font-semibold text-[#3A2E1F]/70">
-                            <span>Showing 1 - {filteredProducts.length} of {products.length} products</span>
+                            <span>Showing {filteredProducts.length > 0 ? startIndex + 1 : 0} - {Math.min(startIndex + itemsPerPage, filteredProducts.length)} of {filteredProducts.length} products</span>
                             <div className="flex items-center gap-1">
-                                <button type="button" disabled className="p-2 rounded-lg border border-[#E8DEC8] opacity-50 cursor-not-allowed">
+                                <button
+                                    type="button"
+                                    disabled={currentPage === 1}
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    className="p-2 rounded-lg border border-[#E8DEC8] hover:bg-[#F5EFE0] disabled:opacity-50 disabled:cursor-not-allowed">
                                     <ChevronLeft className="w-4 h-4" />
                                 </button>
-                                <button type="button" className="px-3 py-1 rounded-lg bg-[#F5A623] text-[#3A2E1F] font-bold">1</button>
-                                <button type="button" className="p-2 rounded-lg border border-[#E8DEC8] hover:bg-[#F5EFE0]">
+                                <button type="button" className="px-3 py-1 rounded-lg bg-[#F5A623] text-[#3A2E1F] font-bold">{currentPage}</button>
+                                <button
+                                    type="button"
+                                    disabled={currentPage === totalPages || totalPages === 0}
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    className="p-2 rounded-lg border border-[#E8DEC8] hover:bg-[#F5EFE0] disabled:opacity-50 disabled:cursor-not-allowed">
                                     <ChevronRight className="w-4 h-4" />
                                 </button>
                             </div>

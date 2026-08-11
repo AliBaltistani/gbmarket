@@ -49,14 +49,6 @@ export default function ProductCard({ product }) {
                     )}
                 </div>
 
-                {/* Wishlist Icon */}
-                <button
-                    type="button"
-                    className="absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur-md text-[#3A2E1F] hover:text-[#D97706] hover:bg-white transition-colors shadow-sm"
-                    aria-label="Add to wishlist"
-                >
-                    <Heart className="w-4 h-4" />
-                </button>
             </div>
 
             {/* Card Body Details */}
@@ -64,11 +56,6 @@ export default function ProductCard({ product }) {
                 <div>
                     <div className="flex items-center justify-between text-xs text-[#D97706] font-semibold mb-1">
                         <span>{category}</span>
-                        <div className="flex items-center gap-1 text-[#3A2E1F]/70">
-                            <Star className="w-3.5 h-3.5 fill-[#F5A623] text-[#F5A623]" />
-                            <span className="font-bold text-[#3A2E1F] text-xs">{rating}</span>
-                            <span>({reviewsCount})</span>
-                        </div>
                     </div>
 
                     <Link to={`/product/${slug}`} className="block group-hover:text-[#D97706] transition-colors">
@@ -91,8 +78,7 @@ export default function ProductCard({ product }) {
                         to={`/product/${slug}`}
                         className="px-4 py-2 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-semibold text-xs rounded-full shadow-sm transition-all duration-200 flex items-center gap-1.5"
                     >
-                        <ShoppingBag className="w-3.5 h-3.5" />
-                        <span>Add</span>
+                        <span>View</span>
                     </Link>
                 </div>
             </div>

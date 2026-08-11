@@ -141,10 +141,6 @@ export default function ProductDetail() {
                         <h1 className="text-2xl sm:text-3xl font-extrabold font-heading text-[#3A2E1F] leading-tight">
                             {product.name}
                         </h1>
-                        <div className="flex items-center gap-2 mt-2 text-xs text-[#3A2E1F]/80">
-                            <div className="flex text-[#F5A623]">{[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}</div>
-                            <span className="font-bold text-[#3A2E1F]">4.9</span>
-                        </div>
                     </div>
 
                     {/* Price Display */}
@@ -196,7 +192,7 @@ export default function ProductDetail() {
                                     <Minus className="w-4 h-4" />
                                 </button>
                                 <span className="w-12 text-center font-bold text-sm text-[#3A2E1F]">{quantity}</span>
-                                <button type="button" onClick={() => setQuantity(quantity + 1)} disabled={isOutOfStock} className="w-9 h-9 rounded-full bg-[#F5EFE0] hover:bg-[#F5A623] disabled:opacity-50 text-[#3A2E1F] flex items-center justify-center transition-colors">
+                                <button type="button" onClick={() => setQuantity(Math.min(product.stock, quantity + 1))} disabled={isOutOfStock || quantity >= product.stock} className="w-9 h-9 rounded-full bg-[#F5EFE0] hover:bg-[#F5A623] disabled:opacity-50 text-[#3A2E1F] flex items-center justify-center transition-colors">
                                     <Plus className="w-4 h-4" />
                                 </button>
                             </div>

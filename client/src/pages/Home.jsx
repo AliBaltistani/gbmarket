@@ -215,32 +215,7 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* TWO-COLUMN PROMO SECTION */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-                <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-8 flex flex-col justify-between space-y-6 shadow-sm">
-                    <div className="space-y-3">
-                        <span className="px-3 py-1 bg-[#F5A623]/20 text-[#D97706] text-xs font-bold rounded-full uppercase tracking-wider">Health Superfood</span>
-                        <h3 className="text-2xl font-bold font-heading text-[#3A2E1F]">Chilgoza & Pine Nuts Superpack</h3>
-                        <p className="text-sm text-[#3A2E1F]/70 leading-relaxed">
-                            Wild Chilas Pine Nuts are loaded with pinolenic acid, magnesium, and essential healthy fats.
-                        </p>
-                    </div>
-                    <Link to="/shop?category=pine-nuts" className="w-full text-center py-3 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-sm rounded-full transition-colors shadow-sm">
-                        Shop Pine Nuts
-                    </Link>
-                </div>
-                <div className="bg-gradient-to-br from-[#D97706] to-[#3A2E1F] text-white rounded-3xl p-8 flex flex-col justify-between space-y-6 shadow-md">
-                    <div className="space-y-4">
-                        <span className="px-3 py-1 bg-white/20 text-amber-200 text-xs font-bold rounded-full uppercase tracking-wider">Limited Offer</span>
-                        <h3 className="text-3xl font-extrabold font-heading text-white leading-tight">Get 15% Off Your First Box!</h3>
-                        <p className="text-sm text-amber-100/90 leading-relaxed">Use promo code <span className="font-bold text-white bg-white/20 px-2 py-0.5 rounded">GBFIRST15</span> at checkout.</p>
-                    </div>
-                    <Link to="/shop" className="inline-flex items-center gap-2 px-8 py-3 bg-[#F5A623] hover:bg-white text-[#3A2E1F] font-bold text-sm rounded-full transition-all shadow-md">
-                        <span>Claim Discount</span>
-                        <ArrowRight className="w-4 h-4" />
-                    </Link>
-                </div>
-            </section>
+
 
             {/* BLOG / LATEST ARTICLES */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">

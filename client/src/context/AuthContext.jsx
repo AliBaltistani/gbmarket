@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../api/api';
-import axios from 'axios';
+// unused axios import removed
 
 const AuthContext = createContext();
 

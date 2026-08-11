@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, Truck, CheckCircle2, ChevronRight, Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useSettings } from '../context/SettingsContext';
 import { createOrder } from '../api/orders';
 import toast from 'react-hot-toast';
 
 export default function Checkout() {
     const navigate = useNavigate();
     const { cartItems, clearCart } = useCart();
+    const { settings } = useSettings();
 
     const [formData, setFormData] = useState({
         name: '',
@@ -17,8 +19,9 @@ export default function Checkout() {
     });
     const [loading, setLoading] = useState(false);
 
-    const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const shippingFee = subtotal >= 3000 || subtotal === 0 ? 0 : 250;
+    const subtotal = cartItems.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0);
+    const freeShippingThreshold = settings?.free_shipping_threshold || 5000;
+    const shippingFee = subtotal >= freeShippingThreshold || subtotal === 0 ? 0 : 350;
     const grandTotal = subtotal + shippingFee;
 
     const handleChange = (e) => {
@@ -115,7 +118,11 @@ export default function Checkout() {
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Phone Number</label>
-                                <input required type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-sm text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623] transition-all placeholder:text-[#3A2E1F]/40" placeholder="0300 1234567" />
+                                <input type="tel" name="phone" required
+                                    pattern="^(03\d{9}|\+923\d{9})$"
+                                    title="Please enter a valid Pakistani phone number (e.g. 03001234567 or +923001234567)"
+                                    className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-sm text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623] transition-all placeholder:text-[#3A2E1F]/40"
+                                    value={formData.phone} onChange={handleChange} placeholder="0300 1234567" />
                             </div>
                             <div className="space-y-1.5 sm:col-span-2">
                                 <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Complete Address</label>
