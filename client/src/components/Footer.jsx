@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Leaf, Mail, Send, Heart, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
 
 export default function Footer() {
@@ -17,7 +18,7 @@ export default function Footer() {
                         </div>
                         <div>
                             <h4 className="font-semibold font-heading text-lg text-white">Free Express Shipping</h4>
-                            <p className="text-xs text-[#F5EFE0]/70">On all orders over $50</p>
+                            <p className="text-xs text-[#F5EFE0]/70">On all orders over Rs. 3,000</p>
                         </div>
                     </div>
 
@@ -27,7 +28,7 @@ export default function Footer() {
                         </div>
                         <div>
                             <h4 className="font-semibold font-heading text-lg text-white">100% Organic & Fresh</h4>
-                            <p className="text-xs text-[#F5EFE0]/70">Direct from premium orchards</p>
+                            <p className="text-xs text-[#F5EFE0]/70">Direct from Gilgit-Baltistan orchards</p>
                         </div>
                     </div>
 
@@ -36,8 +37,8 @@ export default function Footer() {
                             <RefreshCw className="w-6 h-6" />
                         </div>
                         <div>
-                            <h4 className="font-semibold font-heading text-lg text-white">Easy Returns</h4>
-                            <p className="text-xs text-[#F5EFE0]/70">Hassle-free 7-day policy</p>
+                            <h4 className="font-semibold font-heading text-lg text-white">7-Day Fresh Guarantee</h4>
+                            <p className="text-xs text-[#F5EFE0]/70">100% money back or replacement</p>
                         </div>
                     </div>
                 </div>
@@ -49,7 +50,7 @@ export default function Footer() {
 
                     {/* Brand Column */}
                     <div className="space-y-4">
-                        <a href="#" className="flex items-center gap-2">
+                        <Link to="/" className="flex items-center gap-2">
                             <div className="w-10 h-10 rounded-2xl bg-[#F5A623] flex items-center justify-center text-[#3A2E1F]">
                                 <Leaf className="w-6 h-6 fill-current" />
                             </div>
@@ -61,7 +62,7 @@ export default function Footer() {
                                     Dry Fruits & Nuts
                                 </span>
                             </div>
-                        </a>
+                        </Link>
                         <p className="text-sm text-[#F5EFE0]/80 leading-relaxed">
                             Your trusted destination for handpicked organic almonds, walnuts, pistachios, pine nuts, and exotic dried fruits directly from Gilgit-Baltistan.
                         </p>
@@ -71,23 +72,22 @@ export default function Footer() {
                     <div>
                         <h3 className="text-lg font-bold font-heading text-white mb-4 text-[#F5A623]">Shop Categories</h3>
                         <ul className="space-y-2.5 text-sm text-[#F5EFE0]/80">
-                            <li><a href="#" className="hover:text-[#F5A623] transition-colors">Almonds & Walnuts</a></li>
-                            <li><a href="#" className="hover:text-[#F5A623] transition-colors">Pistachios & Cashews</a></li>
-                            <li><a href="#" className="hover:text-[#F5A623] transition-colors">Pine Nuts (Chilgoza)</a></li>
-                            <li><a href="#" className="hover:text-[#F5A623] transition-colors">Dried Apricots & Figs</a></li>
-                            <li><a href="#" className="hover:text-[#F5A623] transition-colors">Gift Boxes & Hampers</a></li>
+                            <li><Link to="/shop?category=almonds" className="hover:text-[#F5A623] transition-colors">Almonds & Walnuts</Link></li>
+                            <li><Link to="/shop?category=pistachios" className="hover:text-[#F5A623] transition-colors">Pistachios & Cashews</Link></li>
+                            <li><Link to="/shop?category=pine-nuts" className="hover:text-[#F5A623] transition-colors">Pine Nuts (Chilgoza)</Link></li>
+                            <li><Link to="/shop?category=dried-apricots" className="hover:text-[#F5A623] transition-colors">Dried Apricots & Mulberries</Link></li>
+                            <li><Link to="/shop?category=dates" className="hover:text-[#F5A623] transition-colors">Royal Ajwa Dates</Link></li>
                         </ul>
                     </div>
 
-                    {/* Customer Service */}
+                    {/* Navigation & Info */}
                     <div>
-                        <h3 className="text-lg font-bold font-heading text-white mb-4 text-[#F5A623]">Customer Care</h3>
+                        <h3 className="text-lg font-bold font-heading text-white mb-4 text-[#F5A623]">Company & Support</h3>
                         <ul className="space-y-2.5 text-sm text-[#F5EFE0]/80">
-                            <li><a href="#" className="hover:text-[#F5A623] transition-colors">Track Your Order</a></li>
-                            <li><a href="#" className="hover:text-[#F5A623] transition-colors">Shipping & Delivery</a></li>
-                            <li><a href="#" className="hover:text-[#F5A623] transition-colors">Refund & Return Policy</a></li>
-                            <li><a href="#" className="hover:text-[#F5A623] transition-colors">Frequently Asked Questions</a></li>
-                            <li><a href="#" className="hover:text-[#F5A623] transition-colors">Contact Support</a></li>
+                            <li><Link to="/about" className="hover:text-[#F5A623] transition-colors">About GBMarket</Link></li>
+                            <li><Link to="/contact" className="hover:text-[#F5A623] transition-colors">Contact Us</Link></li>
+                            <li><Link to="/cart" className="hover:text-[#F5A623] transition-colors">View Cart</Link></li>
+                            <li><Link to="/shop" className="hover:text-[#F5A623] transition-colors">Browse All Products</Link></li>
                         </ul>
                     </div>
 
