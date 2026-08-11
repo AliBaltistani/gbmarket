@@ -84,3 +84,49 @@ curl -X PUT -H "Content-Type: application/json" -d '{
 \`\`\`bash
 curl -X DELETE http://localhost:5000/api/products/1
 \`\`\`
+
+---
+
+### 3. Orders
+
+#### Get All Orders
+\`\`\`bash
+curl http://localhost:5000/api/orders
+\`\`\`
+*Returns:* Array of all orders, including their inner `items` array directly fetched from `order_items`.
+
+#### Create an Order (with Items)
+\`\`\`bash
+curl -X POST -H "Content-Type: application/json" -d '{
+  "customer_name": "Ali Khan",
+  "phone": "03001234567",
+  "address": "123 Test St, Lahore",
+  "total": 3100,
+  "payment_method": "COD",
+  "items": [
+    {
+      "product_id": 1,
+      "product_name": "Premium Kaghan Almonds",
+      "weight_option": "1kg",
+      "quantity": 1,
+      "price": 2450
+    },
+    {
+      "product_id": 5,
+      "product_name": "Hunza Sun-Dried Apricots",
+      "weight_option": "500g",
+      "quantity": 1,
+      "price": 650
+    }
+  ]
+}' http://localhost:5000/api/orders
+\`\`\`
+*Note: This automatically decrements product stock based on `quantity` passed.*
+
+#### Update Order Status
+\`\`\`bash
+curl -X PATCH -H "Content-Type: application/json" -d '{
+  "status": "Shipped"
+}' http://localhost:5000/api/orders/1
+\`\`\`
+*Valid statuses:* `Pending`, `Processing`, `Shipped`, `Delivered`.

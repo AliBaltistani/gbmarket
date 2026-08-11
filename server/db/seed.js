@@ -1,4 +1,5 @@
 const db = require('./db');
+const bcrypt = require('bcryptjs');
 
 const categories = [
     { name: 'Almonds', slug: 'almonds' },
@@ -167,4 +168,18 @@ products.forEach(p => {
     });
 });
 
-console.log('Database seeding complete: Inserted 10 categories and 10 products successfully.');
+// Clean up and Insert Admin User
+db.exec('DELETE FROM admin_users;');
+const adminPassword = 'AdminSecret123!';
+const salt = bcrypt.genSaltSync(10);
+const passwordHash = bcrypt.hashSync(adminPassword, salt);
+
+const insertAdmin = db.prepare('INSERT INTO admin_users (username, password_hash) VALUES (?, ?)');
+insertAdmin.run('admin', passwordHash);
+
+console.log('Database seeding complete: Inserted 10 categories, 10 products, and 1 admin user successfully.');
+console.log('---');
+console.log('ADMIN CREDS:');
+console.log(`Username: admin`);
+console.log(`Password: ${adminPassword}`);
+console.log('---');
