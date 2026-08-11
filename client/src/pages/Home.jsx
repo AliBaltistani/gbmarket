@@ -1,87 +1,80 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Leaf, Award, Sparkles, ArrowRight, ShieldCheck, Heart, Truck, Flame, CheckCircle, Calendar, User } from 'lucide-react';
+import { Leaf, Award, Sparkles, ArrowRight, CheckCircle, Calendar, User, Flame } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
-import { products, categories, blogPosts } from '../data/dummyData';
+import { ProductSkeleton, CategorySkeleton } from '../components/Skeletons';
+import { getProducts } from '../api/products';
+import { getCategories } from '../api/categories';
+import { blogPosts } from '../data/dummyData'; // Still dummy for blog
 
 export default function Home() {
+    const [categories, setCategories] = useState([]);
+    const [featuredProducts, setFeaturedProducts] = useState([]);
+    const [newArrivals, setNewArrivals] = useState([]);
+    const [loadingCats, setLoadingCats] = useState(true);
+    const [loadingProds, setLoadingProds] = useState(true);
+
     useEffect(() => {
         window.scrollTo(0, 0);
-    }, []);
 
-    const featuredProducts = products.filter(p => p.isFeatured).slice(0, 6);
-    const newArrivals = products.filter(p => p.isNew).slice(0, 4);
+        // Fetch Data
+        const fetchData = async () => {
+            try {
+                const [catsRes, featuredRes, allRes] = await Promise.all([
+                    getCategories(),
+                    getProducts({ featured: 'true' }),
+                    getProducts()
+                ]);
+
+                setCategories(catsRes);
+                setFeaturedProducts(featuredRes.slice(0, 6)); // Top 6 featured
+                setNewArrivals(allRes.slice(0, 4)); // First 4 as new arrivals
+            } catch (error) {
+                console.error("Error fetching home data", error);
+            } finally {
+                setLoadingCats(false);
+                setLoadingProds(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     return (
         <div className="space-y-20 pb-16">
 
-            {/* 1. HERO SECTION (Existing exact style preserved) */}
+            {/* HERO SECTION */}
             <section className="relative overflow-hidden bg-gradient-to-br from-[#F5A623]/20 via-[#F5EFE0] to-[#D97706]/10 rounded-3xl p-8 sm:p-12 lg:p-16 border border-[#E8DEC8] shadow-sm max-w-7xl mx-auto mt-4">
-                {/* Background Decorative Element */}
                 <div className="absolute -right-16 -bottom-16 w-80 h-80 bg-[#F5A623]/20 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute right-1/3 top-0 w-64 h-64 bg-[#D97706]/10 rounded-full blur-2xl pointer-events-none" />
 
                 <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                    {/* Left Column: Typography & CTAs */}
                     <div className="space-y-6 text-center lg:text-left">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F5A623]/20 text-[#3A2E1F] border border-[#F5A623]/40 text-xs sm:text-sm font-semibold">
                             <Sparkles className="w-4 h-4 text-[#D97706]" />
                             <span>100% Organic & Sun-Dried Harvest</span>
                         </div>
-
                         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-heading text-[#3A2E1F] tracking-tight leading-[1.15]">
                             Pure Mountain <br className="hidden sm:inline" />
                             <span className="text-[#D97706]">Dry Fruits & Nuts</span> <br className="hidden sm:inline" />
                             From Gilgit
                         </h1>
-
                         <p className="text-base sm:text-lg text-[#3A2E1F]/80 max-w-xl mx-auto lg:mx-0 leading-relaxed font-body">
                             Handpicked from the high-altitude orchards of Gilgit-Baltistan. Experience untouched purity, unmatched crispness, and rich natural oils in every bite.
                         </p>
-
-                        {/* CTAs */}
                         <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-                            <Link
-                                to="/shop"
-                                className="w-full sm:w-auto px-8 py-3.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-base rounded-full shadow-md hover:shadow-lg transition-all duration-200 text-center flex items-center justify-center gap-2"
-                            >
+                            <Link to="/shop" className="w-full sm:w-auto px-8 py-3.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-base rounded-full shadow-md hover:shadow-lg transition-all duration-200 text-center flex items-center justify-center gap-2">
                                 <span>Explore Shop</span>
                                 <ArrowRight className="w-5 h-5" />
                             </Link>
-                            <Link
-                                to="/about"
-                                className="w-full sm:w-auto px-8 py-3.5 bg-[#FFFDF9] hover:bg-[#F5EFE0] text-[#3A2E1F] font-semibold text-base rounded-full border border-[#E8DEC8] transition-all duration-200 text-center"
-                            >
+                            <Link to="/about" className="w-full sm:w-auto px-8 py-3.5 bg-[#FFFDF9] hover:bg-[#F5EFE0] text-[#3A2E1F] font-semibold text-base rounded-full border border-[#E8DEC8] transition-all duration-200 text-center">
                                 Our Sourcing Story
                             </Link>
                         </div>
-
-                        {/* Micro Feature Badges */}
-                        <div className="pt-6 border-t border-[#E8DEC8]/80 grid grid-cols-3 gap-4 text-center lg:text-left">
-                            <div>
-                                <div className="font-extrabold font-heading text-xl text-[#3A2E1F]">100%</div>
-                                <div className="text-xs text-[#3A2E1F]/70">Chemical-Free</div>
-                            </div>
-                            <div>
-                                <div className="font-extrabold font-heading text-xl text-[#3A2E1F]">Direct</div>
-                                <div className="text-xs text-[#3A2E1F]/70">Farmer Sourced</div>
-                            </div>
-                            <div>
-                                <div className="font-extrabold font-heading text-xl text-[#3A2E1F]">Fast</div>
-                                <div className="text-xs text-[#3A2E1F]/70">Pakistan Delivery</div>
-                            </div>
-                        </div>
                     </div>
-
-                    {/* Right Column: Hero Visual Showcase */}
                     <div className="relative flex items-center justify-center">
                         <div className="w-full max-w-md aspect-square bg-[#FFFDF9] rounded-3xl p-4 shadow-xl border border-[#E8DEC8] relative transform hover:scale-[1.02] transition-transform duration-500">
-                            <img
-                                src="https://images.unsplash.com/photo-1594951468249-f79a953eacc2?auto=format&fit=crop&q=80&w=800"
-                                alt="GBMarket Organic Dry Fruits Assortment"
-                                className="w-full h-full object-cover rounded-2xl"
-                            />
-                            {/* Floating Accent Badge */}
+                            <img src="https://images.unsplash.com/photo-1594951468249-f79a953eacc2?auto=format&fit=crop&q=80&w=800" alt="GBMarket" className="w-full h-full object-cover rounded-2xl" />
                             <div className="absolute -bottom-4 -left-4 bg-[#3A2E1F] text-[#F5EFE0] p-4 rounded-2xl shadow-lg border border-[#F5A623]/30 flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-[#F5A623] text-[#3A2E1F] flex items-center justify-center font-bold">
                                     <Award className="w-5 h-5" />
@@ -96,47 +89,40 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* 2. NEW ARRIVALS STRIP */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 sm:p-8 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-sm">
-                    <div className="lg:max-w-xs space-y-3 text-center lg:text-left">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#D97706]/10 text-[#D97706] rounded-full text-xs font-bold uppercase tracking-wider">
-                            <Flame className="w-4 h-4 fill-current" />
-                            <span>Fresh Batch Harvest</span>
-                        </div>
-                        <h2 className="text-2xl font-bold font-heading text-[#3A2E1F]">New Arrivals Strip</h2>
-                        <p className="text-xs text-[#3A2E1F]/70 leading-relaxed">
-                            Handpicked items from this season's first harvest. Limited stock available!
-                        </p>
-                        <Link to="/shop" className="inline-flex items-center gap-1 text-sm font-bold text-[#D97706] hover:underline pt-1">
-                            <span>View all new items</span>
-                            <ArrowRight className="w-4 h-4" />
-                        </Link>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full lg:w-auto">
-                        {newArrivals.map((item) => (
-                            <Link
-                                key={item.id}
-                                to={`/product/${item.slug}`}
-                                className="group bg-[#F5EFE0]/50 p-3 rounded-2xl border border-[#E8DEC8] hover:bg-[#F5EFE0] transition-all text-center flex flex-col items-center"
-                            >
-                                <div className="w-20 h-20 rounded-xl overflow-hidden mb-2 bg-white">
-                                    <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
-                                </div>
-                                <span className="text-xs font-bold text-[#3A2E1F] line-clamp-1 group-hover:text-[#D97706]">
-                                    {item.name}
-                                </span>
-                                <span className="text-xs font-semibold text-[#D97706] mt-0.5">
-                                    Rs. {item.basePrice}
-                                </span>
+            {/* NEW ARRIVALS STRIP */}
+            {(!loadingProds && newArrivals.length > 0) && (
+                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 sm:p-8 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-sm">
+                        <div className="lg:max-w-xs space-y-3 text-center lg:text-left">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#D97706]/10 text-[#D97706] rounded-full text-xs font-bold uppercase tracking-wider">
+                                <Flame className="w-4 h-4 fill-current" />
+                                <span>Fresh Batch Harvest</span>
+                            </div>
+                            <h2 className="text-2xl font-bold font-heading text-[#3A2E1F]">New Arrivals Strip</h2>
+                            <p className="text-xs text-[#3A2E1F]/70 leading-relaxed">
+                                Handpicked items from this season's first harvest. Limited stock available!
+                            </p>
+                            <Link to="/shop" className="inline-flex items-center gap-1 text-sm font-bold text-[#D97706] hover:underline pt-1">
+                                <span>View all new items</span>
+                                <ArrowRight className="w-4 h-4" />
                             </Link>
-                        ))}
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full lg:w-auto">
+                            {newArrivals.map((item) => (
+                                <Link key={item.id} to={`/product/${item.slug}`} className="group bg-[#F5EFE0]/50 p-3 rounded-2xl border border-[#E8DEC8] hover:bg-[#F5EFE0] transition-all text-center flex flex-col items-center">
+                                    <div className="w-20 h-20 rounded-xl overflow-hidden mb-2 bg-white">
+                                        <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                                    </div>
+                                    <span className="text-xs font-bold text-[#3A2E1F] line-clamp-1 group-hover:text-[#D97706]">{item.name}</span>
+                                    <span className="text-xs font-semibold text-[#D97706] mt-0.5">Rs. {item.base_price}</span>
+                                </Link>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
 
-            {/* 3. CATEGORIES HORIZONTAL STRIP */}
+            {/* CATEGORIES HORIZONTAL STRIP */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div>
@@ -144,31 +130,30 @@ export default function Home() {
                         <p className="text-sm text-[#3A2E1F]/70">Explore our wild & organic mountain dry fruit varieties</p>
                     </div>
                     <Link to="/shop" className="text-sm font-bold text-[#D97706] hover:underline flex items-center gap-1">
-                        <span>View All Categories</span>
+                        <span>View All</span>
                         <ArrowRight className="w-4 h-4" />
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-5 gap-4">
-                    {categories.slice(0, 10).map((cat) => (
-                        <Link
-                            key={cat.id}
-                            to={`/shop?category=${cat.slug}`}
-                            className="group bg-[#FFFDF9] border border-[#E8DEC8] rounded-2xl p-4 text-center hover:border-[#F5A623] hover:shadow-md transition-all duration-300 flex flex-col items-center justify-center gap-2"
-                        >
-                            <div className="w-12 h-12 rounded-full bg-[#F5EFE0] group-hover:bg-[#F5A623] text-[#3A2E1F] flex items-center justify-center transition-colors">
-                                <Leaf className="w-6 h-6" />
-                            </div>
-                            <h3 className="font-heading font-bold text-sm text-[#3A2E1F] group-hover:text-[#D97706]">
-                                {cat.name}
-                            </h3>
-                            <span className="text-[11px] text-[#3A2E1F]/60">{cat.count} Items</span>
-                        </Link>
-                    ))}
-                </div>
+                {loadingCats ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-5 gap-4">
+                        {[...Array(5)].map((_, i) => <CategorySkeleton key={i} />)}
+                    </div>
+                ) : (
+                    <div className="flex overflow-x-auto gap-4 pb-4 snap-x">
+                        {categories.map((cat) => (
+                            <Link key={cat.id} to={`/shop?category=${cat.slug}`} className="snap-start shrink-0 w-32 group bg-[#FFFDF9] border border-[#E8DEC8] rounded-2xl p-4 text-center hover:border-[#F5A623] hover:shadow-md transition-all duration-300 flex flex-col items-center justify-center gap-2">
+                                <div className="w-12 h-12 rounded-full bg-[#F5EFE0] group-hover:bg-[#F5A623] text-[#3A2E1F] flex items-center justify-center transition-colors">
+                                    <Leaf className="w-6 h-6" />
+                                </div>
+                                <h3 className="font-heading font-bold text-sm text-[#3A2E1F] group-hover:text-[#D97706]">{cat.name}</h3>
+                            </Link>
+                        ))}
+                    </div>
+                )}
             </section>
 
-            {/* 4. FEATURED PRODUCTS GRID */}
+            {/* FEATURED PRODUCTS GRID */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
                 <div className="text-center max-w-2xl mx-auto space-y-2">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F5A623]/20 text-[#D97706] text-xs font-bold uppercase tracking-wider">
@@ -176,39 +161,36 @@ export default function Home() {
                         <span>Best Seller Collection</span>
                     </div>
                     <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[#3A2E1F]">Featured Dry Fruits</h2>
-                    <p className="text-sm text-[#3A2E1F]/70">
-                        Hand-selected, sun-dried, and vacuum-sealed for maximum nutrition and crispness.
-                    </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                    {featuredProducts.map((prod) => (
-                        <ProductCard key={prod.id} product={prod} />
-                    ))}
-                </div>
-
-                <div className="text-center pt-4">
-                    <Link
-                        to="/shop"
-                        className="inline-flex items-center gap-2 px-8 py-3 bg-[#3A2E1F] hover:bg-[#D97706] text-white font-bold text-sm rounded-full transition-colors shadow-md"
-                    >
-                        <span>View Full Catalog</span>
-                        <ArrowRight className="w-4 h-4" />
-                    </Link>
-                </div>
+                {loadingProds ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                        {[...Array(6)].map((_, i) => <ProductSkeleton key={i} />)}
+                    </div>
+                ) : featuredProducts.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                        {featuredProducts.map((prod) => (
+                            // Map DB product structure to component expectations
+                            <ProductCard key={prod.id} product={{
+                                ...prod,
+                                category: prod.category_name || prod.category_slug,
+                                images: [prod.image_url],
+                                weightOptions: prod.weight_options
+                            }} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center text-[#3A2E1F]/60">No featured products found.</div>
+                )}
             </section>
 
-            {/* 5. ABOUT / FEATURE STRIP */}
+            {/* ABOUT STRIP */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-gradient-to-r from-[#F5EFE0] to-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center shadow-sm">
                     <div className="flex justify-center">
                         <div className="relative">
                             <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-full overflow-hidden border-4 border-[#F5A623] shadow-xl">
-                                <img
-                                    src="https://images.unsplash.com/photo-1596769062638-e6ed3f46f496?auto=format&fit=crop&q=80&w=800"
-                                    alt="Gilgit Baltistan Organic Sourcing"
-                                    className="w-full h-full object-cover"
-                                />
+                                <img src="https://images.unsplash.com/photo-1596769062638-e6ed3f46f496?auto=format&fit=crop&q=80&w=800" alt="Gilgit Baltistan Organic Sourcing" className="w-full h-full object-cover" />
                             </div>
                             <div className="absolute -bottom-2 -right-2 bg-[#3A2E1F] text-[#F5A623] p-4 rounded-2xl shadow-lg border border-[#F5A623]/30 text-center">
                                 <Leaf className="w-8 h-8 mx-auto mb-1" />
@@ -216,7 +198,6 @@ export default function Home() {
                             </div>
                         </div>
                     </div>
-
                     <div className="space-y-5 text-center lg:text-left">
                         <span className="text-xs font-bold uppercase tracking-widest text-[#D97706]">Our Story & Promise</span>
                         <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[#3A2E1F] leading-tight">
@@ -225,20 +206,6 @@ export default function Home() {
                         <p className="text-sm text-[#3A2E1F]/80 leading-relaxed font-body">
                             At GBMarket, we cut out middlemen to bring you purest walnuts, almonds, and dried apricots harvested straight from high-altitude Gilgit-Baltistan valleys. Every nut is sun-dried naturally, guaranteeing unpasteurized freshness and maximum nutrients.
                         </p>
-                        <div className="space-y-2 pt-2">
-                            <div className="flex items-center gap-3 text-sm font-semibold text-[#3A2E1F] justify-center lg:justify-start">
-                                <CheckCircle className="w-5 h-5 text-[#D97706]" />
-                                <span>100% Unprocessed & Additive-Free</span>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm font-semibold text-[#3A2E1F] justify-center lg:justify-start">
-                                <CheckCircle className="w-5 h-5 text-[#D97706]" />
-                                <span>Fair Pricing for Mountain Farming Families</span>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm font-semibold text-[#3A2E1F] justify-center lg:justify-start">
-                                <CheckCircle className="w-5 h-5 text-[#D97706]" />
-                                <span>Hygienic Airtight Zip-Lock Packaging</span>
-                            </div>
-                        </div>
                         <div className="pt-4">
                             <Link to="/about" className="px-6 py-2.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-sm rounded-full transition-colors inline-block">
                                 Read Full Story
@@ -248,82 +215,42 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* 6. TWO-COLUMN PROMO SECTION */}
+            {/* TWO-COLUMN PROMO SECTION */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-                {/* Card 1: Category Highlight with Nutrition Icons */}
                 <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-8 flex flex-col justify-between space-y-6 shadow-sm">
                     <div className="space-y-3">
-                        <span className="px-3 py-1 bg-[#F5A623]/20 text-[#D97706] text-xs font-bold rounded-full uppercase tracking-wider">
-                            Health Superfood
-                        </span>
+                        <span className="px-3 py-1 bg-[#F5A623]/20 text-[#D97706] text-xs font-bold rounded-full uppercase tracking-wider">Health Superfood</span>
                         <h3 className="text-2xl font-bold font-heading text-[#3A2E1F]">Chilgoza & Pine Nuts Superpack</h3>
                         <p className="text-sm text-[#3A2E1F]/70 leading-relaxed">
                             Wild Chilas Pine Nuts are loaded with pinolenic acid, magnesium, and essential healthy fats.
                         </p>
                     </div>
-
-                    <div className="grid grid-cols-3 gap-3 text-center py-4 bg-[#F5EFE0]/50 rounded-2xl border border-[#E8DEC8]">
-                        <div>
-                            <div className="text-lg font-extrabold font-heading text-[#D97706]">68g</div>
-                            <div className="text-[10px] uppercase font-bold text-[#3A2E1F]/70">Healthy Fats</div>
-                        </div>
-                        <div>
-                            <div className="text-lg font-extrabold font-heading text-[#D97706]">13.7g</div>
-                            <div className="text-[10px] uppercase font-bold text-[#3A2E1F]/70">Plant Protein</div>
-                        </div>
-                        <div>
-                            <div className="text-lg font-extrabold font-heading text-[#D97706]">Zero</div>
-                            <div className="text-[10px] uppercase font-bold text-[#3A2E1F]/70">Cholesterol</div>
-                        </div>
-                    </div>
-
-                    <Link
-                        to="/shop?category=pine-nuts"
-                        className="w-full text-center py-3 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-sm rounded-full transition-colors shadow-sm"
-                    >
+                    <Link to="/shop?category=pine-nuts" className="w-full text-center py-3 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-sm rounded-full transition-colors shadow-sm">
                         Shop Pine Nuts
                     </Link>
                 </div>
-
-                {/* Card 2: Colored Accent Panel */}
                 <div className="bg-gradient-to-br from-[#D97706] to-[#3A2E1F] text-white rounded-3xl p-8 flex flex-col justify-between space-y-6 shadow-md">
                     <div className="space-y-4">
-                        <span className="px-3 py-1 bg-white/20 text-amber-200 text-xs font-bold rounded-full uppercase tracking-wider">
-                            Limited Offer
-                        </span>
-                        <h3 className="text-3xl font-extrabold font-heading text-white leading-tight">
-                            Get 15% Off Your First Gilgit Mixed Nut Box!
-                        </h3>
-                        <p className="text-sm text-amber-100/90 leading-relaxed">
-                            Use promo code <span className="font-bold text-white bg-white/20 px-2 py-0.5 rounded">GBFIRST15</span> at checkout and enjoy free express delivery nationwide.
-                        </p>
+                        <span className="px-3 py-1 bg-white/20 text-amber-200 text-xs font-bold rounded-full uppercase tracking-wider">Limited Offer</span>
+                        <h3 className="text-3xl font-extrabold font-heading text-white leading-tight">Get 15% Off Your First Box!</h3>
+                        <p className="text-sm text-amber-100/90 leading-relaxed">Use promo code <span className="font-bold text-white bg-white/20 px-2 py-0.5 rounded">GBFIRST15</span> at checkout.</p>
                     </div>
-
-                    <div className="pt-4">
-                        <Link
-                            to="/shop"
-                            className="inline-flex items-center gap-2 px-8 py-3 bg-[#F5A623] hover:bg-white text-[#3A2E1F] font-bold text-sm rounded-full transition-all shadow-md"
-                        >
-                            <span>Claim Discount Now</span>
-                            <ArrowRight className="w-4 h-4" />
-                        </Link>
-                    </div>
+                    <Link to="/shop" className="inline-flex items-center gap-2 px-8 py-3 bg-[#F5A623] hover:bg-white text-[#3A2E1F] font-bold text-sm rounded-full transition-all shadow-md">
+                        <span>Claim Discount</span>
+                        <ArrowRight className="w-4 h-4" />
+                    </Link>
                 </div>
             </section>
 
-            {/* 7. BLOG / LATEST ARTICLES */}
+            {/* BLOG / LATEST ARTICLES */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div>
-                        <h2 className="text-3xl font-extrabold font-heading text-[#3A2E1F]">Latest From GBMarket Journal</h2>
-                        <p className="text-sm text-[#3A2E1F]/70">Health tips, storage guides, and organic farming insights</p>
-                    </div>
+                    <h2 className="text-3xl font-extrabold font-heading text-[#3A2E1F]">Latest From Our Journal</h2>
                     <Link to="/about" className="text-sm font-bold text-[#D97706] hover:underline flex items-center gap-1">
                         <span>Read All Articles</span>
                         <ArrowRight className="w-4 h-4" />
                     </Link>
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
                     {blogPosts.map((post) => (
                         <article key={post.id} className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
@@ -331,24 +258,8 @@ export default function Home() {
                                 <img src={post.image} alt={post.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
                             </div>
                             <div className="p-6 space-y-3 flex-1 flex flex-col justify-between">
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-4 text-xs text-[#3A2E1F]/60">
-                                        <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-[#D97706]" />{post.date}</span>
-                                        <span className="flex items-center gap-1"><User className="w-3.5 h-3.5 text-[#D97706]" />{post.author}</span>
-                                    </div>
-                                    <h3 className="font-heading font-bold text-lg text-[#3A2E1F] line-clamp-2 hover:text-[#D97706] transition-colors">
-                                        {post.title}
-                                    </h3>
-                                    <p className="text-xs text-[#3A2E1F]/70 line-clamp-3 leading-relaxed">
-                                        {post.excerpt}
-                                    </p>
-                                </div>
-                                <div className="pt-4 border-t border-[#E8DEC8]">
-                                    <Link to="/about" className="text-xs font-bold text-[#D97706] hover:underline flex items-center gap-1">
-                                        <span>Read Article</span>
-                                        <ArrowRight className="w-3.5 h-3.5" />
-                                    </Link>
-                                </div>
+                                <h3 className="font-heading font-bold text-lg text-[#3A2E1F] leading-tight">{post.title}</h3>
+                                <p className="text-xs text-[#3A2E1F]/70 line-clamp-3">{post.excerpt}</p>
                             </div>
                         </article>
                     ))}

@@ -1,111 +1,80 @@
 import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { CheckCircle2, ShoppingBag, ArrowRight, Package, Calendar, MapPin, Sparkles } from 'lucide-react';
-import { initialCartItems } from '../data/dummyData';
+import { Link, useLocation } from 'react-router-dom';
+import { CheckCircle2, ArrowRight, Package, Truck, Phone, ChevronRight } from 'lucide-react';
 
 export default function OrderConfirmation() {
+    const location = useLocation();
+    const { orderId, total, count } = location.state || {};
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
-    const orderNumber = 'GB-2026-8941';
-    const subtotal = initialCartItems.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
-    const shippingFee = subtotal >= 3000 ? 0 : 250;
-    const grandTotal = subtotal + shippingFee;
-
     return (
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center space-y-10">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center space-y-10">
 
-            {/* SUCCESS ANIMATED BADGE */}
-            <div className="space-y-4">
-                <div className="w-24 h-24 bg-[#F5A623]/20 border-2 border-[#D97706] rounded-full flex items-center justify-center mx-auto text-[#D97706] shadow-lg animate-bounce">
-                    <CheckCircle2 className="w-12 h-12 stroke-[2.5]" />
-                </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold uppercase tracking-wider">
-                    <Sparkles className="w-4 h-4 text-emerald-600" />
-                    <span>Order Confirmed & Received</span>
-                </div>
-                <h1 className="text-3xl sm:text-5xl font-extrabold font-heading text-[#3A2E1F]">
-                    Thank You! Your Order Has Been Placed.
-                </h1>
-                <p className="text-sm sm:text-base text-[#3A2E1F]/70 max-w-xl mx-auto font-body">
-                    We have received your request and our team is hand-packing your fresh Gilgit dry fruits. A confirmation SMS has been dispatched.
-                </p>
-            </div>
-
-            {/* ORDER SUMMARY DETAILS CARD */}
-            <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 sm:p-8 text-left space-y-6 shadow-sm">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E8DEC8] pb-4">
-                    <div>
-                        <span className="text-xs text-[#3A2E1F]/60 uppercase tracking-wider font-bold">Order Number</span>
-                        <div className="font-heading font-extrabold text-xl text-[#D97706]">{orderNumber}</div>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs font-bold text-[#3A2E1F] bg-[#F5EFE0] px-4 py-2 rounded-full border border-[#E8DEC8]">
-                        <Calendar className="w-4 h-4 text-[#D97706]" />
-                        <span>Est. Delivery: 2 - 3 Business Days</span>
+            <div className="space-y-6">
+                <div className="relative inline-block">
+                    <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto absolute -inset-1 blur opacity-50 animate-pulse"></div>
+                    <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto relative border-4 border-emerald-200">
+                        <CheckCircle2 className="w-12 h-12 text-emerald-600" />
                     </div>
                 </div>
 
-                {/* Delivery Info */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#F5EFE0]/40 p-4 rounded-2xl border border-[#E8DEC8] text-xs">
-                    <div className="space-y-1">
-                        <span className="font-bold text-[#3A2E1F] flex items-center gap-1.5">
-                            <MapPin className="w-3.5 h-3.5 text-[#D97706]" />
-                            <span>Shipping Address</span>
-                        </span>
-                        <p className="text-[#3A2E1F]/80">Ali Khan, House #45, Street 12, F-8/3, Islamabad</p>
-                        <p className="text-[#3A2E1F]/60">Ph: 03001234567</p>
-                    </div>
-                    <div className="space-y-1">
-                        <span className="font-bold text-[#3A2E1F] flex items-center gap-1.5">
-                            <Package className="w-3.5 h-3.5 text-[#D97706]" />
-                            <span>Payment Mode</span>
-                        </span>
-                        <p className="text-[#3A2E1F]/80">Cash on Delivery (COD)</p>
-                        <p className="text-emerald-700 font-bold">Pay Rs. {grandTotal.toLocaleString()} on delivery</p>
-                    </div>
-                </div>
-
-                {/* Ordered Items List */}
-                <div className="space-y-3 pt-2">
-                    <h3 className="font-heading font-bold text-base text-[#3A2E1F]">Order Recap</h3>
-                    <div className="divide-y divide-[#E8DEC8]/60">
-                        {initialCartItems.map((item) => (
-                            <div key={item.id} className="py-3 flex items-center justify-between text-xs">
-                                <div className="flex items-center gap-3">
-                                    <img src={item.image} alt="" className="w-12 h-12 rounded-xl object-cover border border-[#E8DEC8]" />
-                                    <div>
-                                        <div className="font-bold text-[#3A2E1F]">{item.name}</div>
-                                        <div className="text-[11px] text-[#3A2E1F]/60">{item.selectedWeight} x {item.quantity}</div>
-                                    </div>
-                                </div>
-                                <div className="font-bold text-[#3A2E1F]">
-                                    Rs. {(item.unitPrice * item.quantity).toLocaleString()}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Total Cost */}
-                <div className="border-t border-[#E8DEC8] pt-4 flex justify-between items-baseline text-sm">
-                    <span className="font-heading font-bold text-[#3A2E1F]">Grand Total Paid (COD)</span>
-                    <span className="font-heading font-extrabold text-2xl text-[#3A2E1F]">
-                        Rs. {grandTotal.toLocaleString()}
-                    </span>
+                <div className="space-y-3">
+                    <h1 className="text-3xl sm:text-4xl font-extrabold font-heading text-[#3A2E1F] tracking-tight">
+                        Order Placed Successfully!
+                    </h1>
+                    <p className="text-sm text-[#3A2E1F]/70 max-w-md mx-auto font-body leading-relaxed">
+                        Thank you for choosing GBMarket. Your fresh organic naturally sun-dried items are being prepared for dispatch.
+                    </p>
                 </div>
             </div>
 
-            {/* CTA BUTTON */}
-            <div>
-                <Link
-                    to="/shop"
-                    className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-sm rounded-full shadow-md transition-all"
-                >
-                    <ShoppingBag className="w-4 h-4" />
+            <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 text-left">
+                <h2 className="font-heading font-bold text-lg text-[#3A2E1F] border-b border-[#E8DEC8] pb-3">
+                    Order Summary
+                </h2>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-1">
+                    <div className="space-y-1.5 flex flex-col items-center sm:items-start text-center sm:text-left">
+                        <Package className="w-6 h-6 text-[#D97706] mb-1" />
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[#3A2E1F]/60 block">Order Reference</span>
+                        <span className="font-mono font-bold text-sm text-[#3A2E1F]">#{orderId ? `GB-${2026}-${orderId}` : 'GB-2026-X'}</span>
+                    </div>
+
+                    <div className="space-y-1.5 flex flex-col items-center sm:items-start text-center sm:text-left">
+                        <Truck className="w-6 h-6 text-[#D97706] mb-1" />
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[#3A2E1F]/60 block">Status & Est. Delivery</span>
+                        <span className="text-sm font-bold text-[#3A2E1F]">Processing (2-3 Days)</span>
+                    </div>
+
+                    <div className="space-y-1.5 flex flex-col items-center sm:items-start text-center sm:text-left">
+                        <svg className="w-6 h-6 text-[#D97706] mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[#3A2E1F]/60 block">Payment Method</span>
+                        <span className="text-sm font-bold text-[#3A2E1F]">Cash on Delivery (COD)</span>
+                    </div>
+                </div>
+
+                {total && (
+                    <div className="bg-[#F5EFE0]/60 rounded-2xl p-4 flex items-center justify-between border border-[#E8DEC8]/50 mt-4">
+                        <span className="text-xs font-semibold text-[#3A2E1F]/80">Total amount to pay on delivery:</span>
+                        <span className="font-heading font-extrabold text-lg text-[#3A2E1F]">Rs. {total.toLocaleString()}</span>
+                    </div>
+                )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
+                <Link to="/shop" className="px-8 py-3.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-sm rounded-full shadow-md transition-colors flex items-center justify-center gap-2">
                     <span>Continue Shopping</span>
                     <ArrowRight className="w-4 h-4" />
                 </Link>
+                <div className="px-8 py-3.5 bg-white border border-[#E8DEC8] text-[#3A2E1F]/70 font-semibold text-sm rounded-full flex items-center justify-center gap-2 cursor-pointer shadow-sm">
+                    <Phone className="w-4 h-4" />
+                    <span>Questions? Call us</span>
+                </div>
             </div>
 
         </div>

@@ -8,12 +8,16 @@ export default function ProductCard({ product }) {
         slug,
         category,
         basePrice,
+        base_price,
         rating = 4.8,
         reviewsCount = 42,
         images,
         isNew,
         stockStatus = 'In Stock'
     } = product;
+
+    // Safely support both camelCase (dummy data) and snake_case (SQLite API)
+    const price = base_price || basePrice || 0;
 
     const imageSrc = images && images[0] ? images[0] : 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&q=80&w=800';
 
@@ -78,7 +82,7 @@ export default function ProductCard({ product }) {
                     <div>
                         <span className="text-xs text-[#3A2E1F]/60 block leading-tight">Starting from</span>
                         <span className="text-xl font-extrabold font-heading text-[#3A2E1F]">
-                            Rs. {basePrice.toLocaleString()}
+                            Rs. {price.toLocaleString()}
                         </span>
                     </div>
 

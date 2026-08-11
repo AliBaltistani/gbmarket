@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Search, ShoppingBag, Menu, X, Leaf } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
 export default function Header() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const navigate = useNavigate();
+    const { cartItems } = useCart();
+    const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
     const navLinks = [
         { name: 'Home', path: '/' },
@@ -83,7 +86,7 @@ export default function Header() {
                         >
                             <ShoppingBag className="w-5 h-5" />
                             <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#D97706] text-white text-xs font-bold rounded-full flex items-center justify-center">
-                                3
+                                {cartCount}
                             </span>
                         </Link>
 
@@ -105,7 +108,7 @@ export default function Header() {
                         >
                             <ShoppingBag className="w-6 h-6" />
                             <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#D97706] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                                3
+                                {cartCount}
                             </span>
                         </Link>
                         <button
