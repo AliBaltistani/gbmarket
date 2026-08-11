@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Leaf, Lock, User, AlertCircle, ArrowRight, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useSettings } from '../../context/SettingsContext';
 
 export default function AdminLogin() {
     const navigate = useNavigate();
     const { login } = useAuth();
+    const { settings } = useSettings();
     const [username, setUsername] = useState('admin');
     const [password, setPassword] = useState('AdminSecret123!');
     const [showPassword, setShowPassword] = useState(false);
@@ -40,17 +42,23 @@ export default function AdminLogin() {
                 {/* Brand Header */}
                 <div className="text-center space-y-3">
                     <Link to="/" className="inline-flex items-center gap-2 group">
-                        <div className="w-12 h-12 rounded-2xl bg-[#F5A623] flex items-center justify-center text-[#3A2E1F] shadow-sm group-hover:bg-[#D97706] transition-colors">
-                            <Leaf className="w-7 h-7 fill-current" />
-                        </div>
-                        <div className="flex flex-col text-left">
-                            <span className="text-3xl font-extrabold font-heading tracking-tight text-[#3A2E1F] leading-none">
-                                GB<span className="text-[#D97706]">Market</span>
-                            </span>
-                            <span className="text-[10px] font-semibold text-[#D97706] uppercase tracking-widest leading-tight">
-                                Store Administration
-                            </span>
-                        </div>
+                        {settings.logo_url && !settings.logo_url.includes('placeholder') ? (
+                            <img src={settings.logo_url} alt={settings.store_name} className="h-16 object-contain" />
+                        ) : (
+                            <>
+                                <div className="w-12 h-12 rounded-2xl bg-[#F5A623] flex items-center justify-center text-[#3A2E1F] shadow-sm group-hover:bg-[#D97706] transition-colors">
+                                    <Leaf className="w-7 h-7 fill-current" />
+                                </div>
+                                <div className="flex flex-col text-left">
+                                    <span className="text-3xl font-extrabold font-heading tracking-tight text-[#3A2E1F] leading-none">
+                                        {settings.store_name || 'GBMarket'}
+                                    </span>
+                                    <span className="text-[10px] font-semibold text-[#D97706] uppercase tracking-widest leading-tight">
+                                        Store Administration
+                                    </span>
+                                </div>
+                            </>
+                        )}
                     </Link>
                     <h1 className="text-2xl font-bold font-heading text-[#3A2E1F] pt-2">
                         Admin Portal Sign In

@@ -35,6 +35,9 @@ export default function AdminSettings() {
         logoPreview: settings.logo_url || '/placeholder.png',
         faviconPreview: settings.favicon_url || '/vite.svg',
 
+        // Footer Logo
+        footerLogoPreview: settings.footer_logo_url || '/placeholder.png',
+
         // Contact Info
         contactEmail: settings.contact_email || '',
         contactPhone: settings.contact_phone || '',
@@ -61,6 +64,7 @@ export default function AdminSettings() {
     const logoInputRef = useRef(null);
     const faviconInputRef = useRef(null);
     const heroImageInputRef = useRef(null);
+    const footerLogoInputRef = useRef(null);
 
     // Tab items configuration
     const tabs = [
@@ -94,6 +98,15 @@ export default function AdminSettings() {
         }
     };
 
+    const handleFooterLogoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const previewUrl = URL.createObjectURL(file);
+            setFormData(prev => ({ ...prev, footerLogoPreview: previewUrl }));
+            toast.success('Footer logo preview updated!');
+        }
+    };
+
     const handleHeroImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -113,6 +126,14 @@ export default function AdminSettings() {
                 fd.append('image', logoInputRef.current.files[0]);
                 const { data } = await api.post('/upload', fd);
                 finalLogoUrl = data.url;
+            }
+
+            let finalFooterLogoUrl = formData.footerLogoPreview;
+            if (footerLogoInputRef.current && footerLogoInputRef.current.files[0]) {
+                const fd = new FormData();
+                fd.append('image', footerLogoInputRef.current.files[0]);
+                const { data } = await api.post('/upload', fd);
+                finalFooterLogoUrl = data.url;
             }
 
             let finalFaviconUrl = formData.faviconPreview;
@@ -136,6 +157,7 @@ export default function AdminSettings() {
                 store_tagline: formData.storeTagline,
                 logo_url: finalLogoUrl,
                 favicon_url: finalFaviconUrl,
+                footer_logo_url: finalFooterLogoUrl,
                 contact_email: formData.contactEmail,
                 contact_phone: formData.contactPhone,
                 contact_address: formData.contactAddress,
@@ -156,7 +178,8 @@ export default function AdminSettings() {
                 ...prev,
                 logoPreview: finalLogoUrl,
                 heroImagePreview: finalHeroImageUrl,
-                faviconPreview: finalFaviconUrl
+                faviconPreview: finalFaviconUrl,
+                footerLogoPreview: finalFooterLogoUrl
             }));
         } catch (error) {
             toast.error(error.response?.data?.error || error.message);
@@ -555,6 +578,43 @@ export default function AdminSettings() {
                                             onChange={(e) => handleInputChange('footerAboutText', e.target.value)}
                                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
+                                    </div>
+
+                                    {/* Footer Logo Upload Area */}
+                                    <div className="space-y-2 pt-2 border-t border-[#E8DEC8]">
+                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                            Secondary Footer Logo (Optional)
+                                        </label>
+                                        <input
+                                            type="file"
+                                            ref={footerLogoInputRef}
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={handleFooterLogoChange}
+                                        />
+                                        <div className="flex flex-col sm:flex-row items-center gap-5 p-5 bg-[#F5EFE0]/40 border border-[#E8DEC8] rounded-2xl">
+                                            <div className="w-20 h-20 rounded-2xl bg-white border border-[#E8DEC8] p-2 flex items-center justify-center shrink-0 shadow-xs">
+                                                <img
+                                                    src={formData.footerLogoPreview}
+                                                    alt="Store Footer Logo Preview"
+                                                    className="max-h-full max-w-full object-contain rounded-xl"
+                                                />
+                                            </div>
+                                            <div className="space-y-2 text-center sm:text-left flex-1">
+                                                <h4 className="text-xs font-bold text-[#3A2E1F]">Alternative Footer Mark</h4>
+                                                <p className="text-[11px] text-[#3A2E1F]/60">
+                                                    Looks best with light or negative colored logos against the dark background.
+                                                </p>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => footerLogoInputRef.current?.click()}
+                                                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-xs rounded-full shadow-xs transition-all"
+                                                >
+                                                    <UploadCloud className="w-3.5 h-3.5" />
+                                                    <span>Upload Footer Logo</span>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

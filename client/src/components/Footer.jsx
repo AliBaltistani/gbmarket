@@ -53,14 +53,20 @@ export default function Footer() {
                     {/* Brand Column */}
                     <div className="space-y-4">
                         <Link to="/" className="flex items-center gap-2">
-                            <div className="w-10 h-10 rounded-2xl bg-[#F5A623] flex items-center justify-center text-[#3A2E1F]">
-                                <Leaf className="w-6 h-6 fill-current" />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-2xl font-bold font-heading text-white">
-                                    {settings.store_name || 'GBMarket'}
-                                </span>
-                            </div>
+                            {settings.footer_logo_url && !settings.footer_logo_url.includes('placeholder') ? (
+                                <img src={settings.footer_logo_url} alt={settings.store_name} className="h-12 object-contain" />
+                            ) : (
+                                <>
+                                    <div className="w-10 h-10 rounded-2xl bg-[#F5A623] flex items-center justify-center text-[#3A2E1F]">
+                                        <Leaf className="w-6 h-6 fill-current" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-2xl font-bold font-heading text-white">
+                                            {settings.store_name || 'GBMarket'}
+                                        </span>
+                                    </div>
+                                </>
+                            )}
                         </Link>
                         <p className="text-sm text-[#F5EFE0]/80 leading-relaxed">
                             {settings.footer_about_text || 'Your trusted destination for handpicked organic almonds, walnuts, pistachios, pine nuts, and exotic dried fruits directly from Gilgit-Baltistan.'}

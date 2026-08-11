@@ -14,12 +14,14 @@ import {
     Settings
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useSettings } from '../../context/SettingsContext';
 
 export default function AdminLayout() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
     const { logout, adminUsername } = useAuth();
+    const { settings } = useSettings();
 
     const navItems = [
         { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
@@ -40,12 +42,18 @@ export default function AdminLayout() {
             {/* MOBILE HEADER BAR */}
             <header className="md:hidden bg-[#F5EFE0] border-b border-[#E8DEC8] px-4 py-3 flex items-center justify-between sticky top-0 z-40">
                 <Link to="/admin/dashboard" className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-[#F5A623] flex items-center justify-center text-[#3A2E1F]">
-                        <Leaf className="w-5 h-5 fill-current" />
-                    </div>
-                    <span className="font-heading font-extrabold text-lg text-[#3A2E1F]">
-                        GB<span className="text-[#D97706]">Admin</span>
-                    </span>
+                    {settings.logo_url && !settings.logo_url.includes('placeholder') ? (
+                        <img src={settings.logo_url} alt={settings.store_name} className="h-8 object-contain" />
+                    ) : (
+                        <>
+                            <div className="w-8 h-8 rounded-xl bg-[#F5A623] flex items-center justify-center text-[#3A2E1F]">
+                                <Leaf className="w-5 h-5 fill-current" />
+                            </div>
+                            <span className="font-heading font-extrabold text-lg text-[#3A2E1F]">
+                                {settings.store_name || 'GBMarket'} <span className="text-[#D97706] text-sm font-bold ml-1">Admin</span>
+                            </span>
+                        </>
+                    )}
                 </Link>
                 <div className="flex items-center gap-2">
                     <Link to="/" className="p-2 text-[#3A2E1F]/70 hover:text-[#D97706]" title="View Storefront">
@@ -82,17 +90,23 @@ export default function AdminLayout() {
                     {/* Logo Brand Header */}
                     <div className="flex items-center justify-between">
                         <Link to="/admin/dashboard" className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-[#F5A623] flex items-center justify-center text-[#3A2E1F] shadow-sm">
-                                <Leaf className="w-6 h-6 fill-current" />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-xl font-bold font-heading tracking-tight text-[#3A2E1F] leading-none">
-                                    GB<span className="text-[#D97706]">Market</span>
-                                </span>
-                                <span className="text-[10px] font-semibold text-[#D97706] uppercase tracking-widest leading-tight mt-0.5">
-                                    Control Center
-                                </span>
-                            </div>
+                            {settings.logo_url && !settings.logo_url.includes('placeholder') ? (
+                                <img src={settings.logo_url} alt={settings.store_name} className="h-10 object-contain" />
+                            ) : (
+                                <>
+                                    <div className="w-10 h-10 rounded-2xl bg-[#F5A623] flex items-center justify-center text-[#3A2E1F] shadow-sm">
+                                        <Leaf className="w-6 h-6 fill-current" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-xl font-bold font-heading tracking-tight text-[#3A2E1F] leading-none">
+                                            {settings.store_name || 'GBMarket'}
+                                        </span>
+                                        <span className="text-[10px] font-semibold text-[#D97706] uppercase tracking-widest leading-tight mt-0.5">
+                                            Control Center
+                                        </span>
+                                    </div>
+                                </>
+                            )}
                         </Link>
                         <button
                             type="button"
@@ -184,7 +198,7 @@ export default function AdminLayout() {
                 </header>
 
                 {/* CONTENT AREA */}
-                <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+                <main className="flex-1 p-4 sm:p-6 lg:p-8">
                     <Outlet />
                 </main>
             </div>

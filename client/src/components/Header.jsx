@@ -34,14 +34,20 @@ export default function Header() {
                     {/* Logo Left */}
                     <div className="flex items-center gap-3">
                         <Link to="/" className="flex items-center gap-2 group">
-                            <div className="w-10 h-10 rounded-2xl bg-[#F5A623] flex items-center justify-center text-[#3A2E1F] shadow-sm group-hover:bg-[#D97706] transition-colors">
-                                <Leaf className="w-6 h-6 fill-current" />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-2xl font-bold font-heading tracking-tight text-[#3A2E1F] leading-none">
-                                    {settings.store_name || 'GBMarket'}
-                                </span>
-                            </div>
+                            {settings.logo_url && !settings.logo_url.includes('placeholder') ? (
+                                <img src={settings.logo_url} alt={settings.store_name} className="h-10 object-contain" />
+                            ) : (
+                                <>
+                                    <div className="w-10 h-10 rounded-2xl bg-[#F5A623] flex items-center justify-center text-[#3A2E1F] shadow-sm group-hover:bg-[#D97706] transition-colors">
+                                        <Leaf className="w-6 h-6 fill-current" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-2xl font-bold font-heading tracking-tight text-[#3A2E1F] leading-none">
+                                            {settings.store_name || 'GBMarket'}
+                                        </span>
+                                    </div>
+                                </>
+                            )}
                         </Link>
                     </div>
 

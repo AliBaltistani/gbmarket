@@ -73,6 +73,7 @@ function initDb() {
             store_tagline: 'Premium Dry Fruits & Nuts from the Mountains of Gilgit-Baltistan',
             logo_url: '/placeholder.png',
             favicon_url: '/vite.svg',
+            footer_logo_url: '/placeholder.png',
             contact_email: 'info@gbmarket.pk',
             contact_phone: '+92 300 1234567',
             contact_address: 'Main Bazaar, Gilgit, Gilgit-Baltistan, Pakistan',
