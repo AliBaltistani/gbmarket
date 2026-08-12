@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Leaf, Award, Sparkles, ArrowRight, Flame, Truck, Percent, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
@@ -16,9 +16,47 @@ export default function Home() {
     const [loadingCats, setLoadingCats] = useState(true);
     const [loadingProds, setLoadingProds] = useState(true);
 
+    // Hero Carousel State
+    const [currentHeroSlide, setCurrentHeroSlide] = useState(0);
+    const [isHeroPaused, setIsHeroPaused] = useState(false);
+
     // New Arrivals Carousel State
     const [currentArrivalIndex, setCurrentArrivalIndex] = useState(0);
     const [isArrivalPaused, setIsArrivalPaused] = useState(false);
+
+    // Hero Slides Definition
+    const heroSlides = [
+        {
+            badge: "Fresh Harvest 2026",
+            title: settings.hero_heading || '100% Organic & Sun-Dried Mountain Produce',
+            subtitle: settings.hero_subheading || 'Handpicked paper-shell almonds & walnuts from the high-altitude orchards of Gilgit-Baltistan.',
+            ctaText: "Explore Harvest",
+            ctaLink: "/shop",
+            image: settings.hero_image_url || 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&q=80&w=800',
+            highlight: "Premium Grade Paper-Shell Almonds",
+            gradient: "from-[#F5A623]/25 via-[#F5EFE0] to-[#D97706]/15"
+        },
+        {
+            badge: "Pure Mountain Oils",
+            title: "Cold-Pressed Hunza Apricot & Almond Oils",
+            subtitle: "Raw, unrefined superfood oils extracted directly from wild Gilgit mountain harvests.",
+            ctaText: "Shop Pure Oils",
+            ctaLink: "/shop",
+            image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&q=80&w=800',
+            highlight: "100% Unpasteurized & Nutrient Rich",
+            gradient: "from-[#D97706]/25 via-[#F5EFE0] to-[#F5A623]/20"
+        },
+        {
+            badge: "Limited Reserve",
+            title: "Wild Mountain Pine Nuts (Chilgoza)",
+            subtitle: "Exquisite grade-A pine nuts harvested straight from natural pine forests of Gilgit-Baltistan.",
+            ctaText: "Discover Chilgoza",
+            ctaLink: "/shop",
+            image: 'https://images.unsplash.com/photo-1543362906-acfc16c67564?auto=format&fit=crop&q=80&w=800',
+            highlight: "Direct Sourced Mountain Luxury",
+            gradient: "from-[#3A2E1F]/15 via-[#F5EFE0] to-[#F5A623]/25"
+        }
+    ];
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -45,16 +83,35 @@ export default function Home() {
         fetchData();
     }, []);
 
+    // Auto-play Hero Banner Carousel (4s)
+    useEffect(() => {
+        if (isHeroPaused) return;
+
+        const timer = setInterval(() => {
+            setCurrentHeroSlide((prev) => (prev + 1) % heroSlides.length);
+        }, 1200);
+
+        return () => clearInterval(timer);
+    }, [isHeroPaused, heroSlides.length]);
+
     // Auto-scroll logic for New Arrivals Carousel
     useEffect(() => {
         if (newArrivals.length === 0 || isArrivalPaused) return;
 
         const interval = setInterval(() => {
             setCurrentArrivalIndex((prevIndex) => (prevIndex + 1) % Math.ceil(newArrivals.length / 2));
-        }, 3500);
+        }, 2200);
 
         return () => clearInterval(interval);
     }, [newArrivals.length, isArrivalPaused]);
+
+    const handlePrevHero = () => {
+        setCurrentHeroSlide((prev) => (prev === 0 ? heroSlides.length - 1 : prev - 1));
+    };
+
+    const handleNextHero = () => {
+        setCurrentHeroSlide((prev) => (prev + 1) % heroSlides.length);
+    };
 
     const handlePrevArrival = () => {
         setCurrentArrivalIndex((prev) => (prev === 0 ? Math.ceil(newArrivals.length / 2) - 1 : prev - 1));
@@ -64,57 +121,118 @@ export default function Home() {
         setCurrentArrivalIndex((prev) => (prev + 1) % Math.ceil(newArrivals.length / 2));
     };
 
-    // Prepare doubled categories for seamless infinite marquee loop
+    // Doubled categories for seamless infinite marquee
     const marqueeCategories = [...categories, ...categories];
 
+    const currentSlide = heroSlides[currentHeroSlide];
+
     return (
-        <div className="space-y-12 sm:space-y-20 pb-16">
+        <div className="space-y-10 sm:space-y-16 pb-16">
 
-            {/* HERO SECTION */}
-            <section className="relative overflow-hidden bg-gradient-to-br from-[#F5A623]/20 via-[#F5EFE0] to-[#D97706]/10 rounded-3xl p-6 sm:p-12 lg:p-16 border border-[#E8DEC8] shadow-xs max-w-7xl mx-auto mt-4">
-                <div className="absolute -right-16 -bottom-16 w-80 h-80 bg-[#F5A623]/20 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute right-1/3 top-0 w-64 h-64 bg-[#D97706]/10 rounded-full blur-2xl pointer-events-none" />
+            {/* COMPACT CREATIVE HERO BANNER CAROUSEL */}
+            <section
+                onMouseEnter={() => setIsHeroPaused(true)}
+                onMouseLeave={() => setIsHeroPaused(false)}
+                onTouchStart={() => setIsHeroPaused(true)}
+                onTouchEnd={() => setIsHeroPaused(false)}
+                className={`relative overflow-hidden bg-gradient-to-br ${currentSlide.gradient} rounded-3xl p-5 sm:p-7 lg:p-8 border border-[#E8DEC8] shadow-xs max-w-7xl mx-auto mt-3 transition-colors duration-700`}
+            >
+                {/* Ambient Aura Lights */}
+                <div className="absolute -right-16 -bottom-16 w-64 h-64 bg-[#F5A623]/20 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute left-1/3 top-0 w-48 h-48 bg-[#D97706]/15 rounded-full blur-2xl pointer-events-none" />
 
-                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-                    <div className="space-y-5 sm:space-y-6 text-center lg:text-left">
-                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F5A623]/20 text-[#3A2E1F] border border-[#F5A623]/40 text-xs sm:text-sm font-semibold">
-                            <Sparkles className="w-4 h-4 text-[#D97706]" />
-                            <span>100% Organic & Sun-Dried Harvest</span>
+                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+
+                    {/* Left Column: Text & CTA (7 cols) */}
+                    <div className="lg:col-span-7 space-y-3.5 text-center lg:text-left">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFFDF9]/80 backdrop-blur-md text-[#3A2E1F] border border-[#F5A623]/40 text-xs font-bold shadow-2xs">
+                            <Sparkles className="w-3.5 h-3.5 text-[#D97706]" />
+                            <span>{currentSlide.badge}</span>
                         </div>
-                        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold font-heading text-[#3A2E1F] tracking-tight leading-[1.15]">
-                            {settings.hero_heading || 'Pure Mountain Dry Fruits & Nuts'}
+
+                        <h1 className="text-2xl sm:text-4xl lg:text-4xl font-extrabold font-heading text-[#3A2E1F] tracking-tight leading-tight transition-all duration-500">
+                            {currentSlide.title}
                         </h1>
-                        <p className="text-sm sm:text-lg text-[#3A2E1F]/80 max-w-xl mx-auto lg:mx-0 leading-relaxed font-body">
-                            {settings.hero_subheading || 'Handpicked from the high-altitude orchards of Gilgit-Baltistan.'}
+
+                        <p className="text-xs sm:text-sm text-[#3A2E1F]/80 max-w-xl mx-auto lg:mx-0 leading-relaxed font-body">
+                            {currentSlide.subtitle}
                         </p>
-                        <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
-                            <Link to="/shop" className="w-full sm:w-auto px-8 py-3.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-sm sm:text-base rounded-full shadow-md hover:shadow-lg transition-all duration-200 text-center flex items-center justify-center gap-2 min-h-[44px]">
-                                <span>Explore Shop</span>
-                                <ArrowRight className="w-5 h-5" />
+
+                        <div className="flex flex-row items-center justify-center lg:justify-start gap-3 pt-1">
+                            <Link to={currentSlide.ctaLink} className="px-6 py-2.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-extrabold text-xs sm:text-sm rounded-full shadow-xs hover:shadow-md transition-all duration-200 text-center flex items-center gap-2 min-h-[40px]">
+                                <span>{currentSlide.ctaText}</span>
+                                <ArrowRight className="w-4 h-4" />
                             </Link>
-                            <Link to="/about" className="w-full sm:w-auto px-8 py-3.5 bg-[#FFFDF9] hover:bg-[#F5EFE0] text-[#3A2E1F] font-semibold text-sm sm:text-base rounded-full border border-[#E8DEC8] transition-all duration-200 text-center min-h-[44px] flex items-center justify-center">
-                                Our Sourcing Story
+                            <Link to="/about" className="px-5 py-2.5 bg-[#FFFDF9]/90 hover:bg-[#F5EFE0] text-[#3A2E1F] font-bold text-xs sm:text-sm rounded-full border border-[#E8DEC8] transition-all duration-200 text-center min-h-[40px] flex items-center justify-center">
+                                Story
                             </Link>
                         </div>
                     </div>
-                    <div className="relative flex items-center justify-center">
-                        <div className="w-full max-w-md aspect-square bg-[#FFFDF9] rounded-3xl p-3 sm:p-4 shadow-xl border border-[#E8DEC8] relative transform hover:scale-[1.02] transition-transform duration-500">
-                            <img src={settings.hero_image_url || '/placeholder.png'} alt="Hero" className="w-full h-full object-cover rounded-2xl" onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.png'; }} />
-                            <div className="absolute -bottom-3 -left-3 sm:-bottom-4 sm:-left-4 bg-[#3A2E1F] text-[#F5EFE0] p-3 sm:p-4 rounded-2xl shadow-lg border border-[#F5A623]/30 flex items-center gap-3">
-                                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#F5A623] text-[#3A2E1F] flex items-center justify-center font-bold shrink-0">
-                                    <Award className="w-5 h-5" />
+
+                    {/* Right Column: Creative Banner Card Showcase (5 cols) */}
+                    <div className="lg:col-span-5 relative flex items-center justify-center">
+                        <div className="w-full max-w-xs sm:max-w-sm aspect-16/10 sm:aspect-16/9 bg-[#FFFDF9] rounded-2xl p-2.5 shadow-lg border border-[#E8DEC8] relative transform hover:scale-[1.02] transition-transform duration-500 overflow-hidden">
+                            <img
+                                key={currentHeroSlide}
+                                src={currentSlide.image}
+                                alt={currentSlide.title}
+                                className="w-full h-full object-cover rounded-xl transition-all duration-500 animate-fadeIn"
+                                onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.png'; }}
+                            />
+
+                            {/* Glassmorphism Floating Badge */}
+                            <div className="absolute bottom-3 left-3 right-3 bg-[#3A2E1F]/90 backdrop-blur-md text-[#F5EFE0] p-2.5 rounded-xl shadow-md border border-[#F5A623]/30 flex items-center gap-2.5">
+                                <div className="w-7 h-7 rounded-full bg-[#F5A623] text-[#3A2E1F] flex items-center justify-center font-bold shrink-0">
+                                    <Award className="w-4 h-4" />
                                 </div>
-                                <div>
-                                    <div className="text-[10px] sm:text-xs text-[#F5A623] font-bold uppercase tracking-wider">Premium Grade</div>
-                                    <div className="text-xs sm:text-sm font-semibold">Paper-Shell Almonds & Nuts</div>
+                                <div className="min-w-0">
+                                    <div className="text-[9px] text-[#F5A623] font-black uppercase tracking-wider">Verified Sourced</div>
+                                    <div className="text-xs font-bold truncate">{currentSlide.highlight}</div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
+
+                {/* Banner Carousel Nav Controls & Slide Dots */}
+                <div className="flex items-center justify-between pt-4 mt-2 border-t border-[#E8DEC8]/50">
+                    <div className="flex items-center gap-2">
+                        {heroSlides.map((_, idx) => (
+                            <button
+                                key={idx}
+                                type="button"
+                                onClick={() => setCurrentHeroSlide(idx)}
+                                className={`h-1.5 rounded-full transition-all duration-300 ${currentHeroSlide === idx ? 'w-8 bg-[#D97706]' : 'w-2 bg-[#E8DEC8] hover:bg-[#F5A623]'}`}
+                                aria-label={`Go to hero slide ${idx + 1}`}
+                            />
+                        ))}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-bold text-[#3A2E1F]/60">0{currentHeroSlide + 1} / 0{heroSlides.length}</span>
+                        <button
+                            type="button"
+                            onClick={handlePrevHero}
+                            aria-label="Previous Hero Slide"
+                            className="w-7 h-7 rounded-full bg-white/80 hover:bg-[#F5A623] text-[#3A2E1F] border border-[#E8DEC8] flex items-center justify-center transition-all shadow-2xs"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleNextHero}
+                            aria-label="Next Hero Slide"
+                            className="w-7 h-7 rounded-full bg-white/80 hover:bg-[#F5A623] text-[#3A2E1F] border border-[#E8DEC8] flex items-center justify-center transition-all shadow-2xs"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+
             </section>
 
-            {/* NEW ARRIVALS STRIP — AUTO-SLIDING CAROUSEL WITH DISTINCT EFFECTS */}
+            {/* NEW ARRIVALS STRIP — AUTO-SLIDING CAROUSEL */}
             {(!loadingProds && newArrivals.length > 0) && (
                 <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div
@@ -211,7 +329,7 @@ export default function Home() {
                 </section>
             )}
 
-            {/* BROWSE CATEGORIES — CONTINUOUS INFINITE AUTO-MARQUEE WITH GLOW & LIFT EFFECTS */}
+            {/* BROWSE CATEGORIES — CONTINUOUS INFINITE AUTO-MARQUEE */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-6">
                 <div className="flex flex-row items-center justify-between gap-4">
                     <div>
@@ -229,9 +347,7 @@ export default function Home() {
                         {[...Array(5)].map((_, i) => <CategorySkeleton key={i} />)}
                     </div>
                 ) : (
-                    /* Infinite Continuous Auto Marquee Track with Pause on Hover */
                     <div className="relative overflow-hidden py-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-                        {/* Gradient Fade Edges */}
                         <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-16 bg-gradient-to-r from-[#F5EFE0] via-[#F5EFE0]/80 to-transparent z-10 pointer-events-none" />
                         <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-16 bg-gradient-to-l from-[#F5EFE0] via-[#F5EFE0]/80 to-transparent z-10 pointer-events-none" />
 
@@ -314,7 +430,7 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* PROMO BANNERS SECTION - RENDERS BETWEEN STORY AND JOURNAL */}
+            {/* PROMO BANNERS SECTION */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Promo Banner 1: Seasonal Special Harvest Sale */}
