@@ -26,16 +26,18 @@ import { AuthProvider } from './context/AuthContext';
 import { SettingsProvider } from './context/SettingsContext';
 import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
 import RouteTransition from './components/RouteTransition';
+import MobileCartBar from './components/MobileCartBar';
 
 // Storefront Layout Component
 function StorefrontLayout() {
   return (
     <div className="min-h-screen bg-[#FFFDF9] text-[#3A2E1F] font-body flex flex-col antialiased selection:bg-[#F5A623] selection:text-[#3A2E1F]">
       <Header />
-      <main className="flex-grow pt-2 px-4 sm:px-6 lg:px-8">
+      <main className="flex-grow pt-20 px-4 sm:px-6 lg:px-8 pb-20 md:pb-8">
         <Outlet />
       </main>
       <Footer />
+      <MobileCartBar />
     </div>
   );
 }

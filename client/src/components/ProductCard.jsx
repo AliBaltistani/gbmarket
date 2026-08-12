@@ -139,9 +139,9 @@ export default function ProductCard({ product }) {
 
                     {/* WEIGHT VARIANTS SELECTION CHIPS */}
                     {parsedWeightOptions.length > 0 && (
-                        <div className="pt-1">
-                            <span className="text-[10px] font-bold text-[#3A2E1F]/60 block mb-1">Select Pack Weight:</span>
-                            <div className="flex items-center gap-1.5 flex-wrap">
+                        <div className="pt-0.5">
+                            <span className="text-[9px] sm:text-[10px] font-bold text-[#3A2E1F]/60 block mb-1">Select Pack Weight:</span>
+                            <div className="flex items-center gap-1 flex-wrap">
                                 {parsedWeightOptions.map((opt, idx) => (
                                     <button
                                         key={idx}
@@ -151,9 +151,9 @@ export default function ProductCard({ product }) {
                                             e.stopPropagation();
                                             setSelectedWeightIndex(idx);
                                         }}
-                                        className={`px-2 py-0.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer border ${selectedWeightIndex === idx
-                                                ? 'bg-[#F5A623] text-[#3A2E1F] border-[#D97706] shadow-2xs scale-105'
-                                                : 'bg-[#F5EFE0]/60 hover:bg-[#F5EFE0] text-[#3A2E1F]/80 border-[#E8DEC8]'
+                                        className={`px-1.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-md transition-all cursor-pointer border ${selectedWeightIndex === idx
+                                            ? 'bg-[#F5A623] text-[#3A2E1F] border-[#D97706] shadow-2xs scale-105'
+                                            : 'bg-[#F5EFE0]/60 hover:bg-[#F5EFE0] text-[#3A2E1F]/80 border-[#E8DEC8]'
                                             }`}
                                     >
                                         {opt.label}
@@ -165,15 +165,15 @@ export default function ProductCard({ product }) {
                 </div>
 
                 {/* Price Display & Direct Buy Action Bar */}
-                <div className="space-y-2 pt-2 border-t border-[#E8DEC8]/70">
+                <div className="space-y-1.5 pt-2 border-t border-[#E8DEC8]/70">
                     <div className="flex items-baseline justify-between">
-                        <span className="text-[10px] text-[#3A2E1F]/60">Pack Price:</span>
-                        <div className="text-base sm:text-lg font-black font-heading text-[#3A2E1F]">
+                        <span className="text-[9px] sm:text-[10px] text-[#3A2E1F]/60">Pack Price:</span>
+                        <div className="text-sm sm:text-base lg:text-lg font-black font-heading text-[#3A2E1F]">
                             Rs. {activePrice.toLocaleString()}
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-5 gap-1.5">
+                    <div className="grid grid-cols-5 gap-1">
                         {/* Quick Add icon button (1 col) */}
                         <button
                             type="button"
@@ -182,7 +182,7 @@ export default function ProductCard({ product }) {
                             title={isOutOfStock ? "Out of Stock" : "Add to Cart"}
                             aria-label="Add to Cart"
                             className={`
-                                col-span-1 rounded-xl flex items-center justify-center transition-all cursor-pointer min-h-[38px] active:scale-95 border
+                                col-span-1 rounded-xl flex items-center justify-center transition-all cursor-pointer min-h-[36px] active:scale-95 border
                                 ${isOutOfStock
                                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
                                     : isAdded
@@ -192,9 +192,9 @@ export default function ProductCard({ product }) {
                             `}
                         >
                             {isAdded ? (
-                                <Check className="w-4 h-4 text-white stroke-[3]" />
+                                <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
                             ) : (
-                                <ShoppingBag className="w-4 h-4" />
+                                <ShoppingBag className="w-3.5 h-3.5" />
                             )}
                         </button>
 
@@ -204,15 +204,15 @@ export default function ProductCard({ product }) {
                             onClick={handleBuyNow}
                             disabled={isOutOfStock}
                             className={`
-                                col-span-4 px-3 py-2 rounded-xl font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 shadow-xs min-h-[38px] cursor-pointer active:scale-95
+                                col-span-4 px-2.5 py-1.5 rounded-xl font-extrabold text-[11px] sm:text-xs transition-all flex items-center justify-center gap-1 shadow-xs min-h-[36px] cursor-pointer active:scale-95
                                 ${isOutOfStock
                                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                     : 'bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white shadow-xs'
                                 }
                             `}
                         >
-                            <Zap className="w-3.5 h-3.5 fill-current" />
-                            <span>Buy Now</span>
+                            <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current shrink-0" />
+                            <span className="truncate">Buy Now</span>
                         </button>
                     </div>
                 </div>
