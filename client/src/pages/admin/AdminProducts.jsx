@@ -47,6 +47,8 @@ export default function AdminProducts() {
         category_id: '',
         basePrice: '',
         stock: '',
+        rating: '4.8',
+        reviewCount: '25',
         description: '',
         isFeatured: false,
         weightOptions: [{ label: '500g', price: '' }]
@@ -96,6 +98,8 @@ export default function AdminProducts() {
                 category_id: prod.category_id || (categories.length > 0 ? categories[0].id : ''),
                 basePrice: prod.base_price,
                 stock: prod.stock,
+                rating: prod.rating || 4.8,
+                reviewCount: prod.review_count || 25,
                 description: prod.description || '',
                 isFeatured: prod.is_featured === 1,
                 weightOptions: prod.weight_options && prod.weight_options.length > 0
@@ -110,6 +114,8 @@ export default function AdminProducts() {
                 category_id: categories.length > 0 ? categories[0].id : '',
                 basePrice: '',
                 stock: '',
+                rating: '4.8',
+                reviewCount: '25',
                 description: '',
                 isFeatured: false,
                 weightOptions: [{ label: '1kg', price: '' }, { label: '500g', price: '' }]
@@ -157,6 +163,8 @@ export default function AdminProducts() {
                 category_id: Number(formData.category_id),
                 base_price: Number(formData.basePrice),
                 stock: Number(formData.stock),
+                rating: Number(formData.rating),
+                review_count: Number(formData.reviewCount),
                 description: formData.description,
                 image_url: imageUrl,
                 is_featured: formData.isFeatured ? 1 : 0,
@@ -431,17 +439,43 @@ export default function AdminProducts() {
                         </div>
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Base Price (PKR)</label>
-                        <input
-                            required
-                            type="number"
-                            min="0"
-                            value={formData.basePrice}
-                            onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
-                            placeholder="e.g. 1500"
-                            className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
-                        />
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Base Price (PKR)</label>
+                            <input
+                                required
+                                type="number"
+                                min="0"
+                                value={formData.basePrice}
+                                onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
+                                placeholder="e.g. 1500"
+                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Rating (1.0 - 5.0)</label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                min="1.0"
+                                max="5.0"
+                                value={formData.rating}
+                                onChange={(e) => setFormData({ ...formData, rating: e.target.value })}
+                                placeholder="4.8"
+                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Review Count</label>
+                            <input
+                                type="number"
+                                min="0"
+                                value={formData.reviewCount}
+                                onChange={(e) => setFormData({ ...formData, reviewCount: e.target.value })}
+                                placeholder="42"
+                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                            />
+                        </div>
                     </div>
 
                     {/* Form Controls */}

@@ -271,7 +271,7 @@ app.get('/api/products/:slug', (req, res) => {
 app.post('/api/products', requireAdmin, (req, res) => {
     try {
         const {
-            name, slug, description, category_id, image_url, base_price, stock, weight_options, is_featured
+            name, slug, description, category_id, image_url, base_price, stock, weight_options, is_featured, rating, review_count
         } = req.body;
 
         // Validate required fields
@@ -282,15 +282,17 @@ app.post('/api/products', requireAdmin, (req, res) => {
 
         const stmt = db.prepare(`
       INSERT INTO products (
-        name, slug, description, category_id, image_url, base_price, stock, weight_options, is_featured
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        name, slug, description, category_id, image_url, base_price, stock, weight_options, is_featured, rating, review_count
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
         const info = stmt.run(
             name, slug, description, category_id || null, image_url, Number(base_price),
             stock || 0,
             typeof weight_options === 'string' ? weight_options : JSON.stringify(weight_options),
-            is_featured || 0
+            is_featured || 0,
+            rating ? Number(rating) : 4.8,
+            review_count ? Number(review_count) : 25
         );
 
         res.status(201).json({ id: info.lastInsertRowid, message: 'Product created successfully' });
@@ -307,13 +309,14 @@ app.put('/api/products/:id', requireAdmin, (req, res) => {
     try {
         const { id } = req.params;
         const {
-            name, slug, description, category_id, image_url, base_price, stock, weight_options, is_featured
+            name, slug, description, category_id, image_url, base_price, stock, weight_options, is_featured, rating, review_count
         } = req.body;
 
         const stmt = db.prepare(`
       UPDATE products SET 
         name = ?, slug = ?, description = ?, category_id = ?, image_url = ?, 
-        base_price = ?, stock = ?, weight_options = ?, is_featured = ?
+        base_price = ?, stock = ?, weight_options = ?, is_featured = ?,
+        rating = ?, review_count = ?
       WHERE id = ?
     `);
 
@@ -322,6 +325,8 @@ app.put('/api/products/:id', requireAdmin, (req, res) => {
             stock,
             typeof weight_options === 'string' ? weight_options : JSON.stringify(weight_options),
             is_featured,
+            rating !== undefined ? Number(rating) : 4.8,
+            review_count !== undefined ? Number(review_count) : 25,
             id
         );
 

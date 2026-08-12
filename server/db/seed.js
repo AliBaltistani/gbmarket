@@ -147,14 +147,28 @@ categories.forEach(c => {
 // Insert Products
 const insertProduct = db.prepare(`
   INSERT INTO products (
-    name, slug, description, category_id, image_url, base_price, stock, weight_options, is_featured
+    name, slug, description, category_id, image_url, base_price, stock, weight_options, is_featured, rating, review_count
   ) VALUES (
-    @name, @slug, @description, @category_id, @image_url, @base_price, @stock, @weight_options, @is_featured
+    @name, @slug, @description, @category_id, @image_url, @base_price, @stock, @weight_options, @is_featured, @rating, @review_count
   )
 `);
 
-products.forEach(p => {
+const ratingsList = [
+    { rating: 4.9, review_count: 84 },
+    { rating: 4.8, review_count: 56 },
+    { rating: 4.6, review_count: 32 },
+    { rating: 5.0, review_count: 112 },
+    { rating: 4.7, review_count: 95 },
+    { rating: 4.5, review_count: 19 },
+    { rating: 4.8, review_count: 41 },
+    { rating: 4.9, review_count: 148 },
+    { rating: 4.9, review_count: 73 },
+    { rating: 4.7, review_count: 62 }
+];
+
+products.forEach((p, idx) => {
     const categoryId = categoryMap[p.category_slug];
+    const rInfo = ratingsList[idx % ratingsList.length];
     insertProduct.run({
         name: p.name,
         slug: p.slug,
@@ -164,7 +178,9 @@ products.forEach(p => {
         base_price: p.base_price,
         stock: p.stock,
         weight_options: p.weight_options,
-        is_featured: p.is_featured
+        is_featured: p.is_featured,
+        rating: p.rating || rInfo.rating,
+        review_count: p.review_count || rInfo.review_count
     });
 });
 
