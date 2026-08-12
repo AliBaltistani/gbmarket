@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, SlidersHorizontal, Grid, RotateCcw, PackageX } from 'lucide-react';
+import { Search, SlidersHorizontal, Grid, RotateCcw, PackageX, X } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import { ProductSkeleton } from '../components/Skeletons';
 import { getProducts } from '../api/products';
@@ -21,6 +21,18 @@ export default function Shop() {
     const [sortBy, setSortBy] = useState('newest');
     const [priceRange, setPriceRange] = useState(15000);
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+    // Prevent background scrolling when mobile filter drawer is open
+    useEffect(() => {
+        if (isMobileFilterOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isMobileFilterOpen]);
 
     // Debounce search query syncing to URL
     useEffect(() => {
@@ -218,6 +230,127 @@ export default function Shop() {
                     </main>
                 </div>
             </div>
+
+            {/* 3. MOBILE FILTER DRAWER OVERLAY */}
+            {isMobileFilterOpen && (
+                <div className="fixed inset-0 z-50 lg:hidden flex justify-start">
+                    {/* Backdrop */}
+                    <div
+                        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-fadeIn"
+                        onClick={() => setIsMobileFilterOpen(false)}
+                    />
+
+                    {/* Drawer Content */}
+                    <div className="relative w-full max-w-xs sm:max-w-sm bg-[#FFFDF9] h-full shadow-2xl flex flex-col z-10 animate-fadeIn overflow-y-auto">
+                        {/* Drawer Header */}
+                        <div className="p-5 border-b border-[#E8DEC8] flex items-center justify-between bg-[#FFFDF9] sticky top-0 z-10">
+                            <div className="flex items-center gap-2 font-heading font-bold text-lg text-[#3A2E1F]">
+                                <SlidersHorizontal className="w-5 h-5 text-[#D97706]" />
+                                <span>Filter Products</span>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setIsMobileFilterOpen(false)}
+                                className="p-2 text-[#3A2E1F]/60 hover:text-[#3A2E1F] hover:bg-[#E8DEC8]/50 rounded-full transition-colors"
+                                aria-label="Close filters drawer"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Drawer Body */}
+                        <div className="p-5 space-y-6 flex-1 overflow-y-auto">
+                            {/* Categories */}
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="font-heading font-bold text-sm text-[#3A2E1F]">Categories</h3>
+                                    <button
+                                        type="button"
+                                        onClick={handleResetFilters}
+                                        className="text-xs font-bold text-[#D97706] hover:underline flex items-center gap-1"
+                                    >
+                                        <RotateCcw className="w-3.5 h-3.5" />
+                                        <span>Reset All</span>
+                                    </button>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleCategoryChange('all')}
+                                        className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium transition-colors flex items-center justify-between ${selectedCategory === 'all'
+                                            ? 'bg-[#F5A623] text-[#3A2E1F] font-bold shadow-xs'
+                                            : 'hover:bg-[#F5EFE0] text-[#3A2E1F]/80 bg-[#F5EFE0]/30 border border-[#E8DEC8]/40'
+                                            }`}
+                                    >
+                                        <span>All Categories</span>
+                                    </button>
+                                    {!loadingCats && categories.map((cat) => (
+                                        <button
+                                            key={cat.id}
+                                            type="button"
+                                            onClick={() => handleCategoryChange(cat.slug)}
+                                            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium transition-colors flex items-center justify-between ${selectedCategory === cat.slug
+                                                ? 'bg-[#F5A623] text-[#3A2E1F] font-bold shadow-xs'
+                                                : 'hover:bg-[#F5EFE0] text-[#3A2E1F]/80 bg-[#F5EFE0]/30 border border-[#E8DEC8]/40'
+                                                }`}
+                                        >
+                                            <span>{cat.name}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Price Range Slider */}
+                            <div className="space-y-3 pt-4 border-t border-[#E8DEC8]">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="font-heading font-bold text-sm text-[#3A2E1F]">Max Price</h3>
+                                    <span className="text-xs font-extrabold text-[#D97706] bg-[#F5EFE0] px-2.5 py-1 rounded-lg border border-[#E8DEC8]">
+                                        Rs. {priceRange.toLocaleString()}
+                                    </span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="500"
+                                    max="15000"
+                                    step="500"
+                                    value={priceRange}
+                                    onChange={(e) => setPriceRange(Number(e.target.value))}
+                                    className="w-full accent-[#D97706] cursor-pointer"
+                                />
+                                <div className="flex justify-between text-[11px] font-semibold text-[#3A2E1F]/60">
+                                    <span>Rs. 500</span>
+                                    <span>Rs. 15,000</span>
+                                </div>
+                            </div>
+
+                            {/* Sort Options */}
+                            <div className="space-y-3 pt-4 border-t border-[#E8DEC8]">
+                                <h3 className="font-heading font-bold text-sm text-[#3A2E1F]">Sort By</h3>
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    className="w-full px-3.5 py-2.5 bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl text-xs font-semibold text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                >
+                                    <option value="newest">Newest Arrivals</option>
+                                    <option value="low-high">Price: Low to High</option>
+                                    <option value="high-low">Price: High to Low</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Drawer Footer */}
+                        <div className="p-5 border-t border-[#E8DEC8] bg-[#F5EFE0]/40 sticky bottom-0 z-10">
+                            <button
+                                type="button"
+                                onClick={() => setIsMobileFilterOpen(false)}
+                                className="w-full py-3 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] font-extrabold text-sm rounded-xl transition-all shadow-md active:scale-98"
+                            >
+                                Show Results ({filteredProducts.length})
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
