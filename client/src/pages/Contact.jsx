@@ -5,7 +5,7 @@ import { useSettings } from '../context/SettingsContext';
 export default function Contact() {
     const { settings } = useSettings();
     useEffect(() => {
-        window.scrollTo(0, 0);
+        // window.scrollTo(0, 0); // Handled by RouteTransition
     }, []);
 
     const [formSubmitted, setFormSubmitted] = useState(false);

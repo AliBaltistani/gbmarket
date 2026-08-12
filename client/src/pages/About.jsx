@@ -4,7 +4,7 @@ import { Leaf, Award, ShieldCheck, Heart, Truck, Sparkles, ArrowRight, CheckCirc
 
 export default function About() {
     useEffect(() => {
-        window.scrollTo(0, 0);
+        // window.scrollTo(0, 0); // Handled by RouteTransition
     }, []);
 
     const features = [

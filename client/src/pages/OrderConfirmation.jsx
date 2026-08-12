@@ -7,7 +7,7 @@ export default function OrderConfirmation() {
     const { orderId, total, count } = location.state || {};
 
     useEffect(() => {
-        window.scrollTo(0, 0);
+        // window.scrollTo(0, 0); // Handled by RouteTransition
     }, []);
 
     return (

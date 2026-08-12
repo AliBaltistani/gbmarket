@@ -22,7 +22,7 @@ export default function ProductDetail() {
     const [isAdded, setIsAdded] = useState(false);
 
     useEffect(() => {
-        window.scrollTo(0, 0);
+        // window.scrollTo(0, 0); // Handled by RouteTransition
         const fetchProduct = async () => {
             setLoading(true);
             setNotFound(false);
