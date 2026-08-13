@@ -4,6 +4,7 @@ import { Star, ShoppingBag, Truck, ShieldCheck, RefreshCw, Plus, Minus, ArrowLef
 import ProductCard from '../components/ProductCard';
 import { getProductBySlug, getProducts } from '../api/products';
 import { useCart } from '../context/CartContext';
+import SEO from '../components/SEO';
 
 export default function ProductDetail() {
     const { slug } = useParams();
@@ -104,6 +105,12 @@ export default function ProductDetail() {
 
     return (
         <div className="space-y-8 sm:space-y-12 pb-28 md:pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+            <SEO
+                title={product.name}
+                description={product.description ? product.description.substring(0, 160) : `Buy ${product.name} - premium organic dry fruit from Gilgit-Baltistan.`}
+                ogImage={product.image_url}
+                type="product"
+            />
 
             {/* BREADCRUMB */}
             <nav className="flex items-center gap-2 text-xs font-semibold text-[#3A2E1F]/70 overflow-x-auto scrollbar-none pb-1">

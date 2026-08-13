@@ -4,6 +4,7 @@ import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, ArrowLeft, ShieldCheck, T
 import { useCart } from '../context/CartContext';
 import { useSettings } from '../context/SettingsContext';
 import { useCurrency } from '../hooks/useCurrency';
+import SEO from '../components/SEO';
 
 export default function Cart() {
     const { cartItems, updateQuantity, removeItem, clearCart } = useCart();
@@ -19,6 +20,7 @@ export default function Cart() {
 
     return (
         <div className="space-y-10 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+            <SEO title="Shopping Cart" description="Review your selected premium dry fruits and nuts before checkout." noindex={true} />
             {/* HEADER BANNER */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-[#E8DEC8] pb-6">
                 <div>

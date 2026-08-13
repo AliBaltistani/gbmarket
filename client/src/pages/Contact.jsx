@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, MessageSquare } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
+import SEO from '../components/SEO';
 
 export default function Contact() {
     const { settings } = useSettings();
@@ -27,6 +28,10 @@ export default function Contact() {
 
     return (
         <div className="space-y-12 pb-16">
+            <SEO
+                title="Contact Us"
+                description="Get in touch with GBMarket for bulk orders, order inquiries, or customer support. We're here to help!"
+            />
 
             {/* 1. HERO BANNER */}
             <section className="bg-gradient-to-r from-[#F5EFE0] via-[#F5A623]/20 to-[#F5EFE0] border-b border-[#E8DEC8] py-12 px-4 sm:px-6 lg:px-8 text-center rounded-3xl max-w-7xl mx-auto mt-4">

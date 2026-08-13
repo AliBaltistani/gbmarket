@@ -10,7 +10,7 @@ export default function Footer() {
     };
 
     return (
-        <footer className="bg-[#3A2E1F] text-[#F5EFE0] mt-auto border-t border-[#D97706]/20">
+        <footer role="contentinfo" className="bg-[#3A2E1F] text-[#F5EFE0] mt-auto border-t border-[#D97706]/20">
             {/* Features Bar */}
             <div className="border-b border-[#F5EFE0]/10 bg-[#3A2E1F]/90 py-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
@@ -102,12 +102,13 @@ export default function Footer() {
                         <p className="text-sm text-[#F5EFE0]/80 mb-4">
                             Subscribe to get exclusive discounts, recipe ideas, and seasonal fresh harvest updates.
                         </p>
-                        <form onSubmit={handleSubmit} className="space-y-3">
+                        <form onSubmit={handleSubmit} className="space-y-3" aria-label="Newsletter signup">
                             <div className="relative">
                                 <input
                                     type="email"
                                     placeholder="Enter your email"
                                     required
+                                    aria-label="Email address for newsletter"
                                     className="w-full pl-10 pr-4 py-2.5 text-sm bg-[#F5EFE0]/10 border border-[#F5EFE0]/20 rounded-full text-white placeholder-[#F5EFE0]/50 focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                 />
                                 <Mail className="w-4 h-4 text-[#F5EFE0]/50 absolute left-3.5 top-1/2 -translate-y-1/2" />

@@ -6,6 +6,7 @@ import { ProductSkeleton, CategorySkeleton } from '../components/Skeletons';
 import { getProducts } from '../api/products';
 import { getCategories } from '../api/categories';
 import { useSettings } from '../context/SettingsContext';
+import SEO from '../components/SEO';
 
 // F11: Blog posts inlined — dummyData.js no longer needed
 const blogPosts = [
@@ -149,6 +150,10 @@ export default function Home() {
 
     return (
         <div className="space-y-10 sm:space-y-16 pb-16">
+            <SEO
+                title="Home"
+                description="Shop premium organic dry fruits and nuts from Gilgit-Baltistan. Handpicked almonds, walnuts, pine nuts, and sun-dried apricots delivered across Pakistan."
+            />
 
             {/* COMPACT CREATIVE HERO BANNER CAROUSEL */}
             <section

@@ -6,6 +6,7 @@ import { useSettings } from '../context/SettingsContext';
 import { createOrder } from '../api/orders';
 import { useCurrency } from '../hooks/useCurrency';
 import toast from 'react-hot-toast';
+import SEO from '../components/SEO';
 
 export default function Checkout() {
     const navigate = useNavigate();
@@ -88,6 +89,7 @@ export default function Checkout() {
 
     return (
         <div className="space-y-10 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+            <SEO title="Checkout" description="Complete your order for premium organic dry fruits from Gilgit-Baltistan." noindex={true} />
 
             {/* BREADCRUMB */}
             <nav className="flex items-center gap-2 text-xs font-semibold text-[#3A2E1F]/70 pb-2">

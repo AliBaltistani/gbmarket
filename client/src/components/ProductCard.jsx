@@ -205,6 +205,7 @@ export default function ProductCard({ product }) {
                             type="button"
                             onClick={handleBuyNow}
                             disabled={isOutOfStock}
+                            aria-label={isOutOfStock ? 'Sold out' : `Buy ${name} now`}
                             className={`
                                 col-span-4 px-2.5 py-1.5 rounded-xl font-extrabold text-[11px] sm:text-xs transition-all flex items-center justify-center gap-1 shadow-xs min-h-[36px] cursor-pointer active:scale-95
                                 ${isOutOfStock

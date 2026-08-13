@@ -1,0 +1,70 @@
+const express = require('express');
+
+module.exports = function (db, requireAdmin) {
+    const router = express.Router();
+
+    // GET /api/categories (public, with product count)
+    router.get('/', (req, res, next) => {
+        try {
+            const categories = db.prepare(`
+                SELECT c.*, COUNT(p.id) as productCount
+                FROM categories c
+                LEFT JOIN products p ON p.category_id = c.id
+                GROUP BY c.id
+                ORDER BY c.name ASC
+            `).all();
+            res.json(categories);
+        } catch (error) {
+            next(error);
+        }
+    });
+
+    // POST /api/categories (admin)
+    router.post('/', requireAdmin, (req, res, next) => {
+        try {
+            const { name, slug } = req.body;
+            if (!name || !slug) return res.status(400).json({ error: 'Name and slug are required' });
+            const stmt = db.prepare('INSERT INTO categories (name, slug) VALUES (?, ?)');
+            const info = stmt.run(name, slug);
+            res.status(201).json({ id: info.lastInsertRowid, name, slug });
+        } catch (error) {
+            if (error.message.includes('UNIQUE constraint')) {
+                return res.status(409).json({ error: 'A category with this slug already exists' });
+            }
+            next(error);
+        }
+    });
+
+    // PUT /api/categories/:id (admin)
+    router.put('/:id', requireAdmin, (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const { name, slug } = req.body;
+            if (!name || !slug) return res.status(400).json({ error: 'Name and slug are required' });
+            const stmt = db.prepare('UPDATE categories SET name = ?, slug = ? WHERE id = ?');
+            const info = stmt.run(name, slug, id);
+            if (info.changes === 0) return res.status(404).json({ error: 'Category not found' });
+            res.json({ id: Number(id), name, slug });
+        } catch (error) {
+            if (error.message.includes('UNIQUE constraint')) {
+                return res.status(409).json({ error: 'A category with this slug already exists' });
+            }
+            next(error);
+        }
+    });
+
+    // DELETE /api/categories/:id (admin)
+    router.delete('/:id', requireAdmin, (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const stmt = db.prepare('DELETE FROM categories WHERE id = ?');
+            const info = stmt.run(id);
+            if (info.changes === 0) return res.status(404).json({ error: 'Category not found' });
+            res.json({ message: 'Category deleted successfully' });
+        } catch (error) {
+            next(error);
+        }
+    });
+
+    return router;
+};

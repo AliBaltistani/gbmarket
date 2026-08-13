@@ -28,6 +28,7 @@ function initDb() {
       stock INTEGER DEFAULT 0,
       weight_options TEXT,
       is_featured INTEGER DEFAULT 0,
+      is_deleted INTEGER DEFAULT 0,
       rating REAL DEFAULT 0,
       review_count INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -100,6 +101,13 @@ function initDb() {
   const hasEmail = ordersInfo.some(col => col.name === 'customer_email');
   if (!hasEmail) {
     db.exec('ALTER TABLE orders ADD COLUMN customer_email TEXT');
+  }
+
+  // B7: Ensure is_deleted column exists for product soft-delete
+  const productsInfo = db.prepare("PRAGMA table_info(products)").all();
+  const hasIsDeleted = productsInfo.some(col => col.name === 'is_deleted');
+  if (!hasIsDeleted) {
+    db.exec('ALTER TABLE products ADD COLUMN is_deleted INTEGER DEFAULT 0');
   }
 
   // B3: Removed — ratings are no longer overwritten on every server start.

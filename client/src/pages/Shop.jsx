@@ -5,6 +5,7 @@ import ProductCard from '../components/ProductCard';
 import { ProductSkeleton } from '../components/Skeletons';
 import { getProducts } from '../api/products';
 import { getCategories } from '../api/categories';
+import SEO from '../components/SEO';
 
 export default function Shop() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -108,6 +109,10 @@ export default function Shop() {
 
     return (
         <div className="space-y-10 pb-16">
+            <SEO
+                title="Shop All Products"
+                description="Browse our complete collection of premium organic dry fruits and nuts from Gilgit-Baltistan. Almonds, walnuts, pine nuts, dried apricots and more."
+            />
             {/* 1. SHOP HERO BANNER */}
             <section className="bg-gradient-to-r from-[#F5EFE0] via-[#F5A623]/20 to-[#F5EFE0] border-b border-[#E8DEC8] py-12 px-4 sm:px-6 lg:px-8 text-center rounded-3xl max-w-7xl mx-auto mt-4">
                 <div className="max-w-2xl mx-auto space-y-3">

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Leaf, Award, ShieldCheck, Heart, Truck, Sparkles, ArrowRight, CheckCircle2, Users, MapPin } from 'lucide-react';
+import SEO from '../components/SEO';
 
 export default function About() {
     useEffect(() => {
@@ -32,6 +33,10 @@ export default function About() {
 
     return (
         <div className="space-y-16 pb-16">
+            <SEO
+                title="About Us"
+                description="Learn about GBMarket's mission to bring 100% organic, sun-dried dry fruits from the mountains of Gilgit-Baltistan directly to your doorstep."
+            />
 
             {/* 1. HERO BANNER */}
             <section className="bg-gradient-to-r from-[#F5EFE0] via-[#F5A623]/20 to-[#F5EFE0] border-b border-[#E8DEC8] py-16 px-4 sm:px-6 lg:px-8 text-center rounded-3xl max-w-7xl mx-auto mt-4">
