@@ -142,6 +142,10 @@ export default function AdminProducts() {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            // C8: Revoke old object URL to prevent memory leak
+            if (imagePreview && imagePreview.startsWith('blob:')) {
+                URL.revokeObjectURL(imagePreview);
+            }
             setImageFile(file);
             setImagePreview(URL.createObjectURL(file));
         }

@@ -186,8 +186,8 @@ products.forEach((p, idx) => {
 
 // Clean up and Insert Admin User
 db.exec('DELETE FROM admin_users;');
-const adminPassword = 'AdminSecret123!';
-const salt = bcrypt.genSaltSync(10);
+const adminPassword = process.env.ADMIN_PASSWORD || 'ChangeMe_' + Date.now();
+const salt = bcrypt.genSaltSync(12);
 const passwordHash = bcrypt.hashSync(adminPassword, salt);
 
 const insertAdmin = db.prepare('INSERT INTO admin_users (username, password_hash) VALUES (?, ?)');
@@ -195,7 +195,11 @@ insertAdmin.run('admin', passwordHash);
 
 console.log('Database seeding complete: Inserted 10 categories, 10 products, and 1 admin user successfully.');
 console.log('---');
-console.log('ADMIN CREDS:');
-console.log(`Username: admin`);
-console.log(`Password: ${adminPassword}`);
+console.log('Admin username: admin');
+if (process.env.ADMIN_PASSWORD) {
+    console.log('Admin password was set from ADMIN_PASSWORD environment variable.');
+} else {
+    console.warn('WARNING: No ADMIN_PASSWORD env var set. A random default was used.');
+    console.warn('Re-run with: ADMIN_PASSWORD=YourSecurePass node db/seed.js');
+}
 console.log('---');

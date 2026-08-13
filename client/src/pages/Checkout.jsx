@@ -4,15 +4,18 @@ import { ArrowLeft, MapPin, Truck, CheckCircle2, ChevronRight, Loader2, AlertCir
 import { useCart } from '../context/CartContext';
 import { useSettings } from '../context/SettingsContext';
 import { createOrder } from '../api/orders';
+import { useCurrency } from '../hooks/useCurrency';
 import toast from 'react-hot-toast';
 
 export default function Checkout() {
     const navigate = useNavigate();
     const { cartItems, clearCart } = useCart();
     const { settings } = useSettings();
+    const { formatPrice } = useCurrency();
 
     const [formData, setFormData] = useState({
         name: '',
+        email: '',
         phone: '',
         address: '',
         city: ''
@@ -20,7 +23,7 @@ export default function Checkout() {
     const [loading, setLoading] = useState(false);
 
     const subtotal = cartItems.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0);
-    const freeShippingThreshold = settings?.free_shipping_threshold || 5000;
+    const freeShippingThreshold = Number(settings?.free_shipping_threshold) || 5000;
     const shippingFee = subtotal >= freeShippingThreshold || subtotal === 0 ? 0 : 350;
     const grandTotal = subtotal + shippingFee;
 
@@ -39,6 +42,7 @@ export default function Checkout() {
         try {
             const orderData = {
                 customer_name: formData.name,
+                customer_email: formData.email || undefined,
                 phone: formData.phone,
                 address: `${formData.address}, ${formData.city}`,
                 total: grandTotal,
@@ -62,7 +66,8 @@ export default function Checkout() {
 
         } catch (error) {
             console.error(error);
-            toast.error("Failed to place order. Please try again.");
+            const errorMsg = error.response?.data?.error || 'Failed to place order. Please try again.';
+            toast.error(errorMsg);
         } finally {
             setLoading(false);
         }
@@ -125,6 +130,10 @@ export default function Checkout() {
                                     value={formData.phone} onChange={handleChange} placeholder="0300 1234567" />
                             </div>
                             <div className="space-y-1.5 sm:col-span-2">
+                                <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Email <span className="text-[#3A2E1F]/40 font-normal normal-case">(optional — for order updates)</span></label>
+                                <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-sm text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623] transition-all placeholder:text-[#3A2E1F]/40" placeholder="your@email.com" />
+                            </div>
+                            <div className="space-y-1.5 sm:col-span-2">
                                 <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Complete Address</label>
                                 <input required type="text" name="address" value={formData.address} onChange={handleChange} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-sm text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623] transition-all placeholder:text-[#3A2E1F]/40" placeholder="House 123, Street 4, Phase 5..." />
                             </div>
@@ -176,20 +185,20 @@ export default function Checkout() {
                                     <span className="text-[11px] text-[#D97706] font-semibold">{item.weight_option}</span>
                                 </div>
                                 <div className="text-xs font-bold text-[#3A2E1F]">
-                                    Rs. {(item.price * item.quantity).toLocaleString()}
+                                    {formatPrice(item.price * item.quantity)}
                                 </div>
                             </div>
                         ))}
                     </div>
 
                     <div className="space-y-3 pt-4 border-t border-[#E8DEC8] text-sm text-[#3A2E1F]/80">
-                        <div className="flex justify-between"><span>Subtotal</span><span className="font-bold text-[#3A2E1F]">Rs. {subtotal.toLocaleString()}</span></div>
-                        <div className="flex justify-between"><span>Shipping Fee</span><span className="font-bold text-[#3A2E1F]">{shippingFee === 0 ? 'FREE' : `Rs. ${shippingFee}`}</span></div>
+                        <div className="flex justify-between"><span>Subtotal</span><span className="font-bold text-[#3A2E1F]">{formatPrice(subtotal)}</span></div>
+                        <div className="flex justify-between"><span>Shipping Fee</span><span className="font-bold text-[#3A2E1F]">{shippingFee === 0 ? 'FREE' : formatPrice(shippingFee)}</span></div>
 
                         <div className="pt-4 border-t border-[#E8DEC8] flex flex-col gap-1">
                             <div className="flex justify-between items-baseline">
                                 <span className="font-heading font-bold text-base text-[#3A2E1F]">Total to Pay</span>
-                                <span className="font-heading font-extrabold text-2xl text-[#3A2E1F]">Rs. {grandTotal.toLocaleString()}</span>
+                                <span className="font-heading font-extrabold text-2xl text-[#3A2E1F]">{formatPrice(grandTotal)}</span>
                             </div>
                             <span className="text-right text-[10px] text-[#3A2E1F]/60">Payment on delivery</span>
                         </div>

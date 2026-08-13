@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ShoppingBag, ArrowRight, CheckCircle2, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../hooks/useCurrency';
 
 export default function MobileCartBar() {
     const location = useLocation();
     const { cartItems, lastAddedItem, dismissLastAddedItem } = useCart();
+    const { formatPrice } = useCurrency();
     const [showAddedBanner, setShowAddedBanner] = useState(false);
 
     useEffect(() => {
@@ -79,7 +81,7 @@ export default function MobileCartBar() {
                         <div>
                             <span className="text-[10px] text-[#F5EFE0]/70 uppercase tracking-wider block font-semibold">Cart Total:</span>
                             <div className="font-heading font-black text-base text-white">
-                                Rs. {subtotal.toLocaleString()}
+                                {formatPrice(subtotal)}
                             </div>
                         </div>
                     </div>

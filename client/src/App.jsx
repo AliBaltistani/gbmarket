@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
@@ -44,43 +45,45 @@ function StorefrontLayout() {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <SettingsProvider>
-          <RouteTransition>
-            <Routes>
-              {/* Admin Login - Standalone Page */}
-              <Route path="/admin/login" element={<AdminLogin />} />
+    <ErrorBoundary>
+      <Router>
+        <AuthProvider>
+          <SettingsProvider>
+            <RouteTransition>
+              <Routes>
+                {/* Admin Login - Standalone Page */}
+                <Route path="/admin/login" element={<AdminLogin />} />
 
-              {/* Protected Admin Routes */}
-              <Route path="/admin" element={<ProtectedAdminRoute />}>
-                <Route element={<AdminLayout />}>
-                  <Route index element={<Navigate to="/admin/dashboard" replace />} />
-                  <Route path="dashboard" element={<AdminDashboard />} />
-                  <Route path="products" element={<AdminProducts />} />
-                  <Route path="orders" element={<AdminOrders />} />
-                  <Route path="categories" element={<AdminCategories />} />
-                  <Route path="settings" element={<AdminSettings />} />
+                {/* Protected Admin Routes */}
+                <Route path="/admin" element={<ProtectedAdminRoute />}>
+                  <Route element={<AdminLayout />}>
+                    <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="products" element={<AdminProducts />} />
+                    <Route path="orders" element={<AdminOrders />} />
+                    <Route path="categories" element={<AdminCategories />} />
+                    <Route path="settings" element={<AdminSettings />} />
+                  </Route>
                 </Route>
-              </Route>
 
-              {/* Storefront Routes wrapped in Storefront Layout */}
-              <Route element={<StorefrontLayout />}>
-                <Route path="/" element={<Home />} />
-                <Route path="/shop" element={<Shop />} />
-                <Route path="/product/:slug" element={<ProductDetail />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/order-confirmation" element={<OrderConfirmation />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
-            </Routes>
-          </RouteTransition>
-        </SettingsProvider>
-      </AuthProvider>
-    </Router>
+                {/* Storefront Routes wrapped in Storefront Layout */}
+                <Route element={<StorefrontLayout />}>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/shop" element={<Shop />} />
+                  <Route path="/product/:slug" element={<ProductDetail />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/order-confirmation" element={<OrderConfirmation />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+              </Routes>
+            </RouteTransition>
+          </SettingsProvider>
+        </AuthProvider>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

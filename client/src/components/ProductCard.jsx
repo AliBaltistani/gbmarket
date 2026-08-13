@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Star, ShoppingBag, Check, Zap } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../hooks/useCurrency';
 
 export default function ProductCard({ product }) {
     const { addItem } = useCart();
+    const { formatPrice } = useCurrency();
     const navigate = useNavigate();
     const [isAdded, setIsAdded] = useState(false);
 
@@ -169,7 +171,7 @@ export default function ProductCard({ product }) {
                     <div className="flex items-baseline justify-between">
                         <span className="text-[9px] sm:text-[10px] text-[#3A2E1F]/60">Pack Price:</span>
                         <div className="text-sm sm:text-base lg:text-lg font-black font-heading text-[#3A2E1F]">
-                            Rs. {activePrice.toLocaleString()}
+                            {formatPrice(activePrice)}
                         </div>
                     </div>
 

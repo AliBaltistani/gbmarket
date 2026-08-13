@@ -5,8 +5,29 @@ import ProductCard from '../components/ProductCard';
 import { ProductSkeleton, CategorySkeleton } from '../components/Skeletons';
 import { getProducts } from '../api/products';
 import { getCategories } from '../api/categories';
-import { blogPosts } from '../data/dummyData';
 import { useSettings } from '../context/SettingsContext';
+
+// F11: Blog posts inlined — dummyData.js no longer needed
+const blogPosts = [
+    {
+        id: 1,
+        title: '7 Health Benefits of Gilgit Walnuts You Must Know',
+        excerpt: 'Discover why paper-shell walnuts from Gilgit-Baltistan are considered the ultimate brain food loaded with Omega-3 fats.',
+        image: 'https://images.unsplash.com/photo-1596769062638-e6ed3f46f496?auto=format&fit=crop&q=80&w=600'
+    },
+    {
+        id: 2,
+        title: 'How We Source Sun-Dried Apricots from Hunza Valley',
+        excerpt: 'Take a visual tour through Hunza orchards and see how local farmers traditionally dry apricots without chemicals.',
+        image: 'https://images.unsplash.com/photo-1599879207869-7c87c2fb2402?auto=format&fit=crop&q=80&w=600'
+    },
+    {
+        id: 3,
+        title: 'The Ultimate Guide to Storing Nuts & Dry Fruits Fresh',
+        excerpt: 'Keep your almonds, cashews, and Chilgoza crisp for months with these simple airtight container and refrigeration tips.',
+        image: 'https://images.unsplash.com/photo-1594951468249-f79a953eacc2?auto=format&fit=crop&q=80&w=600'
+    }
+];
 
 export default function Home() {
     const { settings } = useSettings();
@@ -89,7 +110,7 @@ export default function Home() {
 
         const timer = setInterval(() => {
             setCurrentHeroSlide((prev) => (prev + 1) % heroSlides.length);
-        }, 1200);
+        }, 5000);
 
         return () => clearInterval(timer);
     }, [isHeroPaused, heroSlides.length]);
@@ -100,7 +121,7 @@ export default function Home() {
 
         const interval = setInterval(() => {
             setCurrentArrivalIndex((prevIndex) => (prevIndex + 1) % Math.ceil(newArrivals.length / 2));
-        }, 2200);
+        }, 4500);
 
         return () => clearInterval(interval);
     }, [newArrivals.length, isArrivalPaused]);

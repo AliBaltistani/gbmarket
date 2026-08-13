@@ -51,6 +51,14 @@ export default function AdminOrders() {
     const filteredOrders = orders.filter(o => activeTab === 'All' || o.status === activeTab);
 
     const handleStatusChange = async (orderId, newStatus) => {
+        // C12: Confirm before cancelling — this is irreversible
+        if (newStatus === 'Cancelled') {
+            const confirmed = window.confirm(
+                `⚠️ Are you sure you want to cancel Order GB-${orderId}?\n\nThis will restore stock for all items and cannot be undone.`
+            );
+            if (!confirmed) return;
+        }
+
         try {
             await updateOrderStatus(orderId, newStatus);
             setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
@@ -225,6 +233,12 @@ export default function AdminOrders() {
                                     <span className="font-semibold text-[#3A2E1F]">Phone:</span>
                                     <span className="font-mono">{selectedOrder.phone}</span>
                                 </div>
+                                {selectedOrder.customer_email && (
+                                    <div className="flex justify-between">
+                                        <span className="font-semibold text-[#3A2E1F]">Email:</span>
+                                        <span className="text-[#D97706]">{selectedOrder.customer_email}</span>
+                                    </div>
+                                )}
                                 <div className="flex flex-col pt-1">
                                     <span className="font-semibold text-[#3A2E1F]">Address:</span>
                                     <span className="text-[#3A2E1F]/70 leading-relaxed mt-0.5">{selectedOrder.address}</span>
@@ -259,11 +273,13 @@ export default function AdminOrders() {
                         <div className="p-4 bg-[#FFFDF9] border border-[#E8DEC8] rounded-2xl space-y-2 text-xs">
                             <div className="flex justify-between text-[#3A2E1F]/70">
                                 <span>Subtotal</span>
-                                <span>Rs. {selectedOrder.total.toLocaleString()}</span>
+                                <span>Rs. {(selectedOrder.subtotal || selectedOrder.total).toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between text-[#3A2E1F]/70">
                                 <span>Shipping Fee ({selectedOrder.payment_method || 'COD'})</span>
-                                <span className="text-emerald-700 font-bold">FREE</span>
+                                <span className={`font-bold ${(selectedOrder.shipping_fee || 0) === 0 ? 'text-emerald-700' : 'text-[#3A2E1F]'}`}>
+                                    {(selectedOrder.shipping_fee || 0) === 0 ? 'FREE' : `Rs. ${selectedOrder.shipping_fee.toLocaleString()}`}
+                                </span>
                             </div>
                             <div className="pt-2 border-t border-[#E8DEC8] flex justify-between items-baseline">
                                 <span className="font-heading font-bold text-sm text-[#3A2E1F]">Grand Total</span>

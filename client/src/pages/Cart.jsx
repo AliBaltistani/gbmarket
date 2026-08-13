@@ -3,13 +3,15 @@ import { Link } from 'react-router-dom';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, ArrowLeft, ShieldCheck, Truck, Lock } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useSettings } from '../context/SettingsContext';
+import { useCurrency } from '../hooks/useCurrency';
 
 export default function Cart() {
     const { cartItems, updateQuantity, removeItem, clearCart } = useCart();
     const { settings } = useSettings();
+    const { formatPrice } = useCurrency();
 
     const subtotal = cartItems.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0);
-    const freeShippingThreshold = settings?.free_shipping_threshold || 5000;
+    const freeShippingThreshold = Number(settings?.free_shipping_threshold) || 5000;
     const shippingFee = subtotal >= freeShippingThreshold || subtotal === 0 ? 0 : 250;
     const grandTotal = subtotal + shippingFee;
 
@@ -63,7 +65,7 @@ export default function Cart() {
                                     </div>
 
                                     <div className="col-span-2 text-center text-xs font-semibold text-[#3A2E1F] hidden sm:block">
-                                        Rs. {(item.price || 0).toLocaleString()}
+                                        {formatPrice(item.price || 0)}
                                     </div>
 
                                     <div className="col-span-2 flex items-center justify-center">
@@ -80,7 +82,7 @@ export default function Cart() {
 
                                     <div className="col-span-2 text-right font-heading font-extrabold text-sm text-[#3A2E1F] w-full sm:w-auto flex sm:block justify-between items-center border-t sm:border-0 pt-2 sm:pt-0">
                                         <span className="sm:hidden text-xs text-[#3A2E1F]/60">Total:</span>
-                                        <span>Rs. {((item.price || 0) * (item.quantity || 1)).toLocaleString()}</span>
+                                        <span>{formatPrice((item.price || 0) * (item.quantity || 1))}</span>
                                     </div>
                                 </div>
                             ))}
@@ -102,22 +104,22 @@ export default function Cart() {
                             <div className="space-y-3 text-sm text-[#3A2E1F]/80">
                                 <div className="flex justify-between">
                                     <span>Subtotal</span>
-                                    <span className="font-bold text-[#3A2E1F]">Rs. {subtotal.toLocaleString()}</span>
+                                    <span className="font-bold text-[#3A2E1F]">{formatPrice(subtotal)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span>Shipping Fee</span>
                                     <span className="font-bold text-[#3A2E1F]">
-                                        {shippingFee === 0 ? <span className="text-emerald-700 font-bold">FREE</span> : `Rs. ${shippingFee}`}
+                                        {shippingFee === 0 ? <span className="text-emerald-700 font-bold">FREE</span> : formatPrice(shippingFee)}
                                     </span>
                                 </div>
                                 {subtotal > 0 && subtotal < freeShippingThreshold && (
                                     <div className="p-3 bg-[#F5EFE0]/70 rounded-2xl text-[11px] text-[#D97706] font-semibold">
-                                        Add <strong>Rs. {(freeShippingThreshold - subtotal).toLocaleString()}</strong> more to get <strong>Free Delivery</strong>!
+                                        Add <strong>{formatPrice(freeShippingThreshold - subtotal)}</strong> more to get <strong>Free Delivery</strong>!
                                     </div>
                                 )}
                                 <div className="pt-3 border-t border-[#E8DEC8] flex justify-between items-baseline">
                                     <span className="font-heading font-bold text-base text-[#3A2E1F]">Grand Total</span>
-                                    <span className="font-heading font-extrabold text-2xl text-[#3A2E1F]">Rs. {grandTotal.toLocaleString()}</span>
+                                    <span className="font-heading font-extrabold text-2xl text-[#3A2E1F]">{formatPrice(grandTotal)}</span>
                                 </div>
                             </div>
 

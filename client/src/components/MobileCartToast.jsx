@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, ShoppingBag, X, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../hooks/useCurrency';
 
 export default function MobileCartToast() {
     const { lastAddedItem, dismissLastAddedItem, cartItems } = useCart();
+    const { formatPrice } = useCurrency();
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
@@ -67,7 +69,7 @@ export default function MobileCartToast() {
                                 <span>•</span>
                                 <span>Qty: {lastAddedItem.quantity}</span>
                                 <span>•</span>
-                                <span className="font-bold text-white">Rs. {(lastAddedItem.price * lastAddedItem.quantity).toLocaleString()}</span>
+                                <span className="font-bold text-white">{formatPrice(lastAddedItem.price * lastAddedItem.quantity)}</span>
                             </div>
                         </div>
                     </div>

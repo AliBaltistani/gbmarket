@@ -28,16 +28,19 @@ function initDb() {
       stock INTEGER DEFAULT 0,
       weight_options TEXT,
       is_featured INTEGER DEFAULT 0,
-      rating REAL DEFAULT 4.8,
-      review_count INTEGER DEFAULT 25,
+      rating REAL DEFAULT 0,
+      review_count INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS orders (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       customer_name TEXT NOT NULL,
+      customer_email TEXT,
       phone TEXT NOT NULL,
       address TEXT NOT NULL,
+      subtotal REAL NOT NULL DEFAULT 0,
+      shipping_fee REAL NOT NULL DEFAULT 0,
       total REAL NOT NULL,
       status TEXT DEFAULT 'Pending',
       payment_method TEXT DEFAULT 'COD',
@@ -66,35 +69,41 @@ function initDb() {
       value TEXT
     );
   `);
+
   // Ensure rating and review_count columns exist for legacy databases
   const tableInfo = db.prepare("PRAGMA table_info(products)").all();
   const hasRating = tableInfo.some(col => col.name === 'rating');
   const hasReviewCount = tableInfo.some(col => col.name === 'review_count');
 
   if (!hasRating) {
-    db.exec('ALTER TABLE products ADD COLUMN rating REAL DEFAULT 4.8');
+    db.exec('ALTER TABLE products ADD COLUMN rating REAL DEFAULT 0');
   }
   if (!hasReviewCount) {
-    db.exec('ALTER TABLE products ADD COLUMN review_count INTEGER DEFAULT 25');
+    db.exec('ALTER TABLE products ADD COLUMN review_count INTEGER DEFAULT 0');
   }
 
-  // Update products with realistic varied rating & review count data if they are uniform defaults
-  const sampleRatings = [
-    { id: 1, rating: 4.9, review_count: 84 },
-    { id: 2, rating: 4.8, review_count: 56 },
-    { id: 3, rating: 4.6, review_count: 32 },
-    { id: 4, rating: 5.0, review_count: 112 },
-    { id: 5, rating: 4.7, review_count: 95 },
-    { id: 6, rating: 4.5, review_count: 19 },
-    { id: 7, rating: 4.8, review_count: 41 },
-    { id: 8, rating: 4.9, review_count: 148 },
-    { id: 9, rating: 4.9, review_count: 73 },
-    { id: 10, rating: 4.7, review_count: 62 }
-  ];
-  const updateReviewStmt = db.prepare('UPDATE products SET rating = ?, review_count = ? WHERE id = ?');
-  sampleRatings.forEach(item => {
-    updateReviewStmt.run(item.rating, item.review_count, item.id);
-  });
+  // B8: Ensure subtotal and shipping_fee columns exist for legacy databases
+  const ordersInfo = db.prepare("PRAGMA table_info(orders)").all();
+  const hasSubtotal = ordersInfo.some(col => col.name === 'subtotal');
+  const hasShippingFee = ordersInfo.some(col => col.name === 'shipping_fee');
+
+  if (!hasSubtotal) {
+    db.exec('ALTER TABLE orders ADD COLUMN subtotal REAL NOT NULL DEFAULT 0');
+    // Backfill: set subtotal = total for existing orders
+    db.exec('UPDATE orders SET subtotal = total WHERE subtotal = 0');
+  }
+  if (!hasShippingFee) {
+    db.exec('ALTER TABLE orders ADD COLUMN shipping_fee REAL NOT NULL DEFAULT 0');
+  }
+
+  // F6: Ensure customer_email column exists for legacy databases
+  const hasEmail = ordersInfo.some(col => col.name === 'customer_email');
+  if (!hasEmail) {
+    db.exec('ALTER TABLE orders ADD COLUMN customer_email TEXT');
+  }
+
+  // B3: Removed — ratings are no longer overwritten on every server start.
+  // Ratings are set during seeding and manageable via admin panel.
 
   console.log('Database schema initialized.');
 
