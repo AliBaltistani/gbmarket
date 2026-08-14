@@ -91,6 +91,7 @@ export default function Footer() {
                         <ul className="space-y-2.5 text-sm text-[#F5EFE0]/80">
                             <li><Link to="/about" className="hover:text-[#F5A623] transition-colors">About GBMarket</Link></li>
                             <li><Link to="/contact" className="hover:text-[#F5A623] transition-colors">Contact Us</Link></li>
+                            <li><Link to="/track-order" className="hover:text-[#F5A623] transition-colors">Track Order</Link></li>
                             <li><Link to="/cart" className="hover:text-[#F5A623] transition-colors">View Cart</Link></li>
                             <li><Link to="/shop" className="hover:text-[#F5A623] transition-colors">Browse All Products</Link></li>
                         </ul>
