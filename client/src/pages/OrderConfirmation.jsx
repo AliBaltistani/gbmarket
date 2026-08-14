@@ -71,10 +71,11 @@ export default function OrderConfirmation() {
                     <span>Continue Shopping</span>
                     <ArrowRight className="w-4 h-4" />
                 </Link>
-                <div className="px-8 py-3.5 bg-white border border-[#E8DEC8] text-[#3A2E1F]/70 font-semibold text-sm rounded-full flex items-center justify-center gap-2 cursor-pointer shadow-sm">
-                    <Phone className="w-4 h-4" />
-                    <span>Questions? Call us</span>
-                </div>
+                <Link to="/track-order" className="px-8 py-3.5 bg-white border border-[#E8DEC8] text-[#3A2E1F]/70 font-semibold text-sm rounded-full flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:bg-[#F5EFE0] transition-colors">
+                    <Package className="w-4 h-4" />
+                    <span>Track Your Order</span>
+                    <ChevronRight className="w-4 h-4" />
+                </Link>
             </div>
 
         </div>

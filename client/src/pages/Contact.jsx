@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, MessageSquare } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, MessageSquare, Loader2 } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import SEO from '../components/SEO';
+import api from '../api/api';
 
 export default function Contact() {
     const { settings } = useSettings();
@@ -10,6 +11,8 @@ export default function Contact() {
     }, []);
 
     const [formSubmitted, setFormSubmitted] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState('');
     const [contactForm, setContactForm] = useState({
         name: '',
         email: '',
@@ -17,13 +20,20 @@ export default function Contact() {
         message: ''
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setFormSubmitted(true);
-        setTimeout(() => {
-            setFormSubmitted(false);
+        setIsSubmitting(true);
+        setSubmitError('');
+        try {
+            await api.post('/contact', contactForm);
+            setFormSubmitted(true);
             setContactForm({ name: '', email: '', subject: '', message: '' });
-        }, 4000);
+            setTimeout(() => setFormSubmitted(false), 5000);
+        } catch (err) {
+            setSubmitError(err.response?.data?.error || 'Failed to send message. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -68,6 +78,12 @@ export default function Contact() {
                             <div className="p-4 bg-emerald-100 border border-emerald-300 text-emerald-900 rounded-2xl text-xs font-bold flex items-center gap-3">
                                 <CheckCircle2 className="w-5 h-5 text-emerald-700" />
                                 <span>Thank you! Your message has been sent successfully. We will reply shortly.</span>
+                            </div>
+                        )}
+
+                        {submitError && (
+                            <div className="p-4 bg-red-100 border border-red-300 text-red-900 rounded-2xl text-xs font-bold flex items-center gap-3">
+                                <span>⚠️ {submitError}</span>
                             </div>
                         )}
 
@@ -132,10 +148,20 @@ export default function Contact() {
 
                             <button
                                 type="submit"
-                                className="w-full py-3.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-sm rounded-full shadow-md transition-all flex items-center justify-center gap-2"
+                                disabled={isSubmitting}
+                                className="w-full py-3.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-sm rounded-full shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                             >
-                                <span>Send Message</span>
-                                <Send className="w-4 h-4" />
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <span>Sending...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>Send Message</span>
+                                        <Send className="w-4 h-4" />
+                                    </>
+                                )}
                             </button>
                         </form>
                     </div>

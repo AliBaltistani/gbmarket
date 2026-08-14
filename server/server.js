@@ -160,6 +160,7 @@ app.use('/api/settings', require('./routes/settings')(db, requireAdmin));
 app.use('/api/categories', require('./routes/categories')(db, requireAdmin));
 app.use('/api/products', require('./routes/products')(db, requireAdmin));
 app.use('/api/orders', require('./routes/orders')(db, requireAdmin));
+app.use('/api/contact', require('./routes/contact')(db));
 
 // ==========================================
 // C7: API 404 CATCH-ALL

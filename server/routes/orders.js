@@ -1,8 +1,49 @@
 const express = require('express');
 const { parseJSON } = require('../helpers');
+const { getWhatsAppLink } = require('../services/whatsappService');
 
 module.exports = function (db, requireAdmin) {
     const router = express.Router();
+
+    // GET /api/orders/track (public — order tracking by ID + phone)
+    router.get('/track', (req, res, next) => {
+        try {
+            const { order_id, phone } = req.query;
+
+            if (!order_id || !phone) {
+                return res.status(400).json({ error: 'Order ID and phone number are required' });
+            }
+
+            const order = db.prepare('SELECT id, customer_name, phone, status, total, subtotal, shipping_fee, payment_method, created_at FROM orders WHERE id = ?').get(order_id);
+            if (!order) {
+                return res.status(404).json({ error: 'Order not found' });
+            }
+
+            // Verify phone matches (strip non-digits for comparison)
+            const cleanInputPhone = phone.replace(/\D/g, '').slice(-10);
+            const cleanOrderPhone = order.phone.replace(/\D/g, '').slice(-10);
+            if (cleanInputPhone !== cleanOrderPhone) {
+                return res.status(404).json({ error: 'Order not found' });
+            }
+
+            const items = db.prepare('SELECT product_name, weight_option, quantity, price FROM order_items WHERE order_id = ?').all(order_id);
+
+            // Don't expose full phone in response
+            res.json({
+                id: order.id,
+                customer_name: order.customer_name,
+                status: order.status,
+                total: order.total,
+                subtotal: order.subtotal,
+                shipping_fee: order.shipping_fee,
+                payment_method: order.payment_method,
+                created_at: order.created_at,
+                items
+            });
+        } catch (error) {
+            next(error);
+        }
+    });
 
     // GET /api/orders (admin — F2: search/filter support)
     router.get('/', requireAdmin, (req, res, next) => {
@@ -196,7 +237,21 @@ module.exports = function (db, requireAdmin) {
                 db.prepare('UPDATE orders SET status = ? WHERE id = ?').run(status, id);
             }
 
-            res.json({ message: 'Order status updated successfully' });
+            // Send email notification (fire-and-forget)
+            try {
+                const { sendOrderStatusEmail } = require('../services/emailService');
+                sendOrderStatusEmail(order, status);
+            } catch (emailErr) {
+                console.log('[Email] Status notification skipped:', emailErr.message);
+            }
+
+            // Generate WhatsApp link for admin
+            const whatsappLink = getWhatsAppLink(order.phone, order, status);
+
+            res.json({
+                message: 'Order status updated successfully',
+                whatsappLink
+            });
         } catch (error) {
             next(error);
         }

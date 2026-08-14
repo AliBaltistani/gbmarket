@@ -92,5 +92,101 @@ async function sendAdminNotification(order, items) {
         console.error(`[Email] Failed to send admin notification:`, err.message);
     }
 }
+/**
+ * Send contact form submission to admin email
+ */
+async function sendContactFormEmail(name, email, subject, message) {
+    if (!transporter || !adminEmail) {
+        console.log('[Email] Contact form email skipped — SMTP not configured or no admin email.');
+        return;
+    }
 
-module.exports = { sendOrderConfirmation, sendAdminNotification };
+    const html = `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#3A2E1F">
+            <div style="background:#3A2E1F;padding:20px;text-align:center;border-radius:12px 12px 0 0">
+                <h1 style="margin:0;color:#F5A623;font-size:20px">📬 New Contact Form Message</h1>
+            </div>
+            <div style="padding:24px;background:#FFFDF9;border:1px solid #E8DEC8;border-top:none;border-radius:0 0 12px 12px">
+                <table style="width:100%;border-collapse:collapse;margin-bottom:16px">
+                    <tr><td style="padding:8px;font-weight:bold;width:100px;vertical-align:top">Name:</td><td style="padding:8px">${name}</td></tr>
+                    <tr><td style="padding:8px;font-weight:bold;vertical-align:top">Email:</td><td style="padding:8px"><a href="mailto:${email}">${email}</a></td></tr>
+                    <tr><td style="padding:8px;font-weight:bold;vertical-align:top">Subject:</td><td style="padding:8px">${subject}</td></tr>
+                </table>
+                <div style="background:#F5EFE0;padding:16px;border-radius:12px;border:1px solid #E8DEC8">
+                    <p style="font-weight:bold;margin:0 0 8px 0;font-size:12px;text-transform:uppercase;color:#666">Message:</p>
+                    <p style="margin:0;white-space:pre-wrap;line-height:1.6">${message}</p>
+                </div>
+                <p style="margin-top:20px;font-size:12px;color:#999">— Sent via GBMarket Contact Form</p>
+            </div>
+        </div>
+    `;
+
+    try {
+        await transporter.sendMail({
+            from: `"GBMarket Contact" <${fromAddress}>`,
+            replyTo: email,
+            to: adminEmail,
+            subject: `[Contact] ${subject} — from ${name}`,
+            html
+        });
+        console.log(`[Email] Contact form email sent to admin (from ${email})`);
+    } catch (err) {
+        console.error(`[Email] Failed to send contact form email:`, err.message);
+        throw err;
+    }
+}
+
+/**
+ * Send order status update email to customer
+ */
+async function sendOrderStatusEmail(order, newStatus) {
+    if (!transporter || !order.customer_email) return;
+
+    const statusConfig = {
+        'Processing': { emoji: '🔄', color: '#2563EB', label: 'Processing', desc: 'Your order is being prepared and packed.' },
+        'Shipped': { emoji: '🚚', color: '#D97706', label: 'Shipped', desc: 'Your order is on its way! Expect delivery within 2-3 business days.' },
+        'Delivered': { emoji: '✅', color: '#059669', label: 'Delivered', desc: 'Your order has been delivered successfully!' },
+        'Cancelled': { emoji: '❌', color: '#DC2626', label: 'Cancelled', desc: 'Your order has been cancelled. Contact us if you have questions.' }
+    };
+
+    const config = statusConfig[newStatus];
+    if (!config) return;
+
+    const html = `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#3A2E1F">
+            <div style="background:${config.color};padding:20px;text-align:center;border-radius:12px 12px 0 0">
+                <h1 style="margin:0;color:white;font-size:22px">${config.emoji} Order ${config.label}</h1>
+            </div>
+            <div style="padding:24px;background:#FFFDF9;border:1px solid #E8DEC8;border-top:none;border-radius:0 0 12px 12px">
+                <p>Hi <strong>${order.customer_name}</strong>,</p>
+                <p>${config.desc}</p>
+                <div style="background:#F5EFE0;padding:16px;border-radius:12px;margin:16px 0;border:1px solid #E8DEC8">
+                    <p style="margin:0"><strong>Order ID:</strong> #${order.id}</p>
+                    <p style="margin:8px 0 0 0"><strong>Status:</strong> <span style="color:${config.color};font-weight:bold">${config.label}</span></p>
+                    <p style="margin:8px 0 0 0"><strong>Total:</strong> Rs. ${order.total}</p>
+                </div>
+                <p style="margin:16px 0">
+                    <a href="${process.env.CLIENT_ORIGIN || 'http://localhost:5173'}/track-order" 
+                       style="display:inline-block;padding:12px 24px;background:#F5A623;color:#3A2E1F;font-weight:bold;text-decoration:none;border-radius:24px">
+                        Track Your Order →
+                    </a>
+                </p>
+                <p style="margin-top:20px;font-size:12px;color:#999">— GBMarket Team</p>
+            </div>
+        </div>
+    `;
+
+    try {
+        await transporter.sendMail({
+            from: `"GBMarket" <${fromAddress}>`,
+            to: order.customer_email,
+            subject: `${config.emoji} Order #${order.id} — ${config.label}`,
+            html
+        });
+        console.log(`[Email] Status update (${newStatus}) sent to ${order.customer_email}`);
+    } catch (err) {
+        console.error(`[Email] Failed to send status update:`, err.message);
+    }
+}
+
+module.exports = { sendOrderConfirmation, sendAdminNotification, sendContactFormEmail, sendOrderStatusEmail };

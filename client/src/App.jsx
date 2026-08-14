@@ -8,6 +8,7 @@ import { SettingsProvider } from './context/SettingsContext';
 import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
 import RouteTransition from './components/RouteTransition';
 import MobileCartBar from './components/MobileCartBar';
+import WhatsAppButton from './components/WhatsAppButton';
 
 // Lazy-loaded Storefront Pages
 const Home = React.lazy(() => import('./pages/Home'));
@@ -19,6 +20,7 @@ const OrderConfirmation = React.lazy(() => import('./pages/OrderConfirmation'));
 const About = React.lazy(() => import('./pages/About'));
 const Contact = React.lazy(() => import('./pages/Contact'));
 const NotFound = React.lazy(() => import('./pages/NotFound'));
+const TrackOrder = React.lazy(() => import('./pages/TrackOrder'));
 
 // Lazy-loaded Admin Components & Pages
 const AdminLogin = React.lazy(() => import('./pages/admin/AdminLogin'));
@@ -39,6 +41,7 @@ function StorefrontLayout() {
       </main>
       <Footer />
       <MobileCartBar />
+      <WhatsAppButton />
     </div>
   );
 }
@@ -81,6 +84,7 @@ function App() {
                     <Route path="/order-confirmation" element={<OrderConfirmation />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/contact" element={<Contact />} />
+                    <Route path="/track-order" element={<TrackOrder />} />
                     <Route path="*" element={<NotFound />} />
                   </Route>
                 </Routes>

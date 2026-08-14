@@ -10,7 +10,8 @@ import {
     Clock,
     CheckCircle2,
     Truck,
-    AlertCircle
+    AlertCircle,
+    MessageCircle
 } from 'lucide-react';
 import {
     StatusBadge,
@@ -60,12 +61,34 @@ export default function AdminOrders() {
         }
 
         try {
-            await updateOrderStatus(orderId, newStatus);
+            const result = await updateOrderStatus(orderId, newStatus);
             setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
             if (selectedOrder && selectedOrder.id === orderId) {
                 setSelectedOrder({ ...selectedOrder, status: newStatus });
             }
             toast.success(`Order ${orderId} marked as ${newStatus}`);
+
+            // Show WhatsApp notification button if link available
+            if (result.whatsappLink) {
+                toast(
+                    (t) => (
+                        <div className="flex items-center gap-3">
+                            <span className="text-xs font-semibold">Notify customer on WhatsApp?</span>
+                            <a
+                                href={result.whatsappLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => toast.dismiss(t.id)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#25D366] hover:bg-[#1DA851] text-white text-xs font-bold rounded-full transition-colors"
+                            >
+                                <MessageCircle className="w-3.5 h-3.5" />
+                                Send
+                            </a>
+                        </div>
+                    ),
+                    { duration: 10000, icon: '💬' }
+                );
+            }
         } catch (err) {
             toast.error(err.response?.data?.error || "Failed to update order status");
         }
