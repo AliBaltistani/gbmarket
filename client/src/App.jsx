@@ -22,6 +22,7 @@ const About = React.lazy(() => import('./pages/About'));
 const Contact = React.lazy(() => import('./pages/Contact'));
 const NotFound = React.lazy(() => import('./pages/NotFound'));
 const TrackOrder = React.lazy(() => import('./pages/TrackOrder'));
+const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
 
 // Lazy-loaded Admin Components & Pages
 const AdminLogin = React.lazy(() => import('./pages/admin/AdminLogin'));
@@ -92,6 +93,7 @@ function App() {
                     <Route path="/order-confirmation" element={<OrderConfirmation />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/contact" element={<Contact />} />
+                    <Route path="/privacy" element={<PrivacyPolicy />} />
                     <Route path="/track-order" element={<TrackOrder />} />
                     <Route path="*" element={<NotFound />} />
                   </Route>

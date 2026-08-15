@@ -175,8 +175,43 @@ export default function ProductDetail() {
             <SEO
                 title={product.name}
                 description={product.description?.substring(0, 160) || `Buy ${product.name} - premium organic dry fruit.`}
+                canonical={`https://gbmarket.pk/product/${product.slug}`}
                 ogImage={product.image_url}
                 type="product"
+                structuredData={{
+                    "@context": "https://schema.org",
+                    "@graph": [
+                        {
+                            "@type": "Product",
+                            "name": product.name,
+                            "description": product.description || `Buy ${product.name} - premium organic dry fruit.`,
+                            "image": product.image_url || "https://gbmarket.pk/placeholder.png",
+                            "offers": {
+                                "@type": "Offer",
+                                "price": product.base_price,
+                                "priceCurrency": "PKR",
+                                "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                                "url": `https://gbmarket.pk/product/${product.slug}`
+                            },
+                            ...(product.review_count > 0 ? {
+                                "aggregateRating": {
+                                    "@type": "AggregateRating",
+                                    "ratingValue": product.rating,
+                                    "reviewCount": product.review_count
+                                }
+                            } : {})
+                        },
+                        {
+                            "@type": "BreadcrumbList",
+                            "itemListElement": [
+                                { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://gbmarket.pk/" },
+                                { "@type": "ListItem", "position": 2, "name": "Shop", "item": "https://gbmarket.pk/shop" },
+                                { "@type": "ListItem", "position": 3, "name": product.category_name, "item": `https://gbmarket.pk/shop?category=${product.category_slug}` },
+                                { "@type": "ListItem", "position": 4, "name": product.name, "item": `https://gbmarket.pk/product/${product.slug}` }
+                            ]
+                        }
+                    ]
+                }}
             />
 
             {/* BREADCRUMB */}

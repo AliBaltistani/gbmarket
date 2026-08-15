@@ -51,6 +51,7 @@ export default function TrackOrder() {
             <SEO
                 title="Track Your Order"
                 description="Track your GBMarket order status in real-time. Enter your order number and phone to get instant updates."
+                canonical="https://gbmarket.pk/track-order"
             />
 
             {/* HERO */}
@@ -210,8 +211,8 @@ export default function TrackOrder() {
                                 <span className="text-sm font-bold text-[#3A2E1F]">{order.payment_method}</span>
                                 {order.payment_method !== 'COD' && order.payment_status && (
                                     <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold border ${order.payment_status === 'Verified' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
-                                            order.payment_status === 'Rejected' ? 'bg-rose-100 text-rose-800 border-rose-300' :
-                                                'bg-amber-100 text-amber-800 border-amber-300'
+                                        order.payment_status === 'Rejected' ? 'bg-rose-100 text-rose-800 border-rose-300' :
+                                            'bg-amber-100 text-amber-800 border-amber-300'
                                         }`}>{order.payment_status}</span>
                                 )}
                             </div>

@@ -63,8 +63,23 @@ export default function Home() {
     return (
         <div className="space-y-10 sm:space-y-16 pb-16">
             <SEO
-                title="Home"
+                title="Buy Organic Dry Fruits & Nuts Online in Pakistan"
                 description="Shop premium organic dry fruits and nuts from Gilgit-Baltistan. Handpicked almonds, walnuts, pine nuts, and sun-dried apricots delivered across Pakistan."
+                canonical="https://gbmarket.pk/"
+                structuredData={{
+                    "@context": "https://schema.org",
+                    "@type": "Organization",
+                    "name": "GBMarket",
+                    "url": "https://gbmarket.pk",
+                    "logo": "https://gbmarket.pk/icons.svg",
+                    "contactPoint": {
+                        "@type": "ContactPoint",
+                        "telephone": "+92-XXX-XXXXXXX",
+                        "contactType": "customer service",
+                        "areaServed": "PK",
+                        "availableLanguage": "English"
+                    }
+                }}
             />
 
             {sections.map(section => {

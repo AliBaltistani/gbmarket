@@ -13,7 +13,10 @@ export default function SEO({
     const storeName = settings.store_name || 'GBMarket';
     const fullTitle = title ? `${title} | ${storeName}` : `${storeName} - Premium Dry Fruits & Nuts`;
     const metaDescription = description || settings.store_tagline || 'Premium organic dry fruits and nuts from Gilgit-Baltistan. Handpicked almonds, walnuts, pine nuts, and dried apricots delivered across Pakistan.';
-    const metaImage = ogImage || settings.hero_image_url || '';
+
+    // Ensure we have an absolute URL for fallback image
+    const fallbackImage = 'https://gbmarket.pk/placeholder.png'; // Update to absolute URL for OG image
+    const metaImage = ogImage || settings.hero_image_url || fallbackImage;
 
     return (
         <Helmet>
@@ -23,6 +26,8 @@ export default function SEO({
             {canonical && <link rel="canonical" href={canonical} />}
 
             {/* Open Graph */}
+            <meta property="og:site_name" content={storeName} />
+            <meta property="og:locale" content="en_PK" />
             <meta property="og:title" content={fullTitle} />
             <meta property="og:description" content={metaDescription} />
             <meta property="og:type" content={type} />

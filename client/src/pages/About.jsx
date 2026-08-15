@@ -36,6 +36,25 @@ export default function About() {
             <SEO
                 title="About Us"
                 description="Learn about GBMarket's mission to bring 100% organic, sun-dried dry fruits from the mountains of Gilgit-Baltistan directly to your doorstep."
+                canonical="https://gbmarket.pk/about"
+                structuredData={{
+                    "@context": "https://schema.org",
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [
+                        {
+                            "@type": "ListItem",
+                            "position": 1,
+                            "name": "Home",
+                            "item": "https://gbmarket.pk/"
+                        },
+                        {
+                            "@type": "ListItem",
+                            "position": 2,
+                            "name": "About Us",
+                            "item": "https://gbmarket.pk/about"
+                        }
+                    ]
+                }}
             />
 
             {/* 1. HERO BANNER */}
