@@ -79,6 +79,17 @@ function initDb() {
       is_visible INTEGER NOT NULL DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS payment_accounts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      method TEXT NOT NULL,
+      title TEXT NOT NULL,
+      account_number TEXT NOT NULL,
+      account_name TEXT NOT NULL,
+      instructions TEXT DEFAULT '',
+      is_active INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   // Ensure rating and review_count columns exist for legacy databases
@@ -118,6 +129,18 @@ function initDb() {
   const hasIsDeleted = productsInfo.some(col => col.name === 'is_deleted');
   if (!hasIsDeleted) {
     db.exec('ALTER TABLE products ADD COLUMN is_deleted INTEGER DEFAULT 0');
+  }
+
+  // Ensure payment_proof and payment_status columns exist for online payments
+  const hasPaymentProof = ordersInfo.some(col => col.name === 'payment_proof');
+  const hasPaymentStatus = ordersInfo.some(col => col.name === 'payment_status');
+  if (!hasPaymentProof) {
+    db.exec('ALTER TABLE orders ADD COLUMN payment_proof TEXT');
+  }
+  if (!hasPaymentStatus) {
+    db.exec("ALTER TABLE orders ADD COLUMN payment_status TEXT DEFAULT 'Unpaid'");
+    // Backfill: COD orders don't need payment verification
+    db.exec("UPDATE orders SET payment_status = 'Unpaid' WHERE payment_method = 'COD' AND payment_status IS NULL");
   }
 
   // B3: Removed — ratings are no longer overwritten on every server start.
@@ -259,6 +282,19 @@ function initDb() {
     });
     hpTrx();
     console.log('Homepage sections seeded with defaults.');
+  }
+
+  // Seed Default Payment Accounts if empty
+  const { count: paCount } = db.prepare('SELECT COUNT(*) as count FROM payment_accounts').get();
+  if (paCount === 0) {
+    const insertPA = db.prepare('INSERT INTO payment_accounts (method, title, account_number, account_name, instructions, is_active) VALUES (?, ?, ?, ?, ?, 1)');
+    const paTrx = db.transaction(() => {
+      insertPA.run('easypaisa', 'Easypaisa', '03001234567', 'GBMarket Official', 'Send payment to the above Easypaisa number and upload the screenshot as proof.');
+      insertPA.run('jazzcash', 'JazzCash', '03009876543', 'GBMarket Official', 'Send payment to the above JazzCash number and upload the transaction screenshot.');
+      insertPA.run('bank_transfer', 'Bank Transfer (HBL)', 'PK36HABB0012345678901234', 'GBMarket Pvt Ltd', 'Transfer the total amount to the above bank account and upload the receipt screenshot. Bank: Habib Bank Limited.');
+    });
+    paTrx();
+    console.log('Default payment accounts seeded.');
   }
 }
 

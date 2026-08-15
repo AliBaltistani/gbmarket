@@ -4,7 +4,14 @@ import { CheckCircle2, ArrowRight, Package, Truck, Phone, ChevronRight } from 'l
 
 export default function OrderConfirmation() {
     const location = useLocation();
-    const { orderId, total, count } = location.state || {};
+    const { orderId, total, count, paymentMethod, isOnlinePayment } = location.state || {};
+
+    const paymentLabels = {
+        'COD': 'Cash on Delivery (COD)',
+        'easypaisa': 'Easypaisa',
+        'jazzcash': 'JazzCash',
+        'bank_transfer': 'Bank Transfer'
+    };
 
     useEffect(() => {
         // window.scrollTo(0, 0); // Handled by RouteTransition
@@ -54,13 +61,25 @@ export default function OrderConfirmation() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                         <span className="text-[11px] font-bold uppercase tracking-wider text-[#3A2E1F]/60 block">Payment Method</span>
-                        <span className="text-sm font-bold text-[#3A2E1F]">Cash on Delivery (COD)</span>
+                        <span className="text-sm font-bold text-[#3A2E1F]">{paymentLabels[paymentMethod] || 'Cash on Delivery (COD)'}</span>
                     </div>
                 </div>
 
+                {isOnlinePayment && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 mt-4">
+                        <svg className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div>
+                            <span className="text-xs font-bold text-amber-800 block">Payment Verification in Progress</span>
+                            <span className="text-[11px] text-amber-700">Your payment receipt has been submitted and is being verified by our team. You'll receive confirmation shortly.</span>
+                        </div>
+                    </div>
+                )}
+
                 {total && (
                     <div className="bg-[#F5EFE0]/60 rounded-2xl p-4 flex items-center justify-between border border-[#E8DEC8]/50 mt-4">
-                        <span className="text-xs font-semibold text-[#3A2E1F]/80">Total amount to pay on delivery:</span>
+                        <span className="text-xs font-semibold text-[#3A2E1F]/80">{isOnlinePayment ? 'Total amount paid:' : 'Total amount to pay on delivery:'}</span>
                         <span className="font-heading font-extrabold text-lg text-[#3A2E1F]">Rs. {total.toLocaleString()}</span>
                     </div>
                 )}

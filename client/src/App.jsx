@@ -9,6 +9,7 @@ import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
 import RouteTransition from './components/RouteTransition';
 import MobileCartBar from './components/MobileCartBar';
 import WhatsAppButton from './components/WhatsAppButton';
+import ChatBot from './components/ChatBot';
 
 // Lazy-loaded Storefront Pages
 const Home = React.lazy(() => import('./pages/Home'));
@@ -31,6 +32,7 @@ const AdminOrders = React.lazy(() => import('./pages/admin/AdminOrders'));
 const AdminCategories = React.lazy(() => import('./pages/admin/AdminCategories'));
 const AdminSettings = React.lazy(() => import('./pages/admin/AdminSettings'));
 const AdminHomepage = React.lazy(() => import('./pages/admin/AdminHomepage'));
+const AdminPayments = React.lazy(() => import('./pages/admin/AdminPayments'));
 
 // Storefront Layout Component
 function StorefrontLayout() {
@@ -42,6 +44,7 @@ function StorefrontLayout() {
       </main>
       <Footer />
       <MobileCartBar />
+      <ChatBot />
       <WhatsAppButton />
     </div>
   );
@@ -73,6 +76,7 @@ function App() {
                       <Route path="orders" element={<AdminOrders />} />
                       <Route path="categories" element={<AdminCategories />} />
                       <Route path="settings" element={<AdminSettings />} />
+                      <Route path="payments" element={<AdminPayments />} />
                     </Route>
                   </Route>
 

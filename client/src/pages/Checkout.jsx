@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Truck, CheckCircle2, ChevronRight, Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, MapPin, Truck, CheckCircle2, ChevronRight, Loader2, AlertCircle, ShieldCheck, Upload, X, CreditCard, Banknote, Smartphone, Building2, Camera } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useSettings } from '../context/SettingsContext';
 import { createOrder } from '../api/orders';
+import { getPaymentAccounts } from '../api/payments';
 import { useCurrency } from '../hooks/useCurrency';
 import toast from 'react-hot-toast';
 import SEO from '../components/SEO';
+
+const PAYMENT_METHODS = [
+    { id: 'COD', label: 'Cash on Delivery', icon: Banknote, description: 'Pay when your order arrives' },
+    { id: 'easypaisa', label: 'Easypaisa', icon: Smartphone, description: 'Send via Easypaisa & upload receipt', color: '#4CAF50' },
+    { id: 'jazzcash', label: 'JazzCash', icon: Smartphone, description: 'Send via JazzCash & upload receipt', color: '#E4002B' },
+    { id: 'bank_transfer', label: 'Bank Transfer', icon: Building2, description: 'Transfer to our bank account', color: '#1565C0' },
+];
 
 export default function Checkout() {
     const navigate = useNavigate();
@@ -21,15 +29,57 @@ export default function Checkout() {
         address: '',
         city: ''
     });
+    const [paymentMethod, setPaymentMethod] = useState('COD');
+    const [paymentAccounts, setPaymentAccounts] = useState([]);
+    const [receiptFile, setReceiptFile] = useState(null);
+    const [receiptPreview, setReceiptPreview] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [loadingAccounts, setLoadingAccounts] = useState(false);
 
     const subtotal = cartItems.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0);
     const freeShippingThreshold = Number(settings?.free_shipping_threshold) || 5000;
     const shippingFee = subtotal >= freeShippingThreshold || subtotal === 0 ? 0 : 350;
     const grandTotal = subtotal + shippingFee;
 
+    const isOnlinePayment = paymentMethod !== 'COD';
+    const selectedAccount = paymentAccounts.find(a => a.method === paymentMethod);
+
+    // Fetch payment accounts on mount
+    useEffect(() => {
+        const fetchAccounts = async () => {
+            setLoadingAccounts(true);
+            try {
+                const accounts = await getPaymentAccounts();
+                setPaymentAccounts(accounts);
+            } catch (err) {
+                console.log('Could not load payment accounts:', err.message);
+            } finally {
+                setLoadingAccounts(false);
+            }
+        };
+        fetchAccounts();
+    }, []);
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleReceiptChange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error('Receipt image must be under 5MB');
+                return;
+            }
+            setReceiptFile(file);
+            setReceiptPreview(URL.createObjectURL(file));
+        }
+    };
+
+    const removeReceipt = () => {
+        setReceiptFile(null);
+        if (receiptPreview) URL.revokeObjectURL(receiptPreview);
+        setReceiptPreview(null);
     };
 
     const handleSubmit = async (e) => {
@@ -39,15 +89,34 @@ export default function Checkout() {
             return;
         }
 
+        if (isOnlinePayment && !receiptFile) {
+            toast.error("Please upload your payment receipt/screenshot.");
+            return;
+        }
+
         setLoading(true);
         try {
+            let paymentProofPath = null;
+
+            // If online payment, upload receipt first
+            if (isOnlinePayment && receiptFile) {
+                const uploadData = new FormData();
+                uploadData.append('image', receiptFile);
+                const api = (await import('../api/api')).default;
+                const uploadRes = await api.post('/payments/receipt-upload', uploadData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                paymentProofPath = uploadRes.data.url;
+            }
+
             const orderData = {
                 customer_name: formData.name,
                 customer_email: formData.email || undefined,
                 phone: formData.phone,
                 address: `${formData.address}, ${formData.city}`,
                 total: grandTotal,
-                payment_method: 'COD',
+                payment_method: paymentMethod,
+                payment_proof: paymentProofPath,
                 items: cartItems.map(i => ({
                     product_id: i.product_id,
                     product_name: i.product_name,
@@ -60,9 +129,14 @@ export default function Checkout() {
             const res = await createOrder(orderData);
             clearCart();
             toast.success("Order placed successfully!");
-            // If the backend returns id or order_id, pass it in state
             navigate('/order-confirmation', {
-                state: { orderId: res.id || res.order_id || Date.now(), total: grandTotal, count: cartItems.length }
+                state: {
+                    orderId: res.id || res.order_id || Date.now(),
+                    total: grandTotal,
+                    count: cartItems.length,
+                    paymentMethod: paymentMethod,
+                    isOnlinePayment: isOnlinePayment
+                }
             });
 
         } catch (error) {
@@ -149,24 +223,130 @@ export default function Checkout() {
                     {/* Payment Method */}
                     <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
                         <h2 className="font-heading font-bold text-xl text-[#3A2E1F] flex items-center gap-2">
-                            Payment Method
+                            <CreditCard className="w-5 h-5 text-[#D97706]" /> Payment Method
                         </h2>
                         <div className="space-y-3">
-                            <label className="flex items-center justify-between p-4 border-2 border-[#F5A623] bg-[#F5A623]/5 rounded-2xl cursor-pointer transition-all">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-5 h-5 rounded-full border-4 border-[#3A2E1F] flex items-center justify-center bg-white"><div className="w-2.5 h-2.5 bg-[#3A2E1F] rounded-full"></div></div>
-                                    <div className="font-bold text-[#3A2E1F] text-sm flex items-center gap-2">Cash on Delivery (COD) <Truck className="w-4 h-4 text-[#D97706]" /></div>
-                                </div>
-                            </label>
+                            {PAYMENT_METHODS.map((method) => {
+                                const Icon = method.icon;
+                                const isSelected = paymentMethod === method.id;
+                                const hasAccount = method.id === 'COD' || paymentAccounts.some(a => a.method === method.id);
 
-                            <label className="flex items-center justify-between p-4 border border-[#E8DEC8] bg-[#F5EFE0]/30 rounded-2xl cursor-not-allowed opacity-60">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-5 h-5 rounded-full border-2 border-[#E8DEC8] bg-white"></div>
-                                    <div className="font-bold text-[#3A2E1F] text-sm">Online Payment</div>
-                                </div>
-                                <span className="text-[10px] font-bold text-white bg-[#3A2E1F] px-2 py-0.5 rounded-full uppercase tracking-wider">Coming Soon</span>
-                            </label>
+                                // Don't show method if no account is configured (except COD)
+                                if (method.id !== 'COD' && !hasAccount && !loadingAccounts) return null;
+
+                                return (
+                                    <label
+                                        key={method.id}
+                                        className={`flex items-center justify-between p-4 border-2 rounded-2xl cursor-pointer transition-all ${isSelected
+                                            ? 'border-[#F5A623] bg-[#F5A623]/5 shadow-sm'
+                                            : 'border-[#E8DEC8] bg-[#F5EFE0]/30 hover:border-[#F5A623]/50'
+                                            }`}
+                                        onClick={() => setPaymentMethod(method.id)}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-5 h-5 rounded-full border-4 flex items-center justify-center bg-white ${isSelected ? 'border-[#3A2E1F]' : 'border-[#E8DEC8]'}`}>
+                                                {isSelected && <div className="w-2.5 h-2.5 bg-[#3A2E1F] rounded-full" />}
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-[#3A2E1F] text-sm flex items-center gap-2">
+                                                    {method.label}
+                                                    <Icon className="w-4 h-4" style={{ color: method.color || '#D97706' }} />
+                                                </div>
+                                                <div className="text-[11px] text-[#3A2E1F]/60 mt-0.5">{method.description}</div>
+                                            </div>
+                                        </div>
+                                        <input
+                                            type="radio"
+                                            name="payment_method"
+                                            value={method.id}
+                                            checked={isSelected}
+                                            onChange={() => setPaymentMethod(method.id)}
+                                            className="sr-only"
+                                        />
+                                    </label>
+                                );
+                            })}
                         </div>
+
+                        {/* Online Payment Details */}
+                        {isOnlinePayment && selectedAccount && (
+                            <div className="mt-4 space-y-4 animate-in slide-in-from-top-2 duration-300">
+                                {/* Account Details Card */}
+                                <div className="bg-gradient-to-br from-[#3A2E1F] to-[#5a4a3a] text-white rounded-2xl p-5 space-y-3 relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">Send Payment To</span>
+                                        <span className="text-[10px] font-bold uppercase tracking-widest bg-white/10 px-2 py-0.5 rounded-full">{selectedAccount.title}</span>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div>
+                                            <span className="text-[10px] text-white/50 block">Account Number</span>
+                                            <span className="font-mono font-bold text-lg tracking-wider">{selectedAccount.account_number}</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-[10px] text-white/50 block">Account Name</span>
+                                            <span className="font-bold text-sm">{selectedAccount.account_name}</span>
+                                        </div>
+                                    </div>
+                                    <div className="pt-2 border-t border-white/10">
+                                        <div className="flex justify-between items-baseline">
+                                            <span className="text-[10px] text-white/50">Amount to Send</span>
+                                            <span className="font-heading font-extrabold text-xl text-[#F5A623]">{formatPrice(grandTotal)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {selectedAccount.instructions && (
+                                    <p className="text-xs text-[#3A2E1F]/70 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-2">
+                                        <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                                        {selectedAccount.instructions}
+                                    </p>
+                                )}
+
+                                {/* Receipt Upload */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                        Upload Payment Receipt <span className="text-rose-500">*</span>
+                                    </label>
+                                    {!receiptPreview ? (
+                                        <label className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-[#E8DEC8] hover:border-[#F5A623] rounded-2xl p-8 cursor-pointer transition-all hover:bg-[#F5A623]/5 group">
+                                            <div className="w-14 h-14 rounded-2xl bg-[#F5EFE0] group-hover:bg-[#F5A623]/20 flex items-center justify-center transition-colors">
+                                                <Camera className="w-7 h-7 text-[#D97706]" />
+                                            </div>
+                                            <div className="text-center">
+                                                <span className="text-sm font-bold text-[#3A2E1F] block">Click to upload receipt</span>
+                                                <span className="text-[11px] text-[#3A2E1F]/50">PNG, JPG, or WebP (max 5MB)</span>
+                                            </div>
+                                            <input
+                                                type="file"
+                                                accept="image/jpeg,image/png,image/webp"
+                                                onChange={handleReceiptChange}
+                                                className="sr-only"
+                                            />
+                                        </label>
+                                    ) : (
+                                        <div className="relative group">
+                                            <img
+                                                src={receiptPreview}
+                                                alt="Payment receipt"
+                                                className="w-full max-h-48 object-contain rounded-2xl border border-[#E8DEC8] bg-white"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={removeReceipt}
+                                                className="absolute top-2 right-2 w-8 h-8 bg-rose-600 hover:bg-rose-700 text-white rounded-full flex items-center justify-center shadow-lg transition-colors opacity-0 group-hover:opacity-100"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                            <div className="flex items-center gap-2 mt-2 text-xs text-emerald-700 font-bold">
+                                                <CheckCircle2 className="w-4 h-4" />
+                                                Receipt uploaded — {receiptFile?.name}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </form>
 
@@ -202,7 +382,9 @@ export default function Checkout() {
                                 <span className="font-heading font-bold text-base text-[#3A2E1F]">Total to Pay</span>
                                 <span className="font-heading font-extrabold text-2xl text-[#3A2E1F]">{formatPrice(grandTotal)}</span>
                             </div>
-                            <span className="text-right text-[10px] text-[#3A2E1F]/60">Payment on delivery</span>
+                            <span className="text-right text-[10px] text-[#3A2E1F]/60">
+                                {isOnlinePayment ? `Pay via ${PAYMENT_METHODS.find(m => m.id === paymentMethod)?.label}` : 'Payment on delivery'}
+                            </span>
                         </div>
                     </div>
 

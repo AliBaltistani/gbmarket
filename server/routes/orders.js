@@ -14,7 +14,7 @@ module.exports = function (db, requireAdmin) {
                 return res.status(400).json({ error: 'Order ID and phone number are required' });
             }
 
-            const order = db.prepare('SELECT id, customer_name, phone, status, total, subtotal, shipping_fee, payment_method, created_at FROM orders WHERE id = ?').get(order_id);
+            const order = db.prepare('SELECT id, customer_name, phone, status, total, subtotal, shipping_fee, payment_method, payment_status, created_at FROM orders WHERE id = ?').get(order_id);
             if (!order) {
                 return res.status(404).json({ error: 'Order not found' });
             }
@@ -37,6 +37,7 @@ module.exports = function (db, requireAdmin) {
                 subtotal: order.subtotal,
                 shipping_fee: order.shipping_fee,
                 payment_method: order.payment_method,
+                payment_status: order.payment_status,
                 created_at: order.created_at,
                 items
             });
@@ -149,14 +150,17 @@ module.exports = function (db, requireAdmin) {
                 const shippingFee = serverSubtotal >= freeShippingThreshold ? 0 : 350;
                 const grandTotal = serverSubtotal + shippingFee;
 
+                const paymentMethod = orderData.payment_method || 'COD';
+                const paymentStatus = paymentMethod === 'COD' ? 'Unpaid' : (orderData.payment_proof ? 'Pending Verification' : 'Unpaid');
+
                 const insertOrder = db.prepare(`
-                    INSERT INTO orders (customer_name, customer_email, phone, address, subtotal, shipping_fee, total, payment_method)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO orders (customer_name, customer_email, phone, address, subtotal, shipping_fee, total, payment_method, payment_proof, payment_status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `);
                 const orderInfo = insertOrder.run(
                     orderData.customer_name, orderData.customer_email || null, orderData.phone, orderData.address,
                     serverSubtotal, shippingFee, grandTotal,
-                    orderData.payment_method || 'COD'
+                    paymentMethod, orderData.payment_proof || null, paymentStatus
                 );
                 const orderId = orderInfo.lastInsertRowid;
 
@@ -172,7 +176,8 @@ module.exports = function (db, requireAdmin) {
                 return { orderId, grandTotal, validatedItems, customerEmail: orderData.customer_email, customerName: orderData.customer_name };
             });
 
-            const result = processOrder({ customer_name, customer_email, phone, address, payment_method }, items);
+            const { payment_proof } = req.body;
+            const result = processOrder({ customer_name, customer_email, phone, address, payment_method, payment_proof }, items);
 
             // F3: Send email notification (fire-and-forget)
             try {
@@ -252,6 +257,27 @@ module.exports = function (db, requireAdmin) {
                 message: 'Order status updated successfully',
                 whatsappLink
             });
+        } catch (error) {
+            next(error);
+        }
+    });
+
+    // PATCH /api/orders/:id/payment (admin — verify or reject payment proof)
+    router.patch('/:id/payment', requireAdmin, (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const { payment_status } = req.body;
+
+            const validStatuses = ['Pending Verification', 'Verified', 'Rejected'];
+            if (!validStatuses.includes(payment_status)) {
+                return res.status(400).json({ error: `Invalid payment status. Must be one of: ${validStatuses.join(', ')}` });
+            }
+
+            const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
+            if (!order) return res.status(404).json({ error: 'Order not found' });
+
+            db.prepare('UPDATE orders SET payment_status = ? WHERE id = ?').run(payment_status, id);
+            res.json({ message: `Payment status updated to ${payment_status}` });
         } catch (error) {
             next(error);
         }

@@ -166,10 +166,10 @@ export default function TrackOrder() {
 
                                                 {/* Icon */}
                                                 <div className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${isCurrent
-                                                        ? `${config.bg} ${config.border} ring-4 ring-offset-1 ${config.bg}/50`
-                                                        : isCompleted
-                                                            ? 'bg-emerald-100 border-emerald-400'
-                                                            : 'bg-[#F5EFE0] border-[#E8DEC8]'
+                                                    ? `${config.bg} ${config.border} ring-4 ring-offset-1 ${config.bg}/50`
+                                                    : isCompleted
+                                                        ? 'bg-emerald-100 border-emerald-400'
+                                                        : 'bg-[#F5EFE0] border-[#E8DEC8]'
                                                     }`}>
                                                     <Icon className={`w-5 h-5 ${isCurrent ? config.color : isCompleted ? 'text-emerald-600' : 'text-[#3A2E1F]/30'
                                                         }`} />
@@ -208,6 +208,12 @@ export default function TrackOrder() {
                             <div className="space-y-1">
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#3A2E1F]/50 block">Payment</span>
                                 <span className="text-sm font-bold text-[#3A2E1F]">{order.payment_method}</span>
+                                {order.payment_method !== 'COD' && order.payment_status && (
+                                    <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold border ${order.payment_status === 'Verified' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
+                                            order.payment_status === 'Rejected' ? 'bg-rose-100 text-rose-800 border-rose-300' :
+                                                'bg-amber-100 text-amber-800 border-amber-300'
+                                        }`}>{order.payment_status}</span>
+                                )}
                             </div>
                             <div className="space-y-1">
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#3A2E1F]/50 block">Total</span>

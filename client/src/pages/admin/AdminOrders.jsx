@@ -11,7 +11,11 @@ import {
     CheckCircle2,
     Truck,
     AlertCircle,
-    MessageCircle
+    MessageCircle,
+    CreditCard,
+    ShieldCheck,
+    ShieldX,
+    Image as ImageIcon
 } from 'lucide-react';
 import {
     StatusBadge,
@@ -20,6 +24,7 @@ import {
     AdminSkeletonTable
 } from '../../components/admin/AdminComponents';
 import { getOrders, updateOrderStatus } from '../../api/orders';
+import { updatePaymentStatus } from '../../api/payments';
 import toast from 'react-hot-toast';
 
 export default function AdminOrders() {
@@ -94,6 +99,19 @@ export default function AdminOrders() {
         }
     };
 
+    const handlePaymentAction = async (orderId, status) => {
+        try {
+            await updatePaymentStatus(orderId, status);
+            setOrders(orders.map(o => o.id === orderId ? { ...o, payment_status: status } : o));
+            if (selectedOrder && selectedOrder.id === orderId) {
+                setSelectedOrder({ ...selectedOrder, payment_status: status });
+            }
+            toast.success(`Payment ${status === 'Verified' ? 'verified' : 'rejected'} for Order GB-${orderId}`);
+        } catch (err) {
+            toast.error(err.response?.data?.error || 'Failed to update payment status');
+        }
+    };
+
     return (
         <div className="space-y-8 max-w-7xl mx-auto">
 
@@ -165,8 +183,8 @@ export default function AdminOrders() {
                                 <tr className="border-b border-[#E8DEC8] text-[11px] font-bold uppercase tracking-wider text-[#3A2E1F]/60">
                                     <th className="py-3 px-4">Order ID</th>
                                     <th className="py-3 px-4">Customer</th>
-                                    <th className="py-3 px-4">Phone</th>
-                                    <th className="py-3 px-4">Total Amount</th>
+                                    <th className="py-3 px-4">Total</th>
+                                    <th className="py-3 px-4">Payment</th>
                                     <th className="py-3 px-4">Status</th>
                                     <th className="py-3 px-4">Date</th>
                                     <th className="py-3 px-4 text-right">Details</th>
@@ -185,11 +203,16 @@ export default function AdminOrders() {
                                         <td className="py-4 px-4 font-bold text-[#3A2E1F]">
                                             {order.customer_name}
                                         </td>
-                                        <td className="py-4 px-4 text-[#3A2E1F]/70 font-mono">
-                                            {order.phone}
-                                        </td>
                                         <td className="py-4 px-4 font-extrabold text-sm text-[#3A2E1F]">
                                             Rs. {order.total.toLocaleString()}
+                                        </td>
+                                        <td className="py-4 px-4">
+                                            <div className="flex flex-col gap-1">
+                                                <span className="text-[10px] font-bold text-[#3A2E1F]/60 uppercase">{order.payment_method || 'COD'}</span>
+                                                {order.payment_method !== 'COD' && order.payment_status && (
+                                                    <PaymentStatusBadge status={order.payment_status} />
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="py-4 px-4">
                                             <StatusBadge status={order.status} />
@@ -269,6 +292,51 @@ export default function AdminOrders() {
                             </div>
                         </div>
 
+                        {/* Payment Info */}
+                        {selectedOrder.payment_method !== 'COD' && (
+                            <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-2xl p-5 space-y-3">
+                                <h4 className="font-heading font-bold text-sm text-[#3A2E1F] border-b border-[#E8DEC8] pb-2 flex items-center gap-2">
+                                    <CreditCard className="w-4 h-4 text-[#D97706]" /> Payment Verification
+                                </h4>
+                                <div className="space-y-2 text-xs">
+                                    <div className="flex justify-between">
+                                        <span className="font-semibold text-[#3A2E1F]">Method:</span>
+                                        <span className="font-bold uppercase">{selectedOrder.payment_method}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-semibold text-[#3A2E1F]">Status:</span>
+                                        <PaymentStatusBadge status={selectedOrder.payment_status} />
+                                    </div>
+                                </div>
+                                {selectedOrder.payment_proof && (
+                                    <div className="space-y-2">
+                                        <span className="text-[10px] font-bold text-[#3A2E1F]/60 uppercase block">Payment Receipt</span>
+                                        <a href={selectedOrder.payment_proof} target="_blank" rel="noopener noreferrer" className="block">
+                                            <img src={selectedOrder.payment_proof} alt="Payment receipt" className="w-full max-h-40 object-contain rounded-xl border border-[#E8DEC8] bg-white hover:border-[#F5A623] transition-colors cursor-pointer" />
+                                        </a>
+                                    </div>
+                                )}
+                                {selectedOrder.payment_status !== 'Verified' && (
+                                    <div className="flex gap-2 pt-2">
+                                        <button
+                                            onClick={() => handlePaymentAction(selectedOrder.id, 'Verified')}
+                                            className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+                                        >
+                                            <ShieldCheck className="w-3.5 h-3.5" /> Verify Payment
+                                        </button>
+                                        {selectedOrder.payment_status !== 'Rejected' && (
+                                            <button
+                                                onClick={() => handlePaymentAction(selectedOrder.id, 'Rejected')}
+                                                className="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+                                            >
+                                                <ShieldX className="w-3.5 h-3.5" /> Reject
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {/* Ordered Items Breakdown */}
                         <div className="space-y-3">
                             <h4 className="font-heading font-bold text-sm text-[#3A2E1F] flex items-center gap-2">
@@ -315,5 +383,19 @@ export default function AdminOrders() {
             </SlideOver>
 
         </div>
+    );
+}
+
+function PaymentStatusBadge({ status }) {
+    const styles = {
+        'Unpaid': 'bg-gray-100 text-gray-700 border-gray-300',
+        'Pending Verification': 'bg-amber-100 text-amber-800 border-amber-300',
+        'Verified': 'bg-emerald-100 text-emerald-800 border-emerald-300',
+        'Rejected': 'bg-rose-100 text-rose-800 border-rose-300',
+    };
+    return (
+        <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${styles[status] || styles['Unpaid']}`}>
+            {status || 'Unpaid'}
+        </span>
     );
 }

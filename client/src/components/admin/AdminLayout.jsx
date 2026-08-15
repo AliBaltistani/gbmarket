@@ -12,7 +12,8 @@ import {
     Leaf,
     UserCircle,
     Settings,
-    LayoutTemplate
+    LayoutTemplate,
+    CreditCard
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -29,6 +30,7 @@ export default function AdminLayout() {
         { name: 'Homepage', path: '/admin/homepage', icon: LayoutTemplate },
         { name: 'Products', path: '/admin/products', icon: Package },
         { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },
+        { name: 'Payments', path: '/admin/payments', icon: CreditCard },
         { name: 'Categories', path: '/admin/categories', icon: Tags },
         { name: 'Settings', path: '/admin/settings', icon: Settings },
     ];
