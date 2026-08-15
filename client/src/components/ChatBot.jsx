@@ -127,7 +127,7 @@ export default function ChatBot() {
             {!isOpen && (
                 <div className={`fixed ${isCartBarVisible ? 'bottom-[7.5rem]' : 'bottom-[2.2rem]'} md:bottom-[2.2rem] right-[5.2rem] z-50 bg-[#3A2E1F] text-white text-[11px] font-bold px-3 py-1.5 rounded-xl shadow-lg whitespace-nowrap animate-in fade-in slide-in-from-right-2 duration-500 hidden md:block`}
                     style={{ zIndex: 9997 }}>
-                    Need help? Ask me! 💬
+                    Ask AI Assitance! 💬
                     <div className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-3 bg-[#3A2E1F] rotate-45" />
                 </div>
             )}
@@ -136,7 +136,7 @@ export default function ChatBot() {
             {isOpen && (
                 <div
                     className="fixed z-50 bg-[#FFFDF9] border border-[#E8DEC8] shadow-2xl flex flex-col overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-4 fade-in
-                        bottom-0 right-0 w-full h-[100dvh] sm:bottom-6 sm:right-6 sm:w-[400px] sm:h-[580px] sm:rounded-3xl"
+                        bottom-0 right-0 w-full h-[60dvh] sm:bottom-6 sm:right-6 sm:w-[400px] sm:h-[520px] sm:rounded-3xl"
                     style={{ zIndex: 9999 }}
                 >
                     {/* Header */}
@@ -146,7 +146,7 @@ export default function ChatBot() {
                                 <Bot className="w-5 h-5 text-[#3A2E1F]" />
                             </div>
                             <div>
-                                <h3 className="font-heading font-bold text-sm">GB Assistant</h3>
+                                <h3 className="font-heading font-bold text-sm">GB AI Assistant</h3>
                                 <div className="flex items-center gap-1.5">
                                     <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
                                     <span className="text-[10px] text-white/70 font-semibold">Online • Ready to help</span>
