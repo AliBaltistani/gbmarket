@@ -179,12 +179,19 @@ function initDb() {
 
   console.log('Database schema initialized.');
 
+  // Migration for new keys like site_url
+  const existSiteUrl = db.prepare('SELECT COUNT(*) as count FROM settings WHERE key = ?').get('site_url');
+  if (existSiteUrl.count === 0) {
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('site_url', 'https://gbmarket.pk');
+  }
+
   // Seed Initial Settings if empty
   const { count } = db.prepare('SELECT COUNT(*) as count FROM settings').get();
   if (count === 0) {
     const seedSettings = {
       store_name: 'GBMarket',
       store_tagline: 'Premium Dry Fruits & Nuts from the Mountains of Gilgit-Baltistan',
+      site_url: 'https://gbmarket.pk',
       logo_url: '/placeholder.png',
       favicon_url: '/vite.svg',
       footer_logo_url: '/placeholder.png',

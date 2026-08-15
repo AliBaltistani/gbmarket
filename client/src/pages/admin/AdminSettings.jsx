@@ -31,6 +31,7 @@ export default function AdminSettings() {
         // General
         storeName: settings.store_name || '',
         storeTagline: settings.store_tagline || '',
+        siteBaseUrl: settings.site_url || 'https://gbmarket.pk',
         logoPreview: settings.logo_url || '/placeholder.png',
         faviconPreview: settings.favicon_url || '/vite.svg',
 
@@ -137,6 +138,7 @@ export default function AdminSettings() {
             const payload = {
                 store_name: formData.storeName,
                 store_tagline: formData.storeTagline,
+                site_url: formData.siteBaseUrl,
                 logo_url: finalLogoUrl,
                 favicon_url: finalFaviconUrl,
                 footer_logo_url: finalFooterLogoUrl,
@@ -275,6 +277,20 @@ export default function AdminSettings() {
                                             onChange={(e) => handleInputChange('storeTagline', e.target.value)}
                                             placeholder="Enter brand tagline..."
                                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                        />
+                                    </div>
+
+                                    {/* Site Base URL */}
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                            Site Base URL
+                                        </label>
+                                        <input
+                                            type="url"
+                                            value={formData.siteBaseUrl}
+                                            onChange={(e) => handleInputChange('siteBaseUrl', e.target.value)}
+                                            placeholder="https://gbmarket.pk"
+                                            className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
                                     </div>
 

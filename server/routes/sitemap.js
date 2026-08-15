@@ -5,13 +5,20 @@ module.exports = function (db) {
 
     router.get('/', (req, res, next) => {
         try {
+            // Retrieve dynamic site URL from settings
+            const settingsRows = db.prepare('SELECT value FROM settings WHERE key = ?').get('site_url');
+            const siteUrl = settingsRows ? (settingsRows.value || 'https://gbmarket.pk') : 'https://gbmarket.pk';
+
+            // Normalize trailing slash
+            const baseUrl = siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl;
+
             const pages = [
-                { url: 'https://gbmarket.pk/', changefreq: 'daily', priority: 1.0 },
-                { url: 'https://gbmarket.pk/shop', changefreq: 'daily', priority: 0.9 },
-                { url: 'https://gbmarket.pk/about', changefreq: 'monthly', priority: 0.6 },
-                { url: 'https://gbmarket.pk/contact', changefreq: 'monthly', priority: 0.6 },
-                { url: 'https://gbmarket.pk/track-order', changefreq: 'monthly', priority: 0.6 },
-                { url: 'https://gbmarket.pk/privacy', changefreq: 'yearly', priority: 0.5 }
+                { url: `${baseUrl}/`, changefreq: 'daily', priority: 1.0 },
+                { url: `${baseUrl}/shop`, changefreq: 'daily', priority: 0.9 },
+                { url: `${baseUrl}/about`, changefreq: 'monthly', priority: 0.6 },
+                { url: `${baseUrl}/contact`, changefreq: 'monthly', priority: 0.6 },
+                { url: `${baseUrl}/track-order`, changefreq: 'monthly', priority: 0.6 },
+                { url: `${baseUrl}/privacy`, changefreq: 'yearly', priority: 0.5 }
             ];
 
             const products = db.prepare('SELECT slug, created_at FROM products WHERE (is_deleted IS NULL OR is_deleted = 0)').all();
@@ -20,7 +27,7 @@ module.exports = function (db) {
                 // If created_at is present, use a default fallback
                 const date = p.created_at ? new Date(p.created_at) : new Date();
                 pages.push({
-                    url: `https://gbmarket.pk/product/${p.slug}`,
+                    url: `${baseUrl}/product/${p.slug}`,
                     changefreq: 'weekly',
                     priority: 0.8,
                     lastmod: date.toISOString().split('T')[0]

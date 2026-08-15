@@ -22,7 +22,23 @@ if (isConfigured) {
     console.log('[Email] SMTP not configured — email notifications disabled. Set SMTP_HOST, SMTP_USER, SMTP_PASS to enable.');
 }
 
-const fromAddress = process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@gbmarket.pk';
+const db = require('../db/db');
+
+function getDynamicDomain() {
+    try {
+        const row = db.prepare('SELECT value FROM settings WHERE key = ?').get('site_url');
+        const siteUrl = row ? (row.value || 'https://gbmarket.pk') : 'https://gbmarket.pk';
+        return {
+            siteUrl,
+            hostname: new URL(siteUrl).hostname
+        };
+    } catch {
+        return { siteUrl: 'https://gbmarket.pk', hostname: 'gbmarket.pk' };
+    }
+}
+
+const { hostname, siteUrl } = getDynamicDomain();
+const fromAddress = process.env.SMTP_FROM || process.env.SMTP_USER || `noreply@${hostname}`;
 const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER || null;
 
 /**
@@ -166,7 +182,7 @@ async function sendOrderStatusEmail(order, newStatus) {
                     <p style="margin:8px 0 0 0"><strong>Total:</strong> Rs. ${order.total}</p>
                 </div>
                 <p style="margin:16px 0">
-                    <a href="${process.env.CLIENT_ORIGIN || 'http://localhost:5173'}/track-order" 
+                    <a href="${siteUrl}/track-order" 
                        style="display:inline-block;padding:12px 24px;background:#F5A623;color:#3A2E1F;font-weight:bold;text-decoration:none;border-radius:24px">
                         Track Your Order →
                     </a>

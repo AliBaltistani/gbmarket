@@ -159,7 +159,7 @@ export default function AdminLayout() {
                         <UserCircle className="w-8 h-8 text-[#D97706]" />
                         <div className="flex flex-col text-xs overflow-hidden">
                             <span className="font-bold text-[#3A2E1F] truncate">{adminUsername || 'Store Admin'}</span>
-                            <span className="text-[10px] text-[#3A2E1F]/60 truncate">admin@gbmarket.pk</span>
+                            <span className="text-[10px] text-[#3A2E1F]/60 truncate">{settings.contact_email || 'admin'}</span>
                         </div>
                     </div>
 
