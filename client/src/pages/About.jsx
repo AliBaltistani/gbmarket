@@ -2,8 +2,10 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Leaf, Award, ShieldCheck, Heart, Truck, Sparkles, ArrowRight, CheckCircle2, Users, MapPin } from 'lucide-react';
 import SEO from '../components/SEO';
+import { useSettings } from '../context/SettingsContext';
 
 export default function About() {
+    const { settings } = useSettings();
     useEffect(() => {
         // window.scrollTo(0, 0); // Handled by RouteTransition
     }, []);
@@ -65,10 +67,10 @@ export default function About() {
                         <span>Our Journey & Heritage</span>
                     </div>
                     <h1 className="text-3xl sm:text-5xl font-extrabold font-heading text-[#3A2E1F]">
-                        Pure Mountain Goodness Direct From Gilgit-Baltistan
+                        {settings.about_hero_heading || 'Pure Mountain Goodness Direct From Gilgit-Baltistan'}
                     </h1>
-                    <p className="text-base text-[#3A2E1F]/80 leading-relaxed font-body">
-                        GBMarket was founded with a single mission: bringing the untouched, nutrient-dense organic dry fruits of Northern Pakistan straight to your family's table.
+                    <p className="text-base text-[#3A2E1F]/80 leading-relaxed font-body whitespace-pre-line">
+                        {settings.about_hero_subheading || 'GBMarket was founded with a single mission: bringing the untouched, nutrient-dense organic dry fruits of Northern Pakistan straight to your family\'s table.'}
                     </p>
                 </div>
             </section>
@@ -81,14 +83,11 @@ export default function About() {
                             The GBMarket Story
                         </span>
                         <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[#3A2E1F] leading-tight">
-                            Sourced From High Altitude Orchards
+                            {settings.about_story_heading || 'Sourced From High Altitude Orchards'}
                         </h2>
-                        <p className="text-sm text-[#3A2E1F]/80 leading-relaxed font-body">
-                            Nestled between the Karakoram and Himalayan mountain ranges, Gilgit-Baltistan produces some of the world's finest walnuts, paper-shell almonds, Chilgoza pine nuts, and sun-dried apricots.
-                        </p>
-                        <p className="text-sm text-[#3A2E1F]/80 leading-relaxed font-body">
-                            Fed by pure glacier meltwater and ripened in intense high-altitude sunlight, our dry fruits are richer in natural oils, antioxidants, and crunch compared to commercial store-bought alternatives.
-                        </p>
+                        <div className="text-sm text-[#3A2E1F]/80 leading-relaxed font-body whitespace-pre-line space-y-4">
+                            {settings.about_story_text || 'Nestled between the Karakoram and Himalayan mountain ranges, Gilgit-Baltistan produces some of the world\'s finest walnuts, paper-shell almonds, Chilgoza pine nuts, and sun-dried apricots.\n\nFed by pure glacier meltwater and ripened in intense high-altitude sunlight, our dry fruits are richer in natural oils, antioxidants, and crunch compared to commercial store-bought alternatives.'}
+                        </div>
                         <div className="pt-2 space-y-2">
                             <div className="flex items-center gap-3 text-xs font-bold text-[#3A2E1F]">
                                 <CheckCircle2 className="w-4 h-4 text-[#D97706]" />

@@ -229,7 +229,7 @@ export default function Contact() {
                                     </div>
                                     <div>
                                         <strong className="block text-[#3A2E1F] font-bold">Working Hours</strong>
-                                        <span>Mon - Sat: 9:00 AM - 8:00 PM (PKT)</span>
+                                        <span>{settings.working_hours || 'Mon - Sat: 9:00 AM - 8:00 PM (PKT)'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -242,7 +242,7 @@ export default function Contact() {
                                 <div className="w-full h-48 bg-[#F5EFE0] rounded-2xl border border-[#E8DEC8] overflow-hidden">
                                     <iframe
                                         title="GBMarket Location"
-                                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d102146.12648415714!2d74.249495!3d35.918968!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38e649e3742ea395%3A0xe543594b28867aab!2sGilgit%2C%20Gilgit-Baltistan%2C%20Pakistan!5e0!3m2!1sen!2s!4v1700000000000"
+                                        src={settings.map_embed_url || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d102146.12648415714!2d74.249495!3d35.918968!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38e649e3742ea395%3A0xe543594b28867aab!2sGilgit%2C%20Gilgit-Baltistan%2C%20Pakistan!5e0!3m2!1sen!2s!4v1700000000000"}
                                         width="100%"
                                         height="100%"
                                         style={{ border: 0 }}

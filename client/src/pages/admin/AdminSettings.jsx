@@ -15,7 +15,8 @@ import {
     Sparkles,
     DollarSign,
     Truck,
-    Info
+    Info,
+    LayoutTemplate
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSettings } from '../../context/SettingsContext';
@@ -42,6 +43,8 @@ export default function AdminSettings() {
         contactEmail: settings.contact_email || '',
         contactPhone: settings.contact_phone || '',
         contactAddress: settings.contact_address || '',
+        workingHours: settings.working_hours || 'Mon - Sat: 9:00 AM - 8:00 PM (PKT)',
+        mapEmbedUrl: settings.map_embed_url || 'https://www.google.com/maps/embed?pb=...',
 
 
 
@@ -55,7 +58,14 @@ export default function AdminSettings() {
 
         // Store Settings
         currencySymbol: settings.currency_symbol || '',
-        freeShippingThreshold: settings.free_shipping_threshold || ''
+        freeShippingThreshold: settings.free_shipping_threshold || '',
+
+        // Static Pages CMS
+        privacyPolicyContent: settings.privacy_policy_content || '',
+        aboutHeroHeading: settings.about_hero_heading || '',
+        aboutHeroSubheading: settings.about_hero_subheading || '',
+        aboutStoryHeading: settings.about_story_heading || '',
+        aboutStoryText: settings.about_story_text || ''
     });
 
     const logoInputRef = useRef(null);
@@ -69,6 +79,7 @@ export default function AdminSettings() {
         { id: 'contact', label: 'Contact Info', icon: Mail },
         { id: 'social', label: 'Social Links', icon: Share2 },
         { id: 'footer', label: 'Footer', icon: Info },
+        { id: 'pages', label: 'Pages Content', icon: LayoutTemplate },
         { id: 'store', label: 'Store Settings', icon: Sliders },
     ];
 
@@ -145,13 +156,20 @@ export default function AdminSettings() {
                 contact_email: formData.contactEmail,
                 contact_phone: formData.contactPhone,
                 contact_address: formData.contactAddress,
+                working_hours: formData.workingHours,
+                map_embed_url: formData.mapEmbedUrl,
 
                 social_facebook: formData.facebookUrl,
                 social_instagram: formData.instagramUrl,
                 social_whatsapp: formData.whatsappNumber,
                 footer_about_text: formData.footerAboutText,
                 currency_symbol: formData.currencySymbol,
-                free_shipping_threshold: formData.freeShippingThreshold
+                free_shipping_threshold: formData.freeShippingThreshold,
+                privacy_policy_content: formData.privacyPolicyContent,
+                about_hero_heading: formData.aboutHeroHeading,
+                about_hero_subheading: formData.aboutHeroSubheading,
+                about_story_heading: formData.aboutStoryHeading,
+                about_story_text: formData.aboutStoryText
             };
 
             await updateSettings(payload);
@@ -421,6 +439,33 @@ export default function AdminSettings() {
                                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
                                     </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                            Working Hours
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.workingHours}
+                                            onChange={(e) => handleInputChange('workingHours', e.target.value)}
+                                            placeholder="e.g. Mon - Sat: 9am - 8pm"
+                                            className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                            Google Maps Embed URL
+                                        </label>
+                                        <input
+                                            type="url"
+                                            value={formData.mapEmbedUrl}
+                                            onChange={(e) => handleInputChange('mapEmbedUrl', e.target.value)}
+                                            placeholder="https://www.google.com/maps/embed?pb=..."
+                                            className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                        />
+                                        <p className="text-[10px] text-[#3A2E1F]/60">Got to Google Maps {'->'} Share {'->'} Embed a map {'->'} Copy the HTML `src` link ONLY.</p>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -541,6 +586,49 @@ export default function AdminSettings() {
                                                     <span>Upload Footer Logo</span>
                                                 </button>
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* PAGES CONTENT */}
+                        {activeTab === 'pages' && (
+                            <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+                                <div className="border-b border-[#E8DEC8] pb-4">
+                                    <h2 className="font-heading font-extrabold text-xl text-[#3A2E1F] flex items-center gap-2">
+                                        <LayoutTemplate className="w-5 h-5 text-[#D97706]" /> Static Pages Content
+                                    </h2>
+                                    <p className="text-xs text-[#3A2E1F]/70 mt-1">
+                                        Manage textual content for the About Us and Privacy Policy pages.
+                                    </p>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div className="space-y-4 border-b border-[#E8DEC8] pb-6">
+                                        <h3 className="font-bold text-sm text-[#3A2E1F]">About Us Details</h3>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block"> Hero Heading </label>
+                                            <input type="text" value={formData.aboutHeroHeading} onChange={(e) => handleInputChange('aboutHeroHeading', e.target.value)} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block"> Hero Subheading </label>
+                                            <textarea rows={2} value={formData.aboutHeroSubheading} onChange={(e) => handleInputChange('aboutHeroSubheading', e.target.value)} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block"> Story Heading </label>
+                                            <input type="text" value={formData.aboutStoryHeading} onChange={(e) => handleInputChange('aboutStoryHeading', e.target.value)} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block"> Story Text/Paragraph </label>
+                                            <textarea rows={5} value={formData.aboutStoryText} onChange={(e) => handleInputChange('aboutStoryText', e.target.value)} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4 pt-2">
+                                        <h3 className="font-bold text-sm text-[#3A2E1F]">Privacy Policy HTML</h3>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block"> Privacy Content (Supports standard HTML) </label>
+                                            <textarea rows={10} value={formData.privacyPolicyContent} onChange={(e) => handleInputChange('privacyPolicyContent', e.target.value)} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs font-mono text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
                                         </div>
                                     </div>
                                 </div>

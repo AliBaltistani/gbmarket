@@ -179,10 +179,34 @@ function initDb() {
 
   console.log('Database schema initialized.');
 
-  // Migration for new keys like site_url
+  // Migration for new keys like site_url, working_hours, map_embed_url
   const existSiteUrl = db.prepare('SELECT COUNT(*) as count FROM settings WHERE key = ?').get('site_url');
   if (existSiteUrl.count === 0) {
     db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('site_url', 'https://gbmarket.pk');
+  }
+
+  const existWorkingHours = db.prepare('SELECT COUNT(*) as count FROM settings WHERE key = ?').get('working_hours');
+  if (existWorkingHours.count === 0) {
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('working_hours', 'Mon - Sat: 9:00 AM - 8:00 PM (PKT)');
+  }
+
+  const existMapUrl = db.prepare('SELECT COUNT(*) as count FROM settings WHERE key = ?').get('map_embed_url');
+  if (existMapUrl.count === 0) {
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('map_embed_url', 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d102146.12648415714!2d74.249495!3d35.918968!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38e649e3742ea395%3A0xe543594b28867aab!2sGilgit%2C%20Gilgit-Baltistan%2C%20Pakistan!5e0!3m2!1sen!2s!4v1700000000000');
+  }
+
+  // --- CMS Pages Migrations ---
+  const existPrivacy = db.prepare('SELECT COUNT(*) as count FROM settings WHERE key = ?').get('privacy_policy_content');
+  if (existPrivacy.count === 0) {
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('privacy_policy_content', '<h2 class="text-xl font-bold text-[#3A2E1F] my-4">1. Introduction</h2><p class="mb-4">GBMarket values your privacy and is committed to protecting your personal data...</p><h2 class="text-xl font-bold text-[#3A2E1F] my-4">Contact Us</h2><p class="mb-4">If you have any questions, please contact us.</p>');
+  }
+
+  const existAboutStory = db.prepare('SELECT COUNT(*) as count FROM settings WHERE key = ?').get('about_story_heading');
+  if (existAboutStory.count === 0) {
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('about_hero_heading', 'Pure Mountain Goodness Direct From Gilgit-Baltistan');
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('about_hero_subheading', 'GBMarket was founded with a single mission: bringing the untouched, nutrient-dense organic dry fruits of Northern Pakistan straight to your family\'s table.');
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('about_story_heading', 'Sourced From High Altitude Orchards');
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('about_story_text', 'Nestled between the Karakoram and Himalayan mountain ranges, Gilgit-Baltistan produces some of the world\'s finest walnuts, paper-shell almonds, Chilgoza pine nuts, and sun-dried apricots.\n\nFed by pure glacier meltwater and ripened in intense high-altitude sunlight, our dry fruits are richer in natural oils, antioxidants, and crunch compared to commercial store-bought alternatives.');
   }
 
   // Seed Initial Settings if empty
@@ -196,17 +220,24 @@ function initDb() {
       favicon_url: '/vite.svg',
       footer_logo_url: '/placeholder.png',
       contact_email: 'info@gbmarket.pk',
-      contact_phone: '+92 300 1234567',
-      contact_address: 'Main Bazaar, Gilgit, Gilgit-Baltistan, Pakistan',
-      hero_heading: '100% Organic & Sun-Dried Mountain Produce',
-      hero_subheading: 'Handpicked from the orchards of Hunza, Skardu, and Gilgit Valley, brought fresh to your doorstep across Pakistan.',
-      hero_image_url: 'https://images.unsplash.com/photo-1594951468249-f79a953eacc2?auto=format&fit=crop&q=80&w=1200',
+      contact_phone: '+92 300 0000000',
+      contact_address: 'Main Bazar, Gilgit, Gilgit-Baltistan, Pakistan',
+      working_hours: 'Mon - Sat: 9:00 AM - 8:00 PM (PKT)',
+      map_embed_url: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d102146.12648415714!2d74.249495!3d35.918968!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38e649e3742ea395%3A0xe543594b28867aab!2sGilgit%2C%20Gilgit-Baltistan%2C%20Pakistan!5e0!3m2!1sen!2s!4v1700000000000',
+      hero_heading: 'From the Highest Mountains of the World to Your Table.',
+      hero_subheading: 'Experience the pure, 100% natural, and organic taste of Gilgit-Baltistan.',
+      hero_image_url: 'https://images.unsplash.com/photo-1596769062638-e6ed3f46f496?auto=format&fit=crop&q=80&w=1200',
       social_facebook: 'https://facebook.com/gbmarket.pk',
       social_instagram: 'https://instagram.com/gbmarket.pk',
       social_whatsapp: '+92 300 1234567',
-      footer_about_text: 'GBMarket brings authentic, handpicked, sun-dried organic fruits and nuts directly from local mountain farmers of Gilgit-Baltistan to your doorstep with guaranteed purity.',
+      footer_about_text: 'GBMarket brings the finest, freshest, and most organic dry fruits straight from the majestic mountains of Gilgit-Baltistan to your doorstep.',
       currency_symbol: 'Rs. ',
-      free_shipping_threshold: '5000'
+      free_shipping_threshold: '3000',
+      privacy_policy_content: '<h2 class="text-xl font-bold text-[#3A2E1F] my-4">1. Introduction</h2><p class="mb-4">GBMarket values your privacy and is committed to protecting your personal data...</p><h2 class="text-xl font-bold text-[#3A2E1F] my-4">Contact Us</h2><p class="mb-4">If you have any questions, please contact us.</p>',
+      about_hero_heading: 'Pure Mountain Goodness Direct From Gilgit-Baltistan',
+      about_hero_subheading: 'GBMarket was founded with a single mission: bringing the untouched, nutrient-dense organic dry fruits of Northern Pakistan straight to your family\'s table.',
+      about_story_heading: 'Sourced From High Altitude Orchards',
+      about_story_text: 'Nestled between the Karakoram and Himalayan mountain ranges, Gilgit-Baltistan produces some of the world\'s finest walnuts, paper-shell almonds, Chilgoza pine nuts, and sun-dried apricots.\n\nFed by pure glacier meltwater and ripened in intense high-altitude sunlight, our dry fruits are richer in natural oils, antioxidants, and crunch compared to commercial store-bought alternatives.'
     };
     const insertSetting = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)');
     const trx = db.transaction(() => {
