@@ -21,9 +21,9 @@ export default function WhatsAppButton() {
     const message = encodeURIComponent(`Hi ${settings.store_name || 'there'}! I have a question.`);
     const url = `https://wa.me/${phone}?text=${message}`;
 
-    // Base positions: ChatBot is at bottom-6 (or 24), so WhatsApp sits above it.
-    const mobileBottom = isCartBarVisible ? 'bottom-[11rem]' : 'bottom-[5.5rem]';
-    const desktopBottom = 'md:bottom-24'; // ChatBot is bottom-6 on desktop usually
+    // Base positions: WhatsApp is on the bottom, ChatBot sits above it.
+    const mobileBottom = isCartBarVisible ? 'bottom-24' : 'bottom-6';
+    const desktopBottom = 'md:bottom-6';
 
     return (
         <a
