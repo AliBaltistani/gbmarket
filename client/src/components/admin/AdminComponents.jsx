@@ -30,9 +30,15 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-md' 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
-            <div className={`w-full ${maxWidth} bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl shadow-xl overflow-hidden space-y-4 p-6 sm:p-8 relative`}>
-                <div className="flex items-center justify-between border-b border-[#E8DEC8] pb-4">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200"
+            onClick={onClose}
+        >
+            <div
+                className={`w-full ${maxWidth} max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)] bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl shadow-xl overflow-hidden flex flex-col p-6 sm:p-8 relative`}
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="flex items-center justify-between border-b border-[#E8DEC8] pb-4 shrink-0">
                     <h3 className="font-heading font-bold text-xl text-[#3A2E1F]">{title}</h3>
                     <button
                         type="button"
@@ -42,7 +48,9 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-md' 
                         <X className="w-5 h-5" />
                     </button>
                 </div>
-                <div>{children}</div>
+                <div className="overflow-y-auto flex-1 pt-4 space-y-4">
+                    {children}
+                </div>
             </div>
         </div>
     );

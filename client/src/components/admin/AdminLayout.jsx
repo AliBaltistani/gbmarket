@@ -81,15 +81,14 @@ export default function AdminLayout() {
 
             {/* SIDEBAR (DESKTOP & MOBILE DRAWER) */}
             <aside className={`
-        fixed md:static inset-y-0 left-0 z-50
+        fixed md:sticky top-0 h-screen inset-y-0 left-0 z-50
         w-64 bg-[#F5EFE0]/80 border-r border-[#E8DEC8]
-        flex flex-col justify-between
+        flex flex-col justify-between shrink-0
         transform transition-transform duration-300 ease-in-out
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-                <div className="p-6 space-y-8">
-
-                    {/* Logo Brand Header */}
+                {/* Logo Brand Header (Fixed Top) */}
+                <div className="p-6 pb-4 shrink-0">
                     <div className="flex items-center justify-between">
                         <Link to="/admin/dashboard" className="flex items-center gap-3">
                             {settings.logo_url && !settings.logo_url.includes('placeholder') ? (
@@ -118,8 +117,10 @@ export default function AdminLayout() {
                             <X className="w-5 h-5" />
                         </button>
                     </div>
+                </div>
 
-                    {/* Navigation Items */}
+                {/* Navigation Items (Scrollable Middle Content) */}
+                <div className="px-6 py-2 flex-1 overflow-y-auto space-y-1.5">
                     <nav className="space-y-1.5">
                         <span className="text-[11px] font-bold uppercase tracking-wider text-[#3A2E1F]/50 px-3 block mb-2">
                             Management
@@ -148,8 +149,8 @@ export default function AdminLayout() {
                     </nav>
                 </div>
 
-                {/* Sidebar Footer / Logout */}
-                <div className="p-6 border-t border-[#E8DEC8]/80 space-y-4">
+                {/* Sidebar Footer / Logout (Fixed Bottom) */}
+                <div className="p-6 border-t border-[#E8DEC8]/80 space-y-4 shrink-0">
                     <div className="flex items-center gap-3 p-2 bg-[#FFFDF9]/60 rounded-2xl border border-[#E8DEC8]">
                         <UserCircle className="w-8 h-8 text-[#D97706]" />
                         <div className="flex flex-col text-xs overflow-hidden">

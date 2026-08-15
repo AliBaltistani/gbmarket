@@ -15,6 +15,7 @@ import {
     deleteHomepageSection
 } from '../../api/homepage';
 import { getCategories } from '../../api/categories';
+import { Modal } from '../../components/admin/AdminComponents';
 
 const SECTION_TYPES = [
     { type: 'hero_banner', label: 'Hero Banner', icon: Sparkles, description: 'Full-width carousel with slides' },
@@ -586,39 +587,33 @@ export default function AdminHomepage() {
             )}
 
             {/* Type Picker Modal */}
-            {showTypePicker && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3A2E1F]/50 backdrop-blur-sm" onClick={() => setShowTypePicker(false)}>
-                    <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl shadow-2xl w-full max-w-md mx-4 p-6 space-y-4" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between">
-                            <h2 className="font-heading font-extrabold text-lg text-[#3A2E1F]">Add New Section</h2>
-                            <button type="button" onClick={() => setShowTypePicker(false)} className="w-8 h-8 rounded-full bg-[#F5EFE0] hover:bg-[#E8DEC8] flex items-center justify-center text-[#3A2E1F]">
-                                <X className="w-4 h-4" />
+            <Modal
+                isOpen={showTypePicker}
+                onClose={() => setShowTypePicker(false)}
+                title="Add New Section"
+            >
+                <div className="space-y-2">
+                    {SECTION_TYPES.map(st => {
+                        const Icon = st.icon;
+                        return (
+                            <button
+                                key={st.type}
+                                type="button"
+                                onClick={() => handleAddSection(st.type)}
+                                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl bg-[#F5EFE0]/50 hover:bg-[#F5A623]/20 border border-[#E8DEC8] hover:border-[#F5A623] text-left transition-all group"
+                            >
+                                <div className="w-10 h-10 rounded-xl bg-[#F5A623]/20 group-hover:bg-[#F5A623] text-[#D97706] group-hover:text-[#3A2E1F] flex items-center justify-center transition-all">
+                                    <Icon className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <div className="text-sm font-bold text-[#3A2E1F]">{st.label}</div>
+                                    <div className="text-[11px] text-[#3A2E1F]/60">{st.description}</div>
+                                </div>
                             </button>
-                        </div>
-                        <div className="space-y-2">
-                            {SECTION_TYPES.map(st => {
-                                const Icon = st.icon;
-                                return (
-                                    <button
-                                        key={st.type}
-                                        type="button"
-                                        onClick={() => handleAddSection(st.type)}
-                                        className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl bg-[#F5EFE0]/50 hover:bg-[#F5A623]/20 border border-[#E8DEC8] hover:border-[#F5A623] text-left transition-all group"
-                                    >
-                                        <div className="w-10 h-10 rounded-xl bg-[#F5A623]/20 group-hover:bg-[#F5A623] text-[#D97706] group-hover:text-[#3A2E1F] flex items-center justify-center transition-all">
-                                            <Icon className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-bold text-[#3A2E1F]">{st.label}</div>
-                                            <div className="text-[11px] text-[#3A2E1F]/60">{st.description}</div>
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
+                        );
+                    })}
                 </div>
-            )}
+            </Modal>
         </div>
     );
 }
