@@ -69,6 +69,16 @@ function initDb() {
       key TEXT UNIQUE NOT NULL,
       value TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS homepage_sections (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      section_type TEXT NOT NULL,
+      title TEXT NOT NULL DEFAULT '',
+      config TEXT NOT NULL DEFAULT '{}',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      is_visible INTEGER NOT NULL DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   // Ensure rating and review_count columns exist for legacy databases
@@ -145,6 +155,110 @@ function initDb() {
     });
     trx();
     console.log('Database settings seeded with defaults.');
+  }
+
+  // Seed Default Homepage Sections if empty
+  const { count: hpCount } = db.prepare('SELECT COUNT(*) as count FROM homepage_sections').get();
+  if (hpCount === 0) {
+    const insertSection = db.prepare('INSERT INTO homepage_sections (section_type, title, config, sort_order, is_visible) VALUES (?, ?, ?, ?, 1)');
+    const hpTrx = db.transaction(() => {
+      // 1. Hero Banner Carousel
+      insertSection.run('hero_banner', 'Hero Banner', JSON.stringify({
+        slides: [
+          {
+            badge: 'Fresh Harvest 2026',
+            title: '100% Organic & Sun-Dried Mountain Produce',
+            subtitle: 'Handpicked paper-shell almonds & walnuts from the high-altitude orchards of Gilgit-Baltistan.',
+            ctaText: 'Explore Harvest',
+            ctaLink: '/shop',
+            image: 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&q=80&w=800',
+            highlight: 'Premium Grade Paper-Shell Almonds'
+          },
+          {
+            badge: 'Pure Mountain Oils',
+            title: 'Cold-Pressed Hunza Apricot & Almond Oils',
+            subtitle: 'Raw, unrefined superfood oils extracted directly from wild Gilgit mountain harvests.',
+            ctaText: 'Shop Pure Oils',
+            ctaLink: '/shop',
+            image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&q=80&w=800',
+            highlight: '100% Unpasteurized & Nutrient Rich'
+          },
+          {
+            badge: 'Limited Reserve',
+            title: 'Wild Mountain Pine Nuts (Chilgoza)',
+            subtitle: 'Exquisite grade-A pine nuts harvested straight from natural pine forests of Gilgit-Baltistan.',
+            ctaText: 'Discover Chilgoza',
+            ctaLink: '/shop',
+            image: 'https://images.unsplash.com/photo-1543362906-acfc16c67564?auto=format&fit=crop&q=80&w=800',
+            highlight: 'Direct Sourced Mountain Luxury'
+          }
+        ]
+      }), 0);
+
+      // 2. Category Showcase
+      insertSection.run('category_showcase', 'Browse Categories', JSON.stringify({
+        heading: 'Browse Categories',
+        description: 'Auto-scrolling organic mountain dry fruit varieties'
+      }), 1);
+
+      // 3. Featured Products Grid
+      insertSection.run('product_grid', 'Featured Dry Fruits', JSON.stringify({
+        heading: 'Featured Dry Fruits',
+        badge: 'Best Seller Collection',
+        filter: 'featured',
+        maxItems: 6
+      }), 2);
+
+      // 4. New Arrivals Carousel
+      insertSection.run('product_carousel', 'New Arrivals', JSON.stringify({
+        heading: 'New Arrivals Strip',
+        badge: 'Fresh Batch Harvest',
+        description: 'Handpicked items from this season\'s first harvest.',
+        filter: 'new',
+        maxItems: 8
+      }), 3);
+
+      // 5. Banner Image
+      insertSection.run('banner_image', 'Promotional Banner', JSON.stringify({
+        image: 'https://images.unsplash.com/photo-1596769062638-e6ed3f46f496?auto=format&fit=crop&q=80&w=1200',
+        link: '/shop',
+        alt: 'Shop Organic Dry Fruits from Gilgit-Baltistan'
+      }), 4);
+
+      // 6. Promo Cards
+      insertSection.run('promo_cards', 'Promotional Offers', JSON.stringify({
+        cards: [
+          {
+            badge: 'Save Up to 20% OFF',
+            heading: 'Organic Mountain Dry Fruit Bundles',
+            body: 'Get our curated 5-Nut Power Mix paired with authentic Hunza Sun-Dried Apricots at special discounted rates this season.',
+            ctaText: 'Shop Deal Bundles',
+            ctaLink: '/shop',
+            theme: 'dark'
+          },
+          {
+            badge: 'Free Express Delivery',
+            heading: 'Fast Shipping Across Pakistan',
+            body: 'Enjoy free insured doorstep shipping on all orders over Rs. 3,000. Freshly sealed packs delivered right to your home.',
+            ctaText: 'Explore Fresh Nuts',
+            ctaLink: '/shop',
+            theme: 'light'
+          }
+        ]
+      }), 5);
+
+      // 7. Customer Reviews
+      insertSection.run('reviews', 'Customer Reviews', JSON.stringify({
+        heading: 'What Our Customers Say',
+        reviews: [
+          { name: 'Ahmed Khan', rating: 5, text: 'Best quality almonds I have ever tasted. Truly organic and fresh from the mountains!', location: 'Islamabad' },
+          { name: 'Fatima Ali', rating: 5, text: 'The Hunza apricots are amazing. My whole family loves them. Will order again!', location: 'Lahore' },
+          { name: 'Bilal Shah', rating: 4, text: 'Great pine nuts and fast delivery. Packaging was excellent and everything was fresh.', location: 'Karachi' }
+        ]
+      }), 6);
+    });
+    hpTrx();
+    console.log('Homepage sections seeded with defaults.');
   }
 }
 

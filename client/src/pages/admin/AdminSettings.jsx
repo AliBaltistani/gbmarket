@@ -15,8 +15,7 @@ import {
     Sparkles,
     DollarSign,
     Truck,
-    Info,
-    LayoutTemplate
+    Info
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSettings } from '../../context/SettingsContext';
@@ -43,10 +42,7 @@ export default function AdminSettings() {
         contactPhone: settings.contact_phone || '',
         contactAddress: settings.contact_address || '',
 
-        // Homepage Hero
-        heroHeading: settings.hero_heading || '',
-        heroSubheading: settings.hero_subheading || '',
-        heroImagePreview: settings.hero_image_url || '/placeholder.png',
+
 
         // Social Links
         facebookUrl: settings.social_facebook || '',
@@ -63,14 +59,13 @@ export default function AdminSettings() {
 
     const logoInputRef = useRef(null);
     const faviconInputRef = useRef(null);
-    const heroImageInputRef = useRef(null);
+
     const footerLogoInputRef = useRef(null);
 
     // Tab items configuration
     const tabs = [
         { id: 'general', label: 'General', icon: Store },
         { id: 'contact', label: 'Contact Info', icon: Mail },
-        { id: 'hero', label: 'Homepage Hero', icon: LayoutTemplate },
         { id: 'social', label: 'Social Links', icon: Share2 },
         { id: 'footer', label: 'Footer', icon: Info },
         { id: 'store', label: 'Store Settings', icon: Sliders },
@@ -107,14 +102,7 @@ export default function AdminSettings() {
         }
     };
 
-    const handleHeroImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const previewUrl = URL.createObjectURL(file);
-            setFormData(prev => ({ ...prev, heroImagePreview: previewUrl }));
-            toast.success('Hero image preview updated!');
-        }
-    };
+
 
     const handleSaveSettings = async (e) => {
         if (e) e.preventDefault();
@@ -144,13 +132,7 @@ export default function AdminSettings() {
                 finalFaviconUrl = data.url;
             }
 
-            let finalHeroImageUrl = formData.heroImagePreview;
-            if (heroImageInputRef.current && heroImageInputRef.current.files[0]) {
-                const fd = new FormData();
-                fd.append('image', heroImageInputRef.current.files[0]);
-                const { data } = await api.post('/upload', fd);
-                finalHeroImageUrl = data.url;
-            }
+
 
             const payload = {
                 store_name: formData.storeName,
@@ -161,9 +143,7 @@ export default function AdminSettings() {
                 contact_email: formData.contactEmail,
                 contact_phone: formData.contactPhone,
                 contact_address: formData.contactAddress,
-                hero_heading: formData.heroHeading,
-                hero_subheading: formData.heroSubheading,
-                hero_image_url: finalHeroImageUrl,
+
                 social_facebook: formData.facebookUrl,
                 social_instagram: formData.instagramUrl,
                 social_whatsapp: formData.whatsappNumber,
@@ -177,7 +157,7 @@ export default function AdminSettings() {
             setFormData(prev => ({
                 ...prev,
                 logoPreview: finalLogoUrl,
-                heroImagePreview: finalHeroImageUrl,
+
                 faviconPreview: finalFaviconUrl,
                 footerLogoPreview: finalFooterLogoUrl
             }));
@@ -429,76 +409,7 @@ export default function AdminSettings() {
                             </div>
                         )}
 
-                        {/* HOMEPAGE HERO */}
-                        {activeTab === 'hero' && (
-                            <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
-                                <div className="border-b border-[#E8DEC8] pb-4">
-                                    <h2 className="font-heading font-extrabold text-xl text-[#3A2E1F] flex items-center gap-2">
-                                        <LayoutTemplate className="w-5 h-5 text-[#D97706]" /> Homepage Hero Section
-                                    </h2>
-                                    <p className="text-xs text-[#3A2E1F]/70 mt-1">
-                                        Customize the main banner text and imagery featured on the home page
-                                    </p>
-                                </div>
 
-                                <div className="space-y-5">
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
-                                            Hero Heading Text
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={formData.heroHeading}
-                                            onChange={(e) => handleInputChange('heroHeading', e.target.value)}
-                                            className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
-                                            Hero Subheading Paragraph
-                                        </label>
-                                        <textarea
-                                            rows={3}
-                                            value={formData.heroSubheading}
-                                            onChange={(e) => handleInputChange('heroSubheading', e.target.value)}
-                                            className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
-                                        />
-                                    </div>
-
-                                    {/* Hero Image Upload Area */}
-                                    <div className="space-y-2 pt-2">
-                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
-                                            Hero Banner Photo
-                                        </label>
-                                        <input
-                                            type="file"
-                                            ref={heroImageInputRef}
-                                            accept="image/*"
-                                            className="hidden"
-                                            onChange={handleHeroImageChange}
-                                        />
-                                        <div className="space-y-3">
-                                            <div className="aspect-16/7 w-full bg-[#F5EFE0] border border-[#E8DEC8] rounded-2xl overflow-hidden relative shadow-xs">
-                                                <img
-                                                    src={formData.heroImagePreview}
-                                                    alt="Hero Banner Preview"
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => heroImageInputRef.current?.click()}
-                                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-xs rounded-full shadow-xs transition-all"
-                                            >
-                                                <UploadCloud className="w-3.5 h-3.5" />
-                                                <span>Replace Hero Image</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
 
                         {/* SOCIAL LINKS */}
                         {activeTab === 'social' && (

@@ -11,7 +11,8 @@ import {
     X,
     Leaf,
     UserCircle,
-    Settings
+    Settings,
+    LayoutTemplate
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -25,6 +26,7 @@ export default function AdminLayout() {
 
     const navItems = [
         { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+        { name: 'Homepage', path: '/admin/homepage', icon: LayoutTemplate },
         { name: 'Products', path: '/admin/products', icon: Package },
         { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },
         { name: 'Categories', path: '/admin/categories', icon: Tags },
