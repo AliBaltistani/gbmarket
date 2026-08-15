@@ -2,11 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
     Plus, Search, Edit, Trash2, Check, X, UploadCloud,
     RefreshCw, ChevronLeft, ChevronRight, Sparkles,
-    AlertCircle, Loader2, Images, GripVertical, Star, Tag, BadgePercent
+    AlertCircle, Loader2, Images, GripVertical, Star, Tag, BadgePercent,
+    FileDown
 } from 'lucide-react';
 import {
     SlideOver, ConfirmDialog, AdminEmptyState, AdminSkeletonTable
 } from '../../components/admin/AdminComponents';
+import BulkImportModal from '../../components/admin/BulkImportModal';
 import { getProducts, createProduct, updateProduct, deleteProduct, uploadImage } from '../../api/products';
 import { getCategories } from '../../api/categories';
 import api from '../../api/api';
@@ -28,6 +30,7 @@ export default function AdminProducts() {
     const itemsPerPage = 6;
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
 
     // Primary image
     const [primaryFile, setPrimaryFile] = useState(null);
@@ -42,6 +45,13 @@ export default function AdminProducts() {
     const [editingProduct, setEditingProduct] = useState(null);
     const [formData, setFormData] = useState(EMPTY_FORM);
     const [deleteProductItem, setDeleteProductItem] = useState(null);
+
+    const handleBulkImport = async (rows) => {
+        const res = await api.post('/products/bulk-import', { products: rows });
+        toast.success(`Imported ${res.data.imported} product(s)`);
+        loadData();
+        return res.data;
+    };
 
     useEffect(() => { loadData(); }, []);
 
@@ -216,6 +226,10 @@ export default function AdminProducts() {
                         className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-[#FFFDF9] border border-[#E8DEC8] hover:bg-[#F5EFE0] text-[#3A2E1F] transition-all">
                         <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#F5A623]' : 'text-[#D97706]'}`} />
                         <span>Refresh</span>
+                    </button>
+                    <button type="button" onClick={() => setIsBulkImportOpen(true)}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#3A2E1F] hover:bg-[#D97706] text-white font-extrabold text-xs rounded-full shadow-md transition-all">
+                        <FileDown className="w-4 h-4" /><span>Import CSV</span>
                     </button>
                     <button type="button" onClick={() => handleOpenForm(null)}
                         className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-extrabold text-xs rounded-full shadow-md transition-all">
@@ -533,6 +547,13 @@ export default function AdminProducts() {
                     </div>
                 </form>
             </SlideOver>
+
+            <BulkImportModal
+                isOpen={isBulkImportOpen}
+                onClose={() => setIsBulkImportOpen(false)}
+                mode="products"
+                onImport={handleBulkImport}
+            />
 
             <ConfirmDialog isOpen={!!deleteProductItem} onClose={() => setDeleteProductItem(null)}
                 onConfirm={handleDeleteConfirm} title="Delete Product"

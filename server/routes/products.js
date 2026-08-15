@@ -195,5 +195,100 @@ module.exports = function (db, requireAdmin) {
         }
     });
 
+    // POST /api/products/bulk-import (admin)
+    router.post('/bulk-import', requireAdmin, (req, res, next) => {
+        try {
+            const { products } = req.body;
+            if (!Array.isArray(products) || products.length === 0) {
+                return res.status(400).json({ error: 'products array is required' });
+            }
+
+            const results = { imported: 0, skipped: 0, errors: [] };
+
+            const insertStmt = db.prepare(`
+                INSERT OR IGNORE INTO products
+                  (name, slug, description, short_description, category_id,
+                   image_url, gallery_images,
+                   base_price, stock, weight_options, is_featured, is_new, discount_percent,
+                   origin, shelf_life, storage_instructions, rating, review_count)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `);
+
+            const importAll = db.transaction(() => {
+                for (let i = 0; i < products.length; i++) {
+                    const p = products[i];
+                    const name = (p.name || '').trim();
+                    if (!name || p.base_price === undefined || p.base_price === '') {
+                        results.errors.push(`Row ${i + 1}: name and base_price are required`);
+                        continue;
+                    }
+                    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
+                    // Resolve category by name
+                    let category_id = null;
+                    if (p.category_name) {
+                        const cat = db.prepare('SELECT id FROM categories WHERE name = ? COLLATE NOCASE').get(p.category_name.trim());
+                        if (cat) category_id = cat.id;
+                    } else if (p.category_id) {
+                        category_id = Number(p.category_id);
+                    }
+
+                    // Parse weight_options: "500g:800,1kg:1500" or JSON string
+                    let weightOptions = '[]';
+                    if (p.weight_options) {
+                        if (typeof p.weight_options === 'string' && !p.weight_options.startsWith('[')) {
+                            try {
+                                weightOptions = JSON.stringify(
+                                    p.weight_options.split(',').map(part => {
+                                        const [label, price] = part.trim().split(':');
+                                        return { label: label.trim(), price: Number(price) || 0 };
+                                    })
+                                );
+                            } catch { weightOptions = '[]'; }
+                        } else {
+                            weightOptions = typeof p.weight_options === 'string' ? p.weight_options : JSON.stringify(p.weight_options);
+                        }
+                    }
+
+                    // Parse gallery_images: pipe-separated URLs → JSON array
+                    let galleryImages = null;
+                    if (p.gallery_images && p.gallery_images.trim()) {
+                        const urls = p.gallery_images.split('|').map(u => u.trim()).filter(Boolean);
+                        if (urls.length > 0) galleryImages = JSON.stringify(urls);
+                    }
+
+                    try {
+                        const info = insertStmt.run(
+                            name, slug,
+                            p.description || null,
+                            p.short_description || null,
+                            category_id,
+                            p.image_url || null,
+                            galleryImages,
+                            Number(p.base_price) || 0,
+                            Number(p.stock) || 0,
+                            weightOptions,
+                            p.is_featured ? 1 : 0,
+                            p.is_new ? 1 : 0,
+                            Number(p.discount_percent) || 0,
+                            p.origin || null,
+                            p.shelf_life || null,
+                            p.storage_instructions || null,
+                            Number(p.rating) || 4.8,
+                            Number(p.review_count) || 0
+                        );
+                        if (info.changes > 0) results.imported++;
+                        else results.skipped++;
+                    } catch (e) {
+                        results.errors.push(`Row ${i + 1} "${name}": ${e.message}`);
+                    }
+                }
+            });
+
+            importAll();
+            res.json({ message: 'Import complete', ...results });
+        } catch (error) { next(error); }
+    });
+
     return router;
 };

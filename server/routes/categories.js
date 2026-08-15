@@ -35,6 +35,37 @@ module.exports = function (db, requireAdmin) {
         }
     });
 
+    // POST /api/categories/bulk-import (admin)
+    router.post('/bulk-import', requireAdmin, (req, res, next) => {
+        try {
+            const { categories } = req.body;
+            if (!Array.isArray(categories) || categories.length === 0) {
+                return res.status(400).json({ error: 'categories array is required' });
+            }
+
+            const stmt = db.prepare('INSERT OR IGNORE INTO categories (name, slug, image_url) VALUES (?, ?, ?)');
+            const results = { imported: 0, skipped: 0, errors: [] };
+
+            const importAll = db.transaction(() => {
+                for (const cat of categories) {
+                    const name = (cat.name || '').trim();
+                    if (!name) { results.errors.push(`Row skipped: name is required`); continue; }
+                    const slug = (cat.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')).trim();
+                    try {
+                        const info = stmt.run(name, slug, cat.image_url || null);
+                        if (info.changes > 0) results.imported++;
+                        else results.skipped++;
+                    } catch (e) {
+                        results.errors.push(`"${name}": ${e.message}`);
+                    }
+                }
+            });
+
+            importAll();
+            res.json({ message: `Import complete`, ...results });
+        } catch (error) { next(error); }
+    });
+
     // PUT /api/categories/:id (admin)
     router.put('/:id', requireAdmin, (req, res, next) => {
         try {

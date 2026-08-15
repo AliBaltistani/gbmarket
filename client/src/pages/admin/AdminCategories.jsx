@@ -8,7 +8,8 @@ import {
     Loader2,
     Camera,
     X,
-    ImageOff
+    ImageOff,
+    FileDown
 } from 'lucide-react';
 import {
     Modal,
@@ -19,6 +20,7 @@ import {
 import { getCategories, createCategory, deleteCategory, updateCategory } from '../../api/categories';
 import api from '../../api/api';
 import toast from 'react-hot-toast';
+import BulkImportModal from '../../components/admin/BulkImportModal';
 
 export default function AdminCategories() {
     const [isLoading, setIsLoading] = useState(true);
@@ -36,6 +38,7 @@ export default function AdminCategories() {
 
     // Delete dialog state
     const [deleteCat, setDeleteCat] = useState(null);
+    const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
 
     // Auto-generate Slug helper
     const autoSlug = categoryName
@@ -52,6 +55,13 @@ export default function AdminCategories() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleBulkImport = async (rows) => {
+        const res = await api.post('/categories/bulk-import', { categories: rows });
+        toast.success(`Imported ${res.data.imported} category/categories`);
+        loadData();
+        return res.data;
     };
 
     useEffect(() => { loadData(); }, []);
@@ -161,6 +171,11 @@ export default function AdminCategories() {
                         className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-[#FFFDF9] border border-[#E8DEC8] hover:bg-[#F5EFE0] text-[#3A2E1F] transition-all">
                         <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#F5A623]' : 'text-[#D97706]'}`} />
                         <span>Refresh</span>
+                    </button>
+                    <button type="button" onClick={() => setIsBulkImportOpen(true)}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#3A2E1F] hover:bg-[#D97706] text-white font-extrabold text-xs rounded-full shadow-md transition-all">
+                        <FileDown className="w-4 h-4" />
+                        <span>Import CSV</span>
                     </button>
                     <button type="button" onClick={openAddModal}
                         className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-extrabold text-xs rounded-full shadow-md transition-all">
@@ -336,6 +351,13 @@ export default function AdminCategories() {
                         ? `Warning: This category has ${deleteCat.productCount} linked products. They will become uncategorized.`
                         : null
                 }
+            />
+
+            <BulkImportModal
+                isOpen={isBulkImportOpen}
+                onClose={() => setIsBulkImportOpen(false)}
+                mode="categories"
+                onImport={handleBulkImport}
             />
         </div>
     );
