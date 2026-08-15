@@ -13,7 +13,8 @@ import {
     UserCircle,
     Settings,
     LayoutTemplate,
-    CreditCard
+    CreditCard,
+    MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -31,6 +32,7 @@ export default function AdminLayout() {
         { name: 'Products', path: '/admin/products', icon: Package },
         { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },
         { name: 'Payments', path: '/admin/payments', icon: CreditCard },
+        { name: 'Reviews', path: '/admin/reviews', icon: MessageSquare },
         { name: 'Categories', path: '/admin/categories', icon: Tags },
         { name: 'Settings', path: '/admin/settings', icon: Settings },
     ];

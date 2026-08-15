@@ -33,6 +33,7 @@ const AdminCategories = React.lazy(() => import('./pages/admin/AdminCategories')
 const AdminSettings = React.lazy(() => import('./pages/admin/AdminSettings'));
 const AdminHomepage = React.lazy(() => import('./pages/admin/AdminHomepage'));
 const AdminPayments = React.lazy(() => import('./pages/admin/AdminPayments'));
+const AdminReviews = React.lazy(() => import('./pages/admin/AdminReviews'));
 
 // Storefront Layout Component
 function StorefrontLayout() {
@@ -77,6 +78,7 @@ function App() {
                       <Route path="categories" element={<AdminCategories />} />
                       <Route path="settings" element={<AdminSettings />} />
                       <Route path="payments" element={<AdminPayments />} />
+                      <Route path="reviews" element={<AdminReviews />} />
                     </Route>
                   </Route>
 

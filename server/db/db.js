@@ -150,8 +150,32 @@ function initDb() {
     db.exec('ALTER TABLE categories ADD COLUMN image_url TEXT');
   }
 
-  // B3: Removed — ratings are no longer overwritten on every server start.
-  // Ratings are set during seeding and manageable via admin panel.
+  // Extended product fields migration
+  const prodInfo = db.prepare("PRAGMA table_info(products)").all();
+  const prodCols = prodInfo.map(c => c.name);
+  if (!prodCols.includes('gallery_images')) db.exec('ALTER TABLE products ADD COLUMN gallery_images TEXT');
+  if (!prodCols.includes('short_description')) db.exec('ALTER TABLE products ADD COLUMN short_description TEXT');
+  if (!prodCols.includes('origin')) db.exec('ALTER TABLE products ADD COLUMN origin TEXT');
+  if (!prodCols.includes('shelf_life')) db.exec('ALTER TABLE products ADD COLUMN shelf_life TEXT');
+  if (!prodCols.includes('storage_instructions')) db.exec('ALTER TABLE products ADD COLUMN storage_instructions TEXT');
+  if (!prodCols.includes('discount_percent')) db.exec('ALTER TABLE products ADD COLUMN discount_percent INTEGER DEFAULT 0');
+  if (!prodCols.includes('is_new')) db.exec('ALTER TABLE products ADD COLUMN is_new INTEGER DEFAULT 0');
+
+  // Product reviews table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS product_reviews (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+      customer_name TEXT NOT NULL,
+      customer_email TEXT,
+      rating INTEGER NOT NULL CHECK(rating >= 1 AND rating <= 5),
+      title TEXT,
+      comment TEXT,
+      is_approved INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
 
   console.log('Database schema initialized.');
 

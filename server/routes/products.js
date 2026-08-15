@@ -45,7 +45,8 @@ module.exports = function (db, requireAdmin) {
 
             const products = db.prepare(query).all(...params).map(p => ({
                 ...p,
-                weight_options: parseJSON(p.weight_options)
+                weight_options: parseJSON(p.weight_options),
+                gallery_images: parseJSON(p.gallery_images) || []
             }));
 
             res.json({
@@ -75,6 +76,7 @@ module.exports = function (db, requireAdmin) {
 
             if (!product) return res.status(404).json({ error: 'Product not found' });
             product.weight_options = parseJSON(product.weight_options);
+            product.gallery_images = parseJSON(product.gallery_images) || [];
             res.json(product);
         } catch (error) {
             next(error);
@@ -85,7 +87,9 @@ module.exports = function (db, requireAdmin) {
     router.post('/', requireAdmin, (req, res, next) => {
         try {
             const {
-                name, slug, description, category_id, image_url, base_price, stock, weight_options, is_featured, rating, review_count
+                name, slug, description, short_description, category_id, image_url, gallery_images,
+                base_price, stock, weight_options, is_featured, rating, review_count,
+                origin, shelf_life, storage_instructions, discount_percent, is_new
             } = req.body;
 
             if (!name || !slug) return res.status(400).json({ error: 'Product name and slug are required' });
@@ -95,17 +99,24 @@ module.exports = function (db, requireAdmin) {
 
             const stmt = db.prepare(`
               INSERT INTO products (
-                name, slug, description, category_id, image_url, base_price, stock, weight_options, is_featured, rating, review_count
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                name, slug, description, short_description, category_id, image_url, gallery_images,
+                base_price, stock, weight_options, is_featured, rating, review_count,
+                origin, shelf_life, storage_instructions, discount_percent, is_new
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
 
             const info = stmt.run(
-                name, slug, description, category_id || null, image_url, Number(base_price),
-                stock || 0,
-                typeof weight_options === 'string' ? weight_options : JSON.stringify(weight_options),
-                is_featured || 0,
+                name, slug, description || null, short_description || null,
+                category_id || null, image_url || null,
+                Array.isArray(gallery_images) ? JSON.stringify(gallery_images) : (gallery_images || null),
+                Number(base_price), stock || 0,
+                typeof weight_options === 'string' ? weight_options : JSON.stringify(weight_options || []),
+                is_featured ? 1 : 0,
                 rating ? Number(rating) : 4.8,
-                review_count ? Number(review_count) : 0
+                review_count ? Number(review_count) : 0,
+                origin || null, shelf_life || null, storage_instructions || null,
+                discount_percent ? Number(discount_percent) : 0,
+                is_new ? 1 : 0
             );
 
             res.status(201).json({ id: info.lastInsertRowid, message: 'Product created successfully' });
@@ -122,24 +133,34 @@ module.exports = function (db, requireAdmin) {
         try {
             const { id } = req.params;
             const {
-                name, slug, description, category_id, image_url, base_price, stock, weight_options, is_featured, rating, review_count
+                name, slug, description, short_description, category_id, image_url, gallery_images,
+                base_price, stock, weight_options, is_featured, rating, review_count,
+                origin, shelf_life, storage_instructions, discount_percent, is_new
             } = req.body;
 
             const stmt = db.prepare(`
-              UPDATE products SET 
-                name = ?, slug = ?, description = ?, category_id = ?, image_url = ?, 
+              UPDATE products SET
+                name = ?, slug = ?, description = ?, short_description = ?,
+                category_id = ?, image_url = ?, gallery_images = ?,
                 base_price = ?, stock = ?, weight_options = ?, is_featured = ?,
-                rating = ?, review_count = ?
+                rating = ?, review_count = ?,
+                origin = ?, shelf_life = ?, storage_instructions = ?,
+                discount_percent = ?, is_new = ?
               WHERE id = ?
             `);
 
             const info = stmt.run(
-                name, slug, description, category_id, image_url, base_price,
-                stock,
-                typeof weight_options === 'string' ? weight_options : JSON.stringify(weight_options),
-                is_featured,
+                name, slug, description || null, short_description || null,
+                category_id || null, image_url || null,
+                Array.isArray(gallery_images) ? JSON.stringify(gallery_images) : (gallery_images || null),
+                Number(base_price), Number(stock) || 0,
+                typeof weight_options === 'string' ? weight_options : JSON.stringify(weight_options || []),
+                is_featured ? 1 : 0,
                 rating !== undefined ? Number(rating) : 4.8,
                 review_count !== undefined ? Number(review_count) : 0,
+                origin || null, shelf_life || null, storage_instructions || null,
+                discount_percent ? Number(discount_percent) : 0,
+                is_new ? 1 : 0,
                 id
             );
 
