@@ -157,9 +157,14 @@ export default function Shop() {
                                 {!loadingCats && categories.map((cat) => (
                                     <button
                                         key={cat.id} type="button" onClick={() => handleCategoryChange(cat.slug)}
-                                        className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-colors flex items-center justify-between ${selectedCategory === cat.slug ? 'bg-[#F5A623] text-[#3A2E1F] font-bold' : 'hover:bg-[#F5EFE0] text-[#3A2E1F]/80'
+                                        className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-colors flex items-center gap-2.5 ${selectedCategory === cat.slug ? 'bg-[#F5A623] text-[#3A2E1F] font-bold' : 'hover:bg-[#F5EFE0] text-[#3A2E1F]/80'
                                             }`}
                                     >
+                                        <span className="w-6 h-6 rounded-full overflow-hidden shrink-0 bg-[#F5EFE0] border border-[#E8DEC8] flex items-center justify-center text-xs">
+                                            {cat.image_url
+                                                ? <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover" />
+                                                : cat.icon || '📦'}
+                                        </span>
                                         <span>{cat.name}</span>
                                     </button>
                                 ))}
@@ -294,11 +299,16 @@ export default function Shop() {
                                             key={cat.id}
                                             type="button"
                                             onClick={() => handleCategoryChange(cat.slug)}
-                                            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium transition-colors flex items-center justify-between ${selectedCategory === cat.slug
+                                            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium transition-colors flex items-center gap-2.5 ${selectedCategory === cat.slug
                                                 ? 'bg-[#F5A623] text-[#3A2E1F] font-bold shadow-xs'
                                                 : 'hover:bg-[#F5EFE0] text-[#3A2E1F]/80 bg-[#F5EFE0]/30 border border-[#E8DEC8]/40'
                                                 }`}
                                         >
+                                            <span className="w-7 h-7 rounded-full overflow-hidden shrink-0 bg-[#F5EFE0] border border-[#E8DEC8] flex items-center justify-center text-sm">
+                                                {cat.image_url
+                                                    ? <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover" />
+                                                    : cat.icon || '📦'}
+                                            </span>
                                             <span>{cat.name}</span>
                                         </button>
                                     ))}

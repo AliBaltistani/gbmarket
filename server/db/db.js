@@ -143,6 +143,13 @@ function initDb() {
     db.exec("UPDATE orders SET payment_status = 'Unpaid' WHERE payment_method = 'COD' AND payment_status IS NULL");
   }
 
+  // Ensure image_url column exists on categories for category images
+  const categoriesInfo = db.prepare("PRAGMA table_info(categories)").all();
+  const hasCategoryImage = categoriesInfo.some(col => col.name === 'image_url');
+  if (!hasCategoryImage) {
+    db.exec('ALTER TABLE categories ADD COLUMN image_url TEXT');
+  }
+
   // B3: Removed — ratings are no longer overwritten on every server start.
   // Ratings are set during seeding and manageable via admin panel.
 

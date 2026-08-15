@@ -56,8 +56,17 @@ export default function CategoryShowcase({ config }) {
                                 to={`/shop?category=${cat.slug}`}
                                 className="shrink-0 w-32 sm:w-40 group bg-[#FFFDF9] border border-[#E8DEC8] hover:border-[#F5A623] rounded-2xl p-4 text-center shadow-xs hover:shadow-lg hover:shadow-[#F5A623]/25 hover:-translate-y-1.5 hover:rotate-1 transition-all duration-300 flex flex-col items-center justify-center gap-2.5 cursor-pointer"
                             >
-                                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#F5EFE0] group-hover:bg-[#F5A623] text-[#3A2E1F] flex items-center justify-center transition-all duration-300 shadow-xs group-hover:scale-110 group-hover:rotate-12">
-                                    <Leaf className="w-6 h-6 sm:w-7 sm:h-7 text-[#D97706] group-hover:text-[#3A2E1F] transition-colors" />
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#F5EFE0] group-hover:bg-[#F5A623]/20 flex items-center justify-center transition-all duration-300 shadow-xs group-hover:scale-110 group-hover:rotate-12 overflow-hidden shrink-0">
+                                    {cat.image_url ? (
+                                        <img
+                                            src={cat.image_url}
+                                            alt={cat.name}
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.insertAdjacentHTML('beforeend', '<span style="font-size:1.5rem">📦</span>'); }}
+                                        />
+                                    ) : (
+                                        <Leaf className="w-6 h-6 sm:w-7 sm:h-7 text-[#D97706] group-hover:text-[#3A2E1F] transition-colors" />
+                                    )}
                                 </div>
                                 <h3 className="font-heading font-extrabold text-xs sm:text-sm text-[#3A2E1F] group-hover:text-[#D97706] line-clamp-1 transition-colors">{cat.name}</h3>
                             </Link>
