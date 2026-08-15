@@ -103,7 +103,7 @@ export default function About() {
                     <div className="relative flex justify-center">
                         <div className="w-full max-w-md aspect-4/3 rounded-3xl overflow-hidden shadow-lg border-4 border-[#F5A623]">
                             <img
-                                src="https://images.unsplash.com/photo-1596769062638-e6ed3f46f496?auto=format&fit=crop&q=80&w=800"
+                                src={settings.about_story_image || "https://images.unsplash.com/photo-1596769062638-e6ed3f46f496?auto=format&fit=crop&q=80&w=800"}
                                 alt="Gilgit Baltistan Organic Orchards"
                                 className="w-full h-full object-cover"
                             />

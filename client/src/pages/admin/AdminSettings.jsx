@@ -65,13 +65,14 @@ export default function AdminSettings() {
         aboutHeroHeading: settings.about_hero_heading || '',
         aboutHeroSubheading: settings.about_hero_subheading || '',
         aboutStoryHeading: settings.about_story_heading || '',
-        aboutStoryText: settings.about_story_text || ''
+        aboutStoryText: settings.about_story_text || '',
+        aboutStoryImagePreview: settings.about_story_image || 'https://images.unsplash.com/photo-1596769062638-e6ed3f46f496?auto=format&fit=crop&q=80&w=800'
     });
 
     const logoInputRef = useRef(null);
     const faviconInputRef = useRef(null);
-
     const footerLogoInputRef = useRef(null);
+    const aboutStoryImageRef = useRef(null);
 
     // Tab items configuration
     const tabs = [
@@ -79,7 +80,8 @@ export default function AdminSettings() {
         { id: 'contact', label: 'Contact Info', icon: Mail },
         { id: 'social', label: 'Social Links', icon: Share2 },
         { id: 'footer', label: 'Footer', icon: Info },
-        { id: 'pages', label: 'Pages Content', icon: LayoutTemplate },
+        { id: 'about', label: 'About Info', icon: LayoutTemplate },
+        { id: 'privacy', label: 'Privacy Policies', icon: LayoutTemplate },
         { id: 'store', label: 'Store Settings', icon: Sliders },
     ];
 
@@ -114,6 +116,15 @@ export default function AdminSettings() {
         }
     };
 
+    const handleAboutStoryImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const previewUrl = URL.createObjectURL(file);
+            setFormData(prev => ({ ...prev, aboutStoryImagePreview: previewUrl }));
+            toast.success('About Story Image preview updated!');
+        }
+    };
+
 
 
     const handleSaveSettings = async (e) => {
@@ -144,7 +155,13 @@ export default function AdminSettings() {
                 finalFaviconUrl = data.url;
             }
 
-
+            let finalAboutStoryImage = formData.aboutStoryImagePreview;
+            if (aboutStoryImageRef.current && aboutStoryImageRef.current.files[0]) {
+                const fd = new FormData();
+                fd.append('image', aboutStoryImageRef.current.files[0]);
+                const { data } = await api.post('/upload', fd);
+                finalAboutStoryImage = data.url;
+            }
 
             const payload = {
                 store_name: formData.storeName,
@@ -169,7 +186,8 @@ export default function AdminSettings() {
                 about_hero_heading: formData.aboutHeroHeading,
                 about_hero_subheading: formData.aboutHeroSubheading,
                 about_story_heading: formData.aboutStoryHeading,
-                about_story_text: formData.aboutStoryText
+                about_story_text: formData.aboutStoryText,
+                about_story_image: finalAboutStoryImage
             };
 
             await updateSettings(payload);
@@ -592,21 +610,20 @@ export default function AdminSettings() {
                             </div>
                         )}
 
-                        {/* PAGES CONTENT */}
-                        {activeTab === 'pages' && (
+                        {/* ABOUT INFO */}
+                        {activeTab === 'about' && (
                             <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
                                 <div className="border-b border-[#E8DEC8] pb-4">
                                     <h2 className="font-heading font-extrabold text-xl text-[#3A2E1F] flex items-center gap-2">
-                                        <LayoutTemplate className="w-5 h-5 text-[#D97706]" /> Static Pages Content
+                                        <LayoutTemplate className="w-5 h-5 text-[#D97706]" /> About Us Layout
                                     </h2>
                                     <p className="text-xs text-[#3A2E1F]/70 mt-1">
-                                        Manage textual content for the About Us and Privacy Policy pages.
+                                        Manage textual and image content for the About Us page.
                                     </p>
                                 </div>
 
                                 <div className="space-y-6">
-                                    <div className="space-y-4 border-b border-[#E8DEC8] pb-6">
-                                        <h3 className="font-bold text-sm text-[#3A2E1F]">About Us Details</h3>
+                                    <div className="space-y-4">
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block"> Hero Heading </label>
                                             <input type="text" value={formData.aboutHeroHeading} onChange={(e) => handleInputChange('aboutHeroHeading', e.target.value)} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
@@ -623,13 +640,63 @@ export default function AdminSettings() {
                                             <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block"> Story Text/Paragraph </label>
                                             <textarea rows={5} value={formData.aboutStoryText} onChange={(e) => handleInputChange('aboutStoryText', e.target.value)} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
                                         </div>
-                                    </div>
-                                    <div className="space-y-4 pt-2">
-                                        <h3 className="font-bold text-sm text-[#3A2E1F]">Privacy Policy HTML</h3>
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block"> Privacy Content (Supports standard HTML) </label>
-                                            <textarea rows={10} value={formData.privacyPolicyContent} onChange={(e) => handleInputChange('privacyPolicyContent', e.target.value)} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs font-mono text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+
+                                        {/* About Image Upload */}
+                                        <div className="space-y-2 pt-2 border-t border-[#E8DEC8]">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                About Us Story Image
+                                            </label>
+                                            <input
+                                                type="file"
+                                                ref={aboutStoryImageRef}
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handleAboutStoryImageChange}
+                                            />
+                                            <div className="flex flex-col sm:flex-row items-center gap-5 p-5 bg-[#F5EFE0]/40 border border-[#E8DEC8] rounded-2xl">
+                                                <div className="w-24 h-24 rounded-2xl bg-white border border-[#E8DEC8] p-2 flex items-center justify-center shrink-0 shadow-xs">
+                                                    <img
+                                                        src={formData.aboutStoryImagePreview}
+                                                        alt="About Story Image Preview"
+                                                        className="max-h-full max-w-full object-cover rounded-xl"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2 text-center sm:text-left flex-1">
+                                                    <h4 className="text-xs font-bold text-[#3A2E1F]">Story Feature Image</h4>
+                                                    <p className="text-[11px] text-[#3A2E1F]/60">
+                                                        High quality landscape image (4:3 ratio recommended)
+                                                    </p>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => aboutStoryImageRef.current?.click()}
+                                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-xs rounded-full shadow-xs transition-all"
+                                                    >
+                                                        <UploadCloud className="w-3.5 h-3.5" />
+                                                        <span>Upload Image</span>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* PRIVACY POLICY */}
+                        {activeTab === 'privacy' && (
+                            <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+                                <div className="border-b border-[#E8DEC8] pb-4">
+                                    <h2 className="font-heading font-extrabold text-xl text-[#3A2E1F] flex items-center gap-2">
+                                        <LayoutTemplate className="w-5 h-5 text-[#D97706]" /> Privacy Policy HTML
+                                    </h2>
+                                    <p className="text-xs text-[#3A2E1F]/70 mt-1">
+                                        Privacy Content Editor Supports standard raw HTML editing
+                                    </p>
+                                </div>
+                                <div className="space-y-6">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block"> Raw HTML Source </label>
+                                        <textarea rows={15} value={formData.privacyPolicyContent} onChange={(e) => handleInputChange('privacyPolicyContent', e.target.value)} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs font-mono text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
                                     </div>
                                 </div>
                             </div>

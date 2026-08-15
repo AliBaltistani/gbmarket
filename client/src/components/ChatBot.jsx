@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, X, Send, Bot, User, Sparkles, ExternalLink, Loader2 } from 'lucide-react';
+import { useCart } from '../context/CartContext';
+import { useLocation } from 'react-router-dom';
 import api from '../api/api';
 
 export default function ChatBot() {
@@ -11,6 +13,12 @@ export default function ChatBot() {
     const [hasGreeted, setHasGreeted] = useState(false);
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
+    const { cartItems } = useCart();
+    const location = useLocation();
+
+    // Check if bottom cart bar is visible on mobile
+    const hideBarRoutes = ['/cart', '/checkout', '/order-confirmation'];
+    const isCartBarVisible = cartItems?.length > 0 && !hideBarRoutes.includes(location.pathname);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -91,14 +99,18 @@ export default function ChatBot() {
         return formatted;
     };
 
+    const closedMobileBottom = isCartBarVisible ? 'bottom-24' : 'bottom-6';
+    const closedDesktopBottom = 'md:bottom-6';
+    const openMobileBottom = 'bottom-0'; // Snaps to corner when open
+
     return (
         <>
             {/* Chat Bubble Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={`fixed z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 ${isOpen
-                    ? 'bg-[#3A2E1F] text-white bottom-6 right-6'
-                    : 'bg-gradient-to-br from-[#F5A623] to-[#D97706] text-[#3A2E1F] bottom-24 right-6'
+                    ? `bg-[#3A2E1F] text-white ${openMobileBottom} sm:bottom-6 right-0 sm:right-6 sm:rounded-full rounded-none w-full sm:w-14`
+                    : `bg-gradient-to-br from-[#F5A623] to-[#D97706] text-[#3A2E1F] ${closedMobileBottom} ${closedDesktopBottom} right-5`
                     }`}
                 style={{ zIndex: 9998 }}
                 aria-label={isOpen ? 'Close chat' : 'Open AI Assistant'}
@@ -113,7 +125,7 @@ export default function ChatBot() {
 
             {/* Tooltip when closed */}
             {!isOpen && (
-                <div className="fixed bottom-[7.5rem] right-[5.2rem] z-50 bg-[#3A2E1F] text-white text-[11px] font-bold px-3 py-1.5 rounded-xl shadow-lg whitespace-nowrap animate-in fade-in slide-in-from-right-2 duration-500 hidden md:block"
+                <div className={`fixed ${isCartBarVisible ? 'bottom-[7.5rem]' : 'bottom-[2.2rem]'} md:bottom-[2.2rem] right-[5.2rem] z-50 bg-[#3A2E1F] text-white text-[11px] font-bold px-3 py-1.5 rounded-xl shadow-lg whitespace-nowrap animate-in fade-in slide-in-from-right-2 duration-500 hidden md:block`}
                     style={{ zIndex: 9997 }}>
                     Need help? Ask me! 💬
                     <div className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-3 bg-[#3A2E1F] rotate-45" />

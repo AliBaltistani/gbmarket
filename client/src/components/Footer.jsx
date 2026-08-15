@@ -129,8 +129,16 @@ export default function Footer() {
 
             {/* Bottom Bar */}
             <div className="border-t border-[#F5EFE0]/10 bg-[#2A2116] py-6">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#F5EFE0]/60">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#F5EFE0]/60">
                     <p>© {new Date().getFullYear()} GBMarket. All rights reserved.</p>
+                    <div className="flex items-center gap-6">
+                        <Link to="/privacy-policy" className="hover:text-[#F5A623] transition-colors duration-200">
+                            Privacy Policy
+                        </Link>
+                        <Link to="/terms-conditions" className="hover:text-[#F5A623] transition-colors duration-200">
+                            Terms & Conditions
+                        </Link>
+                    </div>
                     <div className="flex items-center gap-1">
                         <span>Crafted with</span>
                         <Heart className="w-3.5 h-3.5 text-[#F5A623] fill-current" />

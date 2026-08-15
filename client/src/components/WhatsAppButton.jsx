@@ -1,16 +1,29 @@
 import React from 'react';
 import { useSettings } from '../context/SettingsContext';
+import { useCart } from '../context/CartContext';
+import { useLocation } from 'react-router-dom';
 
 export default function WhatsAppButton() {
     const { settings } = useSettings();
     const rawNumber = settings.social_whatsapp;
 
+    const { cartItems } = useCart();
+    const location = useLocation();
+
     if (!rawNumber) return null;
+
+    // Check if bottom cart bar is visible on mobile
+    const hideBarRoutes = ['/cart', '/checkout', '/order-confirmation'];
+    const isCartBarVisible = cartItems?.length > 0 && !hideBarRoutes.includes(location.pathname);
 
     // Strip non-digit chars except leading +
     const phone = rawNumber.replace(/[^\d]/g, '');
     const message = encodeURIComponent(`Hi ${settings.store_name || 'there'}! I have a question.`);
     const url = `https://wa.me/${phone}?text=${message}`;
+
+    // Base positions: ChatBot is at bottom-6 (or 24), so WhatsApp sits above it.
+    const mobileBottom = isCartBarVisible ? 'bottom-[11rem]' : 'bottom-[5.5rem]';
+    const desktopBottom = 'md:bottom-24'; // ChatBot is bottom-6 on desktop usually
 
     return (
         <a
@@ -18,7 +31,7 @@ export default function WhatsAppButton() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Chat on WhatsApp"
-            className="fixed bottom-24 md:bottom-8 right-5 z-40 group"
+            className={`fixed ${mobileBottom} ${desktopBottom} right-5 z-40 group transition-all duration-300`}
         >
             {/* Pulse Ring */}
             <span className="absolute inset-0 rounded-full bg-[#25D366]/30 animate-ping" />

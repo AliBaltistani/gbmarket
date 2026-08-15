@@ -237,7 +237,8 @@ function initDb() {
       about_hero_heading: 'Pure Mountain Goodness Direct From Gilgit-Baltistan',
       about_hero_subheading: 'GBMarket was founded with a single mission: bringing the untouched, nutrient-dense organic dry fruits of Northern Pakistan straight to your family\'s table.',
       about_story_heading: 'Sourced From High Altitude Orchards',
-      about_story_text: 'Nestled between the Karakoram and Himalayan mountain ranges, Gilgit-Baltistan produces some of the world\'s finest walnuts, paper-shell almonds, Chilgoza pine nuts, and sun-dried apricots.\n\nFed by pure glacier meltwater and ripened in intense high-altitude sunlight, our dry fruits are richer in natural oils, antioxidants, and crunch compared to commercial store-bought alternatives.'
+      about_story_text: 'Nestled between the Karakoram and Himalayan mountain ranges, Gilgit-Baltistan produces some of the world\'s finest walnuts, paper-shell almonds, Chilgoza pine nuts, and sun-dried apricots.\n\nFed by pure glacier meltwater and ripened in intense high-altitude sunlight, our dry fruits are richer in natural oils, antioxidants, and crunch compared to commercial store-bought alternatives.',
+      about_story_image: 'https://images.unsplash.com/photo-1596769062638-e6ed3f46f496?auto=format&fit=crop&q=80&w=800'
     };
     const insertSetting = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)');
     const trx = db.transaction(() => {
