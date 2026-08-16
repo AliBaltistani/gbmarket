@@ -40,7 +40,7 @@ export default function Contact() {
         <div className="space-y-12 pb-16">
             <SEO
                 title="Contact Us"
-                description="Get in touch with GBMarket for bulk orders, order inquiries, or customer support. We're here to help!"
+                description={settings.store_tagline || "Get in touch with GBMarket for bulk orders, order inquiries, or customer support. We're here to help!"}
                 canonical="https://gbmarket.pk/contact"
                 structuredData={{
                     "@context": "https://schema.org",

@@ -75,7 +75,7 @@ export default function Header() {
                         <form onSubmit={handleSearchSubmit} className="relative" role="search">
                             <input
                                 type="text"
-                                placeholder="Search almonds, walnuts..."
+                                placeholder={settings.search_placeholder || "Search products..."}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 aria-label="Search products"

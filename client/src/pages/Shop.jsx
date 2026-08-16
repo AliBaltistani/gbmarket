@@ -5,9 +5,11 @@ import ProductCard from '../components/ProductCard';
 import { ProductSkeleton } from '../components/Skeletons';
 import { getProducts } from '../api/products';
 import { getCategories } from '../api/categories';
+import { useSettings } from '../context/SettingsContext';
 import SEO from '../components/SEO';
 
 export default function Shop() {
+    const { settings } = useSettings();
     const [searchParams, setSearchParams] = useSearchParams();
     const initialCategory = searchParams.get('category') || 'all';
     const initialSearch = searchParams.get('search') || '';
@@ -110,8 +112,8 @@ export default function Shop() {
     return (
         <div className="space-y-10 pb-16">
             <SEO
-                title="Shop All Products"
-                description="Browse our complete collection of premium organic dry fruits and nuts from Gilgit-Baltistan. Almonds, walnuts, pine nuts, dried apricots and more."
+                title={`Shop All Products - ${settings.store_name || 'GBMarket'}`}
+                description={settings.store_tagline || "Browse our complete collection of premium organic dry fruits and nuts from Gilgit-Baltistan."}
                 canonical="https://gbmarket.pk/shop"
                 structuredData={{
                     "@context": "https://schema.org",
@@ -139,10 +141,10 @@ export default function Shop() {
                         Complete Store Catalog
                     </span>
                     <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-heading text-[#3A2E1F]">
-                        Shop All Organic Products
+                        Shop All {settings.store_name || 'Organic'} Products
                     </h1>
                     <p className="text-sm text-[#3A2E1F]/70 font-body">
-                        100% natural, unpasteurized dry fruits & nuts directly shipped from mountain orchards in Gilgit-Baltistan.
+                        {settings.store_tagline || '100% natural, unpasteurized dry fruits & nuts directly shipped from mountain orchards in Gilgit-Baltistan.'}
                     </p>
                 </div>
             </section>
@@ -194,11 +196,11 @@ export default function Shop() {
                         <div className="space-y-3 pt-4 border-t border-[#E8DEC8]">
                             <div className="flex items-center justify-between">
                                 <h3 className="font-heading font-bold text-sm text-[#3A2E1F]">Max Price</h3>
-                                <span className="text-xs font-bold text-[#D97706]">Rs. {priceRange.toLocaleString()}</span>
+                                <span className="text-xs font-bold text-[#D97706]">{settings.currency_symbol || 'Rs. '}{priceRange.toLocaleString()}</span>
                             </div>
                             <input type="range" min="500" max="15000" step="500" value={priceRange} onChange={(e) => setPriceRange(Number(e.target.value))} className="w-full accent-[#D97706] cursor-pointer" />
                             <div className="flex justify-between text-[11px] text-[#3A2E1F]/60">
-                                <span>Rs. 500</span><span>Rs. 15,000</span>
+                                <span>{settings.currency_symbol || 'Rs. '}500</span><span>{settings.currency_symbol || 'Rs. '}15,000</span>
                             </div>
                         </div>
                     </aside>
@@ -339,7 +341,7 @@ export default function Shop() {
                                 <div className="flex items-center justify-between">
                                     <h3 className="font-heading font-bold text-sm text-[#3A2E1F]">Max Price</h3>
                                     <span className="text-xs font-extrabold text-[#D97706] bg-[#F5EFE0] px-2.5 py-1 rounded-lg border border-[#E8DEC8]">
-                                        Rs. {priceRange.toLocaleString()}
+                                        {settings.currency_symbol || 'Rs. '}{priceRange.toLocaleString()}
                                     </span>
                                 </div>
                                 <input
@@ -352,8 +354,8 @@ export default function Shop() {
                                     className="w-full accent-[#D97706] cursor-pointer"
                                 />
                                 <div className="flex justify-between text-[11px] font-semibold text-[#3A2E1F]/60">
-                                    <span>Rs. 500</span>
-                                    <span>Rs. 15,000</span>
+                                    <span>{settings.currency_symbol || 'Rs. '}500</span>
+                                    <span>{settings.currency_symbol || 'Rs. '}15,000</span>
                                 </div>
                             </div>
 

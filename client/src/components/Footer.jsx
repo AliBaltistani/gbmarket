@@ -19,8 +19,8 @@ export default function Footer() {
                             <Truck className="w-6 h-6" />
                         </div>
                         <div>
-                            <h4 className="font-semibold font-heading text-lg text-white">Free Express Shipping</h4>
-                            <p className="text-xs text-[#F5EFE0]/70">On all orders over Rs. 3,000</p>
+                            <h4 className="font-semibold font-heading text-lg text-white">{settings.footer_feature_1_title || 'Free Express Shipping'}</h4>
+                            <p className="text-xs text-[#F5EFE0]/70">{settings.footer_feature_1_text || 'On all orders over the threshold'}</p>
                         </div>
                     </div>
 
@@ -29,8 +29,8 @@ export default function Footer() {
                             <ShieldCheck className="w-6 h-6" />
                         </div>
                         <div>
-                            <h4 className="font-semibold font-heading text-lg text-white">100% Organic & Fresh</h4>
-                            <p className="text-xs text-[#F5EFE0]/70">Direct from Gilgit-Baltistan orchards</p>
+                            <h4 className="font-semibold font-heading text-lg text-white">{settings.footer_feature_2_title || '100% Quality Guaranteed'}</h4>
+                            <p className="text-xs text-[#F5EFE0]/70">{settings.footer_feature_2_text || 'Direct from trusted sources'}</p>
                         </div>
                     </div>
 
@@ -39,8 +39,8 @@ export default function Footer() {
                             <RefreshCw className="w-6 h-6" />
                         </div>
                         <div>
-                            <h4 className="font-semibold font-heading text-lg text-white">7-Day Fresh Guarantee</h4>
-                            <p className="text-xs text-[#F5EFE0]/70">100% money back or replacement</p>
+                            <h4 className="font-semibold font-heading text-lg text-white">{settings.footer_feature_3_title || '7-Day Fresh Guarantee'}</h4>
+                            <p className="text-xs text-[#F5EFE0]/70">{settings.footer_feature_3_text || '100% money back or replacement'}</p>
                         </div>
                     </div>
                 </div>
@@ -89,7 +89,7 @@ export default function Footer() {
                     <div>
                         <h3 className="text-lg font-bold font-heading text-white mb-4 text-[#F5A623]">Company & Support</h3>
                         <ul className="space-y-2.5 text-sm text-[#F5EFE0]/80">
-                            <li><Link to="/about" className="hover:text-[#F5A623] transition-colors">About GBMarket</Link></li>
+                            <li><Link to="/about" className="hover:text-[#F5A623] transition-colors">About {settings.store_name || 'GBMarket'}</Link></li>
                             <li><Link to="/contact" className="hover:text-[#F5A623] transition-colors">Contact Us</Link></li>
                             <li><Link to="/track-order" className="hover:text-[#F5A623] transition-colors">Track Order</Link></li>
                             <li><Link to="/cart" className="hover:text-[#F5A623] transition-colors">View Cart</Link></li>
@@ -130,7 +130,7 @@ export default function Footer() {
             {/* Bottom Bar */}
             <div className="border-t border-[#F5EFE0]/10 bg-[#2A2116] py-6">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#F5EFE0]/60">
-                    <p>© {new Date().getFullYear()} GBMarket. All rights reserved.</p>
+                    <p>© {new Date().getFullYear()} {settings.store_name || 'GBMarket'}. All rights reserved.</p>
                     <div className="flex items-center gap-6">
                         <Link to="/privacy" className="hover:text-[#F5A623] transition-colors duration-200">
                             Privacy Policy
@@ -140,9 +140,7 @@ export default function Footer() {
                         </Link>
                     </div>
                     <div className="flex items-center gap-1">
-                        <span>Crafted with</span>
-                        <Heart className="w-3.5 h-3.5 text-[#F5A623] fill-current" />
-                        <span>for healthy living</span>
+                        <span>{settings.footer_tagline || 'Crafted with ❤ for healthy living'}</span>
                     </div>
                 </div>
             </div>

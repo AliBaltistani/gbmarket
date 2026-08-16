@@ -8,6 +8,7 @@ import {
 import ProductCard from '../components/ProductCard';
 import { getProductBySlug, getProducts } from '../api/products';
 import { useCart } from '../context/CartContext';
+import { useSettings } from '../context/SettingsContext';
 import SEO from '../components/SEO';
 import api from '../api/api';
 
@@ -44,6 +45,7 @@ export default function ProductDetail() {
     const { slug } = useParams();
     const navigate = useNavigate();
     const { addItem } = useCart();
+    const { settings } = useSettings();
 
     const [product, setProduct] = useState(null);
     const [relatedProducts, setRelatedProducts] = useState([]);
@@ -189,7 +191,7 @@ export default function ProductDetail() {
                             "offers": {
                                 "@type": "Offer",
                                 "price": product.base_price,
-                                "priceCurrency": "PKR",
+                                "priceCurrency": settings.currency_code || "PKR",
                                 "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
                                 "url": `https://gbmarket.pk/product/${product.slug}`
                             },
@@ -235,7 +237,7 @@ export default function ProductDetail() {
                         <img src={selectedImage} alt={product.name}
                             className="w-full h-full object-cover transition-all duration-300"
                             onError={e => { e.target.onerror = null; e.target.src = '/placeholder.png'; }} />
-                        <span className="absolute top-4 left-4 px-3 py-1 bg-[#F5A623] text-[#3A2E1F] font-extrabold text-xs rounded-full shadow-xs">100% Organic</span>
+                        <span className="absolute top-4 left-4 px-3 py-1 bg-[#F5A623] text-[#3A2E1F] font-extrabold text-xs rounded-full shadow-xs">{settings.product_badge_text || '100% Organic'}</span>
                         {product.is_new === 1 && (
                             <span className="absolute top-4 right-4 px-3 py-1 bg-blue-500 text-white font-bold text-xs rounded-full shadow-xs">New Arrival</span>
                         )}
@@ -291,19 +293,19 @@ export default function ProductDetail() {
                                 <span className="text-xs text-[#3A2E1F]/70 block">Selected Pack</span>
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-2xl sm:text-3xl font-black font-heading text-[#3A2E1F]">
-                                        Rs. {product.discount_percent > 0
+                                        {settings.currency_symbol || 'Rs. '} {product.discount_percent > 0
                                             ? Math.round(currentPrice * (1 - product.discount_percent / 100)).toLocaleString()
                                             : currentPrice.toLocaleString()}
                                     </span>
                                     {product.discount_percent > 0 && (
                                         <>
-                                            <span className="text-sm text-[#3A2E1F]/40 line-through">Rs. {currentPrice.toLocaleString()}</span>
+                                            <span className="text-sm text-[#3A2E1F]/40 line-through">{settings.currency_symbol || 'Rs. '} {currentPrice.toLocaleString()}</span>
                                             <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">-{product.discount_percent}%</span>
                                         </>
                                     )}
                                 </div>
                             </div>
-                            <span className="text-xs text-[#D97706] font-bold">(Rs. {selectedWeight.price} / {selectedWeight.label})</span>
+                            <span className="text-xs text-[#D97706] font-bold">({settings.currency_symbol || 'Rs. '} {selectedWeight.price} / {selectedWeight.label})</span>
                         </div>
                     )}
 
@@ -336,7 +338,7 @@ export default function ProductDetail() {
                                     <button key={option.label} type="button" onClick={() => setSelectedWeight(option)}
                                         className={`py-3 px-4 rounded-2xl border text-xs font-bold transition-all text-center flex flex-col items-center gap-1 cursor-pointer active:scale-95 ${selectedWeight?.label === option.label ? 'bg-[#F5A623] border-[#D97706] text-[#3A2E1F] ring-2 ring-[#F5A623]/40' : 'bg-white border-[#E8DEC8] text-[#3A2E1F]/80 hover:bg-[#F5EFE0]'}`}>
                                         <span className="text-sm font-black">{option.label}</span>
-                                        <span className="text-[11px] text-[#3A2E1F]/70">Rs. {option.price}</span>
+                                        <span className="text-[11px] text-[#3A2E1F]/70">{settings.currency_symbol || 'Rs. '} {option.price}</span>
                                     </button>
                                 ))}
                             </div>
@@ -415,7 +417,7 @@ export default function ProductDetail() {
                                     { label: 'Storage', value: product.storage_instructions },
                                     { label: 'Category', value: product.category_name },
                                     { label: 'Available Pack Sizes', value: product.weight_options?.map(o => o.label).join(', ') },
-                                    { label: 'SKU', value: `GBM-${product.id?.toString().padStart(4, '0')}` },
+                                    { label: 'SKU', value: `${settings.sku_prefix || 'GBM-'}${product.id?.toString().padStart(4, '0')}` },
                                 ].filter(d => d.value).map(d => (
                                     <div key={d.label} className="bg-[#F5EFE0]/50 rounded-2xl p-4 border border-[#E8DEC8]">
                                         <dt className="text-[10px] font-bold uppercase tracking-wider text-[#3A2E1F]/50">{d.label}</dt>
@@ -433,7 +435,11 @@ export default function ProductDetail() {
                             <ul className="list-disc list-inside space-y-1.5 text-xs">
                                 <li>Orders dispatched within 24 hours.</li>
                                 <li>Delivery time: 2–3 business days.</li>
-                                <li>Free shipping on all orders above Rs. 3,000.</li>
+                                {settings.shipping_info_text ? (
+                                    <li>{settings.shipping_info_text}</li>
+                                ) : (
+                                    <li>Free shipping on all orders above Rs. 3,000.</li>
+                                )}
                                 <li>Tracked delivery via courier service.</li>
                             </ul>
                         </div>
@@ -475,7 +481,7 @@ export default function ProductDetail() {
                                                     <StarDisplay rating={r.rating} />
                                                 </div>
                                                 <span className="text-[11px] text-[#3A2E1F]/40 shrink-0">
-                                                    {new Date(r.created_at).toLocaleDateString('en-PK', { year: 'numeric', month: 'short', day: 'numeric' })}
+                                                    {new Date(r.created_at).toLocaleDateString(settings.locale?.replace('_', '-') || 'en-PK', { year: 'numeric', month: 'short', day: 'numeric' })}
                                                 </span>
                                             </div>
                                             {r.title && <p className="text-sm font-bold text-[#3A2E1F]">"{r.title}"</p>}
@@ -561,7 +567,7 @@ export default function ProductDetail() {
                 <div>
                     <span className="text-[10px] text-[#3A2E1F]/60 block leading-tight font-bold uppercase tracking-wider">Total ({selectedWeight?.label || '500g'})</span>
                     <span className="text-lg font-black font-heading text-[#3A2E1F]">
-                        Rs. {product.discount_percent > 0 ? Math.round(currentPrice * (1 - product.discount_percent / 100)).toLocaleString() : currentPrice.toLocaleString()}
+                        {settings.currency_symbol || 'Rs. '} {product.discount_percent > 0 ? Math.round(currentPrice * (1 - product.discount_percent / 100)).toLocaleString() : currentPrice.toLocaleString()}
                     </span>
                 </div>
                 <button type="button" onClick={handleAddToCart} disabled={isOutOfStock}

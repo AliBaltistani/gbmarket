@@ -47,7 +47,7 @@ export default function SEO({
 
             {/* Open Graph */}
             <meta property="og:site_name" content={storeName} />
-            <meta property="og:locale" content="en_PK" />
+            <meta property="og:locale" content={settings.locale || "en_PK"} />
             <meta property="og:title" content={fullTitle} />
             <meta property="og:description" content={metaDescription} />
             <meta property="og:type" content={type} />

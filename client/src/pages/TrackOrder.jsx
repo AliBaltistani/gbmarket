@@ -3,6 +3,7 @@ import { Search, Package, Truck, CheckCircle2, Clock, XCircle, Loader2, ArrowRig
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import api from '../api/api';
+import { useSettings } from '../context/SettingsContext';
 
 const STATUSES = ['Pending', 'Processing', 'Shipped', 'Delivered'];
 
@@ -15,6 +16,7 @@ const statusConfig = {
 };
 
 export default function TrackOrder() {
+    const { settings } = useSettings();
     const [orderId, setOrderId] = useState('');
     const [phone, setPhone] = useState('');
     const [order, setOrder] = useState(null);
@@ -50,7 +52,7 @@ export default function TrackOrder() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-10 pb-16">
             <SEO
                 title="Track Your Order"
-                description="Track your GBMarket order status in real-time. Enter your order number and phone to get instant updates."
+                description={`Track your ${settings.store_name || 'GBMarket'} order status in real-time. Enter your order number and phone to get instant updates.`}
                 canonical="https://gbmarket.pk/track-order"
             />
 

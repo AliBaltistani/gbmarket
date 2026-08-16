@@ -209,6 +209,40 @@ function initDb() {
     db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('about_story_text', 'Nestled between the Karakoram and Himalayan mountain ranges, Gilgit-Baltistan produces some of the world\'s finest walnuts, paper-shell almonds, Chilgoza pine nuts, and sun-dried apricots.\n\nFed by pure glacier meltwater and ripened in intense high-altitude sunlight, our dry fruits are richer in natural oils, antioxidants, and crunch compared to commercial store-bought alternatives.');
   }
 
+  // Add new dynamic settings if they don't exist
+  const newSettings = [
+    { key: 'currency_code', val: 'PKR' },
+    { key: 'locale', val: 'en_PK' },
+    { key: 'default_shipping_fee', val: '350' },
+    { key: 'shipping_info_text', val: 'Orders dispatched within 24 hours.\nDelivery time: 2–3 business days.\nFree shipping on all orders above the threshold.\nTracked delivery via courier service.' },
+    { key: 'order_prefix', val: 'GB' },
+    { key: 'sku_prefix', val: 'GBM' },
+    { key: 'phone_pattern', val: '^(\\d{10,15}|\\+\\d{10,15})$' },
+    { key: 'phone_placeholder', val: '0300 1234567' },
+    { key: 'search_placeholder', val: 'Search products...' },
+    { key: 'chatbot_name', val: 'AI Assistant' },
+    { key: 'footer_tagline', val: 'Crafted with love for healthy living' },
+    { key: 'footer_feature_1_title', val: 'Free Express Shipping' },
+    { key: 'footer_feature_1_text', val: 'On all orders over the threshold' },
+    { key: 'footer_feature_2_title', val: '100% Quality Guaranteed' },
+    { key: 'footer_feature_2_text', val: 'Direct from trusted sources' },
+    { key: 'footer_feature_3_title', val: '7-Day Fresh Guarantee' },
+    { key: 'footer_feature_3_text', val: '100% money back or replacement' },
+    { key: 'product_badge_text', val: '100% Organic' },
+    { key: 'empty_cart_text', val: 'Looks like you haven\'t added any products to your cart yet.' }
+  ];
+
+  const checkSetting = db.prepare('SELECT COUNT(*) as count FROM settings WHERE key = ?');
+  const insertSet = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)');
+
+  db.transaction(() => {
+    for (const s of newSettings) {
+      if (checkSetting.get(s.key).count === 0) {
+        insertSet.run(s.key, s.val);
+      }
+    }
+  })();
+
   // Seed Initial Settings if empty
   const { count } = db.prepare('SELECT COUNT(*) as count FROM settings').get();
   if (count === 0) {
@@ -232,8 +266,27 @@ function initDb() {
       social_whatsapp: '+92 300 1234567',
       footer_about_text: 'GBMarket brings the finest, freshest, and most organic dry fruits straight from the majestic mountains of Gilgit-Baltistan to your doorstep.',
       currency_symbol: 'Rs. ',
+      currency_code: 'PKR',
+      locale: 'en_PK',
       free_shipping_threshold: '3000',
-      privacy_policy_content: '<h2 class="text-xl font-bold text-[#3A2E1F] my-4">1. Introduction</h2><p class="mb-4">GBMarket values your privacy and is committed to protecting your personal data...</p><h2 class="text-xl font-bold text-[#3A2E1F] my-4">Contact Us</h2><p class="mb-4">If you have any questions, please contact us.</p>',
+      default_shipping_fee: '350',
+      shipping_info_text: 'Orders dispatched within 24 hours.\nDelivery time: 2–3 business days.\nFree shipping on all orders above the threshold.\nTracked delivery via courier service.',
+      order_prefix: 'GB',
+      sku_prefix: 'GBM',
+      phone_pattern: '^(\\d{10,15}|\\+\\d{10,15})$',
+      phone_placeholder: '0300 1234567',
+      search_placeholder: 'Search products...',
+      chatbot_name: 'AI Assistant',
+      footer_tagline: 'Crafted with love for healthy living',
+      footer_feature_1_title: 'Free Express Shipping',
+      footer_feature_1_text: 'On all orders over the threshold',
+      footer_feature_2_title: '100% Quality Guaranteed',
+      footer_feature_2_text: 'Direct from trusted sources',
+      footer_feature_3_title: '7-Day Fresh Guarantee',
+      footer_feature_3_text: '100% money back or replacement',
+      product_badge_text: '100% Organic',
+      empty_cart_text: 'Looks like you haven\'t added any products to your cart yet.',
+      privacy_policy_content: '<h2 class="text-xl font-bold text-[#3A2E1F] my-4">1. Introduction</h2><p class="mb-4">We value your privacy and are committed to protecting your personal data...</p><h2 class="text-xl font-bold text-[#3A2E1F] my-4">Contact Us</h2><p class="mb-4">If you have any questions, please contact us.</p>',
       about_hero_heading: 'Pure Mountain Goodness Direct From Gilgit-Baltistan',
       about_hero_subheading: 'GBMarket was founded with a single mission: bringing the untouched, nutrient-dense organic dry fruits of Northern Pakistan straight to your family\'s table.',
       about_story_heading: 'Sourced From High Altitude Orchards',

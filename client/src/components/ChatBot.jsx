@@ -2,10 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, X, Send, Bot, User, Sparkles, ExternalLink, Loader2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useSettings } from '../context/SettingsContext';
 import { useLocation } from 'react-router-dom';
 import api from '../api/api';
 
 export default function ChatBot() {
+    const { settings } = useSettings();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
@@ -146,7 +148,7 @@ export default function ChatBot() {
                                 <Bot className="w-5 h-5 text-[#3A2E1F]" />
                             </div>
                             <div>
-                                <h3 className="font-heading font-bold text-sm">GB AI Assistant</h3>
+                                <h3 className="font-heading font-bold text-sm">{settings.chatbot_name || 'GB AI Assistant'}</h3>
                                 <div className="flex items-center gap-1.5">
                                     <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
                                     <span className="text-[10px] text-white/70 font-semibold">Online • Ready to help</span>
@@ -196,7 +198,7 @@ export default function ChatBot() {
                                                     <div className="flex-1 min-w-0">
                                                         <h5 className="text-[11px] font-bold text-[#3A2E1F] line-clamp-1 group-hover:text-[#D97706] transition-colors">{p.name}</h5>
                                                         <span className="text-[10px] font-bold text-[#D97706]">
-                                                            Rs. {p.base_price?.toLocaleString()}
+                                                            {settings.currency_symbol || 'Rs. '}{p.base_price?.toLocaleString()}
                                                         </span>
                                                         {p.stock > 0 ? (
                                                             <span className="text-[9px] text-emerald-600 font-bold ml-2">In Stock</span>

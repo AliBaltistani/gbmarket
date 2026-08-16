@@ -137,8 +137,8 @@ export default function Cart() {
                         <ShoppingBag className="w-10 h-10" />
                     </div>
                     <div className="space-y-2">
-                        <h2 className="font-heading font-bold text-3xl text-[#3A2E1F]">Your Cart is Empty</h2>
-                        <p className="text-sm text-[#3A2E1F]/70 leading-relaxed font-body">Looks like you haven't added any fresh Gilgit dry fruits or nuts to your cart yet.</p>
+                        <h2 className="font-heading font-bold text-3xl text-[#3A2E1F]">{settings.cart_empty_heading || 'Your Cart is Empty'}</h2>
+                        <p className="text-sm text-[#3A2E1F]/70 leading-relaxed font-body">{settings.cart_empty_text || "Looks like you haven't added any fresh Gilgit dry fruits or nuts to your cart yet."}</p>
                     </div>
                     <Link to="/shop" className="inline-flex items-center gap-2 px-8 py-3 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-sm rounded-full transition-colors shadow-sm">
                         <span>Explore Products</span><ArrowRight className="w-4 h-4" />

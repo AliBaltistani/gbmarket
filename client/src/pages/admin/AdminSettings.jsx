@@ -58,7 +58,26 @@ export default function AdminSettings() {
 
         // Store Settings
         currencySymbol: settings.currency_symbol || '',
+        currencyCode: settings.currency_code || 'PKR',
         freeShippingThreshold: settings.free_shipping_threshold || '',
+        defaultShippingFee: settings.default_shipping_fee || '',
+        shippingInfoText: settings.shipping_info_text || '',
+        orderPrefix: settings.order_prefix || 'GB',
+        skuPrefix: settings.sku_prefix || 'GBM',
+        phonePattern: settings.phone_pattern || '',
+        phonePlaceholder: settings.phone_placeholder || '',
+        searchPlaceholder: settings.search_placeholder || '',
+        chatbotName: settings.chatbot_name || '',
+        footerTagline: settings.footer_tagline || '',
+        footerFeature1Title: settings.footer_feature_1_title || '',
+        footerFeature1Text: settings.footer_feature_1_text || '',
+        footerFeature2Title: settings.footer_feature_2_title || '',
+        footerFeature2Text: settings.footer_feature_2_text || '',
+        footerFeature3Title: settings.footer_feature_3_title || '',
+        footerFeature3Text: settings.footer_feature_3_text || '',
+        productBadgeText: settings.product_badge_text || '',
+        emptyCartText: settings.empty_cart_text || '',
+        locale: settings.locale || 'en_PK',
 
         // Static Pages CMS
         privacyPolicyContent: settings.privacy_policy_content || '',
@@ -181,7 +200,26 @@ export default function AdminSettings() {
                 social_whatsapp: formData.whatsappNumber,
                 footer_about_text: formData.footerAboutText,
                 currency_symbol: formData.currencySymbol,
+                currency_code: formData.currencyCode,
                 free_shipping_threshold: formData.freeShippingThreshold,
+                default_shipping_fee: formData.defaultShippingFee,
+                shipping_info_text: formData.shippingInfoText,
+                order_prefix: formData.orderPrefix,
+                sku_prefix: formData.skuPrefix,
+                phone_pattern: formData.phonePattern,
+                phone_placeholder: formData.phonePlaceholder,
+                search_placeholder: formData.searchPlaceholder,
+                chatbot_name: formData.chatbotName,
+                footer_tagline: formData.footerTagline,
+                footer_feature_1_title: formData.footerFeature1Title,
+                footer_feature_1_text: formData.footerFeature1Text,
+                footer_feature_2_title: formData.footerFeature2Title,
+                footer_feature_2_text: formData.footerFeature2Text,
+                footer_feature_3_title: formData.footerFeature3Title,
+                footer_feature_3_text: formData.footerFeature3Text,
+                product_badge_text: formData.productBadgeText,
+                empty_cart_text: formData.emptyCartText,
+                locale: formData.locale,
                 privacy_policy_content: formData.privacyPolicyContent,
                 about_hero_heading: formData.aboutHeroHeading,
                 about_hero_subheading: formData.aboutHeroSubheading,
@@ -328,6 +366,35 @@ export default function AdminSettings() {
                                             placeholder="https://gbmarket.pk"
                                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
+                                    </div>
+
+                                    {/* Additional General Settings */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Locale (SEO base)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.locale}
+                                                onChange={(e) => handleInputChange('locale', e.target.value)}
+                                                placeholder="en_PK"
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Search Placeholder Text
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.searchPlaceholder}
+                                                onChange={(e) => handleInputChange('searchPlaceholder', e.target.value)}
+                                                placeholder="Search products..."
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
                                     </div>
 
                                     {/* Logo Upload Area */}
@@ -541,6 +608,19 @@ export default function AdminSettings() {
                                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
                                     </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                            Chatbot Display Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.chatbotName}
+                                            onChange={(e) => handleInputChange('chatbotName', e.target.value)}
+                                            placeholder="AI Assistant"
+                                            className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -568,6 +648,37 @@ export default function AdminSettings() {
                                             onChange={(e) => handleInputChange('footerAboutText', e.target.value)}
                                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
+                                    </div>
+
+                                    <div className="space-y-1.5 mt-4">
+                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                            Footer Bottom Tagline
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.footerTagline}
+                                            onChange={(e) => handleInputChange('footerTagline', e.target.value)}
+                                            placeholder="Crafted with love for healthy living"
+                                            className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                        />
+                                    </div>
+
+                                    <div className="pt-4 border-t border-[#E8DEC8] space-y-4">
+                                        <h3 className="text-xs font-bold text-[#3A2E1F]">Footer Feature Columns</h3>
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                            <div className="space-y-1.5">
+                                                <input type="text" value={formData.footerFeature1Title} onChange={(e) => handleInputChange('footerFeature1Title', e.target.value)} placeholder="Feature 1 Title" className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-3 py-2 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                                <input type="text" value={formData.footerFeature1Text} onChange={(e) => handleInputChange('footerFeature1Text', e.target.value)} placeholder="Feature 1 Subtext" className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-3 py-2 text-[10px] text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <input type="text" value={formData.footerFeature2Title} onChange={(e) => handleInputChange('footerFeature2Title', e.target.value)} placeholder="Feature 2 Title" className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-3 py-2 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                                <input type="text" value={formData.footerFeature2Text} onChange={(e) => handleInputChange('footerFeature2Text', e.target.value)} placeholder="Feature 2 Subtext" className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-3 py-2 text-[10px] text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <input type="text" value={formData.footerFeature3Title} onChange={(e) => handleInputChange('footerFeature3Title', e.target.value)} placeholder="Feature 3 Title" className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-3 py-2 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                                <input type="text" value={formData.footerFeature3Text} onChange={(e) => handleInputChange('footerFeature3Text', e.target.value)} placeholder="Feature 3 Subtext" className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-3 py-2 text-[10px] text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {/* Footer Logo Upload Area */}
@@ -731,7 +842,34 @@ export default function AdminSettings() {
 
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
-                                                Free Shipping Threshold (PKR)
+                                                Currency ISO Code
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.currencyCode}
+                                                onChange={(e) => handleInputChange('currencyCode', e.target.value)}
+                                                placeholder="e.g. PKR"
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Default Shipping Fee (Fixed)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={formData.defaultShippingFee}
+                                                onChange={(e) => handleInputChange('defaultShippingFee', e.target.value)}
+                                                placeholder="e.g. 350"
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Free Shipping Threshold
                                             </label>
                                             <input
                                                 type="number"
@@ -740,6 +878,98 @@ export default function AdminSettings() {
                                                 onChange={(e) => handleInputChange('freeShippingThreshold', e.target.value)}
                                                 placeholder="e.g. 5000"
                                                 className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Order Prefix
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.orderPrefix}
+                                                onChange={(e) => handleInputChange('orderPrefix', e.target.value)}
+                                                placeholder="e.g. GB"
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                SKU Prefix
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.skuPrefix}
+                                                onChange={(e) => handleInputChange('skuPrefix', e.target.value)}
+                                                placeholder="e.g. GBM"
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Phone Validation Regex
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.phonePattern}
+                                                onChange={(e) => handleInputChange('phonePattern', e.target.value)}
+                                                placeholder="^(\d{10,15})$"
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-mono focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Phone Placeholder Mask
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.phonePlaceholder}
+                                                onChange={(e) => handleInputChange('phonePlaceholder', e.target.value)}
+                                                placeholder="0300 1234567"
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                            Shipping Info Content (Product Detail)
+                                        </label>
+                                        <textarea
+                                            rows={4}
+                                            value={formData.shippingInfoText}
+                                            onChange={(e) => handleInputChange('shippingInfoText', e.target.value)}
+                                            className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Product Badge Text
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.productBadgeText}
+                                                onChange={(e) => handleInputChange('productBadgeText', e.target.value)}
+                                                placeholder="e.g. 100% Organic"
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Empty Cart Alert Text
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.emptyCartText}
+                                                onChange={(e) => handleInputChange('emptyCartText', e.target.value)}
+                                                placeholder="No products in cart..."
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                             />
                                         </div>
                                     </div>

@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { CheckCircle2, ArrowRight, Package, Truck, Phone, ChevronRight } from 'lucide-react';
+import { useSettings } from '../context/SettingsContext';
 
 export default function OrderConfirmation() {
     const location = useLocation();
     const { orderId, total, count, paymentMethod, isOnlinePayment } = location.state || {};
+    const { settings } = useSettings();
 
     const paymentLabels = {
         'COD': 'Cash on Delivery (COD)',
@@ -33,7 +35,7 @@ export default function OrderConfirmation() {
                         Order Placed Successfully!
                     </h1>
                     <p className="text-sm text-[#3A2E1F]/70 max-w-md mx-auto font-body leading-relaxed">
-                        Thank you for choosing GBMarket. Your fresh organic naturally sun-dried items are being prepared for dispatch.
+                        Thank you for choosing {settings.store_name || 'GBMarket'}. Your fresh organic naturally sun-dried items are being prepared for dispatch.
                     </p>
                 </div>
             </div>
@@ -47,7 +49,7 @@ export default function OrderConfirmation() {
                     <div className="space-y-1.5 flex flex-col items-center sm:items-start text-center sm:text-left">
                         <Package className="w-6 h-6 text-[#D97706] mb-1" />
                         <span className="text-[11px] font-bold uppercase tracking-wider text-[#3A2E1F]/60 block">Order Reference</span>
-                        <span className="font-mono font-bold text-sm text-[#3A2E1F]">#{orderId ? `GB-${2026}-${orderId}` : 'GB-2026-X'}</span>
+                        <span className="font-mono font-bold text-sm text-[#3A2E1F]">#{orderId ? `${settings.order_prefix || 'GB'}-${new Date().getFullYear()}-${orderId}` : `${settings.order_prefix || 'GB'}-${new Date().getFullYear()}-X`}</span>
                     </div>
 
                     <div className="space-y-1.5 flex flex-col items-center sm:items-start text-center sm:text-left">
@@ -80,7 +82,7 @@ export default function OrderConfirmation() {
                 {total && (
                     <div className="bg-[#F5EFE0]/60 rounded-2xl p-4 flex items-center justify-between border border-[#E8DEC8]/50 mt-4">
                         <span className="text-xs font-semibold text-[#3A2E1F]/80">{isOnlinePayment ? 'Total amount paid:' : 'Total amount to pay on delivery:'}</span>
-                        <span className="font-heading font-extrabold text-lg text-[#3A2E1F]">Rs. {total.toLocaleString()}</span>
+                        <span className="font-heading font-extrabold text-lg text-[#3A2E1F]">{settings.currency_symbol || 'Rs. '}{total.toLocaleString()}</span>
                     </div>
                 )}
             </div>
