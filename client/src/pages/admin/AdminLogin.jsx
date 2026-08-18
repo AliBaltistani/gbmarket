@@ -51,7 +51,7 @@ export default function AdminLogin() {
                                 </div>
                                 <div className="flex flex-col text-left">
                                     <span className="text-3xl font-extrabold font-heading tracking-tight text-[#3A2E1F] leading-none">
-                                        {settings.store_name || 'GBMarket'}
+                                        {settings.store_name || 'Store'}
                                     </span>
                                     <span className="text-[10px] font-semibold text-[#D97706] uppercase tracking-widest leading-tight">
                                         Store Administration

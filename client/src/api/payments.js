@@ -6,6 +6,12 @@ export const getPaymentAccounts = async () => {
     return data;
 };
 
+// Public: get available payment methods (dynamic from DB)
+export const getPaymentMethods = async () => {
+    const { data } = await api.get('/payments/methods');
+    return data;
+};
+
 // Admin: get all payment accounts
 export const getPaymentAccountsAdmin = async () => {
     const { data } = await api.get('/payments/accounts/admin');

@@ -80,7 +80,7 @@ export default function ChatBot() {
             setMessages(prev => [...prev, { role: 'user', content: text }]);
             setMessages(prev => [...prev, {
                 role: 'bot',
-                content: '🛍️ Visit our shop to explore all our premium dry fruits and nuts!\n\n[Browse All Products →](/shop)',
+                content: '🛍️ Visit our shop to explore all our products!\n\n[Browse All Products →](/shop)',
                 products: [],
                 suggestions: ['Show Categories', 'Shipping Info']
             }]);
@@ -198,7 +198,7 @@ export default function ChatBot() {
                                                     <div className="flex-1 min-w-0">
                                                         <h5 className="text-[11px] font-bold text-[#3A2E1F] line-clamp-1 group-hover:text-[#D97706] transition-colors">{p.name}</h5>
                                                         <span className="text-[10px] font-bold text-[#D97706]">
-                                                            {settings.currency_symbol || 'Rs. '}{p.base_price?.toLocaleString()}
+                                                            {settings.currency_symbol || '$'}{p.base_price?.toLocaleString()}
                                                         </span>
                                                         {p.stock > 0 ? (
                                                             <span className="text-[9px] text-emerald-600 font-bold ml-2">In Stock</span>

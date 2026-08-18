@@ -20,9 +20,9 @@ module.exports = function (db) {
             // ──────────────────────────────
             // INTENT: Greeting
             // ──────────────────────────────
-            if (/^(hi|hello|hey|assalam|salam|aoa|good morning|good evening)/.test(userMsg)) {
-                const storeName = getSettingValue('store_name') || 'GBMarket';
-                reply = `Assalam o Alaikum! 👋 Welcome to ${storeName}! I'm your shopping assistant. I can help you:\n\n• Find products & check prices\n• Browse categories\n• Check stock availability\n• Get shipping info\n• Track your order\n\nWhat are you looking for today?`;
+            if (/^(hi|hello|hey|good morning|good evening)/.test(userMsg)) {
+                const storeName = getSettingValue('store_name') || 'Store';
+                reply = `Hello! 👋 Welcome to ${storeName}! I'm your shopping assistant. I can help you:\n\n• Find products & check prices\n• Browse categories\n• Check stock availability\n• Get shipping info\n• Track your order\n\nWhat are you looking for today?`;
                 suggestions = ['Browse Products', 'Show Categories', 'Shipping Info', 'Track Order'];
                 return res.json({ reply, products, suggestions });
             }
@@ -39,10 +39,10 @@ module.exports = function (db) {
             // ──────────────────────────────
             // INTENT: Shipping / Delivery Info
             // ──────────────────────────────
-            if (/shipping|delivery|deliver|ship|how long|kitni der|kab aaye ga/i.test(userMsg)) {
+            if (/shipping|delivery|deliver|ship|how long/i.test(userMsg)) {
                 const threshold = getSettingValue('free_shipping_threshold') || '5000';
-                const currency = getSettingValue('currency_symbol') || 'Rs. ';
-                reply = `🚚 **Shipping Information:**\n\n• **Free shipping** on orders over ${currency}${threshold}\n• Standard shipping fee: ${currency}350\n• Delivery across all major cities in Pakistan\n• Orders are processed within 1-2 business days\n• Estimated delivery: 3-5 business days\n\nWould you like to start shopping?`;
+                const currency = getSettingValue('currency_symbol') || '$';
+                reply = `🚚 **Shipping Information:**\n\n• **Free shipping** on orders over ${currency}${threshold}\n• Standard shipping fee applied for smaller orders\n• Orders are processed within 1-2 business days\n• Estimated delivery: 3-5 business days\n\nWould you like to start shopping?`;
                 suggestions = ['Browse Products', 'Track Order'];
                 return res.json({ reply, products, suggestions });
             }
@@ -51,7 +51,19 @@ module.exports = function (db) {
             // INTENT: Payment Methods
             // ──────────────────────────────
             if (/payment|pay|easypaisa|jazzcash|bank|cod|cash on delivery/i.test(userMsg)) {
-                reply = `💳 **Payment Methods Available:**\n\n• **Cash on Delivery (COD)** — Pay when your order arrives\n• **Easypaisa** — Send to our account & upload receipt\n• **JazzCash** — Send to our account & upload receipt\n• **Bank Transfer** — Transfer to our bank account & upload receipt\n\nAll online payments are verified by our team within a few hours.`;
+                // Build payment methods response dynamically from DB
+                const paymentAccounts = db.prepare('SELECT DISTINCT method, title FROM payment_accounts WHERE is_active = 1').all();
+                let methodLines = '• **Cash on Delivery (COD)** — Pay when your order arrives';
+                const methodLabels = { 'easypaisa': 'Easypaisa', 'jazzcash': 'JazzCash', 'bank_transfer': 'Bank Transfer' };
+                const seen = new Set();
+                for (const acc of paymentAccounts) {
+                    if (!seen.has(acc.method)) {
+                        seen.add(acc.method);
+                        const label = methodLabels[acc.method] || acc.title || acc.method;
+                        methodLines += `\n• **${label}** — Send to our account & upload receipt`;
+                    }
+                }
+                reply = `💳 **Payment Methods Available:**\n\n${methodLines}\n\nAll online payments are verified by our team within a few hours.`;
                 suggestions = ['Browse Products', 'Shipping Info'];
                 return res.json({ reply, products, suggestions });
             }
@@ -74,19 +86,20 @@ module.exports = function (db) {
             // ──────────────────────────────
             // INTENT: Price Inquiry
             // ──────────────────────────────
-            if (/price|cost|how much|kitna|kitnay|rate|qeemat/i.test(userMsg)) {
+            if (/price|cost|how much|rate/i.test(userMsg)) {
                 const searchTerm = userMsg
-                    .replace(/price|cost|how much|kitna|kitnay|rate|qeemat|of|the|is|for|what|what's/gi, '')
+                    .replace(/price|cost|how much|rate|of|the|is|for|what|what's/gi, '')
                     .trim();
 
                 if (searchTerm.length >= 2) {
                     const results = searchProducts(searchTerm);
                     if (results.length > 0) {
                         products = results.slice(0, 3);
+                        const currency = getSettingValue('currency_symbol') || '$';
                         const priceInfo = products.map(p => {
                             const options = p.weight_options || [];
-                            const priceList = options.map(o => `${o.label}: Rs. ${o.price.toLocaleString()}`).join(' | ');
-                            return `**${p.name}**: ${priceList || `Rs. ${p.base_price.toLocaleString()}`}`;
+                            const priceList = options.map(o => `${o.label}: ${currency} ${o.price.toLocaleString()}`).join(' | ');
+                            return `**${p.name}**: ${priceList || `${currency} ${p.base_price.toLocaleString()}`}`;
                         }).join('\n\n');
                         reply = `💰 Here are the prices:\n\n${priceInfo}`;
                         suggestions = ['Browse Products', 'Add to Cart'];

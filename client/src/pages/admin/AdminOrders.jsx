@@ -25,12 +25,17 @@ import {
 } from '../../components/admin/AdminComponents';
 import { getOrders, updateOrderStatus } from '../../api/orders';
 import { updatePaymentStatus } from '../../api/payments';
+import { useSettings } from '../../context/SettingsContext';
+import { useCurrency } from '../../hooks/useCurrency';
 import toast from 'react-hot-toast';
 
 export default function AdminOrders() {
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('All');
     const [orders, setOrders] = useState([]);
+    const { settings } = useSettings();
+    const { formatPrice } = useCurrency();
+    const orderPrefix = settings.order_id_prefix || 'ORD';
 
     // SlideOver / Selected Order Detail State
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -60,7 +65,7 @@ export default function AdminOrders() {
         // C12: Confirm before cancelling — this is irreversible
         if (newStatus === 'Cancelled') {
             const confirmed = window.confirm(
-                `⚠️ Are you sure you want to cancel Order GB-${orderId}?\n\nThis will restore stock for all items and cannot be undone.`
+                `⚠️ Are you sure you want to cancel Order ${orderPrefix}-${orderId}?\n\nThis will restore stock for all items and cannot be undone.`
             );
             if (!confirmed) return;
         }
@@ -106,7 +111,7 @@ export default function AdminOrders() {
             if (selectedOrder && selectedOrder.id === orderId) {
                 setSelectedOrder({ ...selectedOrder, payment_status: status });
             }
-            toast.success(`Payment ${status === 'Verified' ? 'verified' : 'rejected'} for Order GB-${orderId}`);
+            toast.success(`Payment ${status === 'Verified' ? 'verified' : 'rejected'} for Order ${orderPrefix}-${orderId}`);
         } catch (err) {
             toast.error(err.response?.data?.error || 'Failed to update payment status');
         }
@@ -122,7 +127,7 @@ export default function AdminOrders() {
                         Order Fulfillment
                     </h1>
                     <p className="text-xs text-[#3A2E1F]/70">
-                        Track, inspect, and update customer order status across Pakistan
+                        Track, inspect, and update customer order status
                     </p>
                 </div>
 
@@ -198,13 +203,13 @@ export default function AdminOrders() {
                                         className="hover:bg-[#F5EFE0]/40 transition-colors cursor-pointer"
                                     >
                                         <td className="py-4 px-4 font-mono font-bold text-[#D97706]">
-                                            GB-{order.id}
+                                            {orderPrefix}-{order.id}
                                         </td>
                                         <td className="py-4 px-4 font-bold text-[#3A2E1F]">
                                             {order.customer_name}
                                         </td>
                                         <td className="py-4 px-4 font-extrabold text-sm text-[#3A2E1F]">
-                                            Rs. {order.total.toLocaleString()}
+                                            {formatPrice(order.total)}
                                         </td>
                                         <td className="py-4 px-4">
                                             <div className="flex flex-col gap-1">
@@ -241,7 +246,7 @@ export default function AdminOrders() {
             <SlideOver
                 isOpen={!!selectedOrder}
                 onClose={() => setSelectedOrder(null)}
-                title={`Order Details: GB-${selectedOrder?.id}`}
+                title={`Order Details: ${orderPrefix}-${selectedOrder?.id}`}
             >
                 {selectedOrder && (
                     <div className="space-y-8">
@@ -349,11 +354,11 @@ export default function AdminOrders() {
                                         <div className="flex justify-between items-start">
                                             <h5 className="font-bold text-[#3A2E1F] line-clamp-1">{item.product_name}</h5>
                                             <div className="text-right font-extrabold text-[#3A2E1F] whitespace-nowrap ml-4">
-                                                Rs. {(item.price * item.quantity).toLocaleString()}
+                                                {formatPrice(item.price * item.quantity)}
                                             </div>
                                         </div>
                                         <div className="text-[11px] text-[#D97706] font-semibold">
-                                            {item.weight_option} × {item.quantity} units (Rs. {item.price.toLocaleString()} each)
+                                            {item.weight_option} × {item.quantity} units ({formatPrice(item.price)} each)
                                         </div>
                                     </div>
                                 ))}
@@ -364,17 +369,17 @@ export default function AdminOrders() {
                         <div className="p-4 bg-[#FFFDF9] border border-[#E8DEC8] rounded-2xl space-y-2 text-xs">
                             <div className="flex justify-between text-[#3A2E1F]/70">
                                 <span>Subtotal</span>
-                                <span>Rs. {(selectedOrder.subtotal || selectedOrder.total).toLocaleString()}</span>
+                                <span>{formatPrice(selectedOrder.subtotal || selectedOrder.total)}</span>
                             </div>
                             <div className="flex justify-between text-[#3A2E1F]/70">
                                 <span>Shipping Fee ({selectedOrder.payment_method || 'COD'})</span>
                                 <span className={`font-bold ${(selectedOrder.shipping_fee || 0) === 0 ? 'text-emerald-700' : 'text-[#3A2E1F]'}`}>
-                                    {(selectedOrder.shipping_fee || 0) === 0 ? 'FREE' : `Rs. ${selectedOrder.shipping_fee.toLocaleString()}`}
+                                    {(selectedOrder.shipping_fee || 0) === 0 ? 'FREE' : formatPrice(selectedOrder.shipping_fee)}
                                 </span>
                             </div>
                             <div className="pt-2 border-t border-[#E8DEC8] flex justify-between items-baseline">
                                 <span className="font-heading font-bold text-sm text-[#3A2E1F]">Grand Total</span>
-                                <span className="font-heading font-extrabold text-xl text-[#3A2E1F]">Rs. {selectedOrder.total.toLocaleString()}</span>
+                                <span className="font-heading font-extrabold text-xl text-[#3A2E1F]">{formatPrice(selectedOrder.total)}</span>
                             </div>
                         </div>
 

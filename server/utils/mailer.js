@@ -7,7 +7,7 @@
  *   SMTP_PORT=587
  *   SMTP_USER=your@email.com
  *   SMTP_PASS=your_app_password
- *   SMTP_FROM="GBMarket <noreply@gbmarket.pk>"
+ *   SMTP_FROM="Store <noreply@example.com>"
  * 
  * If SMTP is not configured, emails are silently skipped (logged only).
  */
@@ -39,12 +39,24 @@ function initMailer() {
 async function sendOrderConfirmation(order, items) {
     if (!transporter || !order.customer_email) return;
 
+    // Read dynamic settings from DB
+    const db = require('../db/db');
+    let storeName = 'Store', currency = '$', orderPrefix = 'ORD';
+    try {
+        const nameRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('store_name');
+        const currRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('currency_symbol');
+        const prefixRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('order_id_prefix');
+        storeName = nameRow?.value || 'Store';
+        currency = currRow?.value || '$';
+        orderPrefix = prefixRow?.value || 'ORD';
+    } catch { /* use defaults */ }
+
     const itemRows = items.map(i =>
         `<tr>
             <td style="padding:8px;border-bottom:1px solid #eee">${i.product_name}</td>
             <td style="padding:8px;border-bottom:1px solid #eee">${i.weight_option}</td>
             <td style="padding:8px;border-bottom:1px solid #eee;text-align:center">${i.quantity}</td>
-            <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">Rs. ${(i.price * i.quantity).toLocaleString()}</td>
+            <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${currency} ${(i.price * i.quantity).toLocaleString()}</td>
         </tr>`
     ).join('');
 
@@ -58,8 +70,8 @@ async function sendOrderConfirmation(order, items) {
             <p>Thank you for your order! Here's your order summary:</p>
             
             <div style="background:#F5EFE0;padding:12px;border-radius:8px;margin:16px 0">
-                <strong>Order ID:</strong> GB-${order.id}<br>
-                <strong>Payment:</strong> Cash on Delivery
+                <strong>Order ID:</strong> ${orderPrefix}-${order.id}<br>
+                <strong>Payment:</strong> ${order.payment_method || 'Cash on Delivery'}
             </div>
 
             <table style="width:100%;border-collapse:collapse;font-size:14px">
@@ -75,10 +87,10 @@ async function sendOrderConfirmation(order, items) {
             </table>
 
             <div style="margin-top:16px;padding:12px;background:#F5EFE0;border-radius:8px;text-align:right">
-                <div>Subtotal: Rs. ${(order.subtotal || order.total).toLocaleString()}</div>
-                <div>Shipping: ${(order.shipping_fee || 0) === 0 ? 'FREE' : `Rs. ${order.shipping_fee}`}</div>
+                <div>Subtotal: ${currency} ${(order.subtotal || order.total).toLocaleString()}</div>
+                <div>Shipping: ${(order.shipping_fee || 0) === 0 ? 'FREE' : `${currency} ${order.shipping_fee}`}</div>
                 <div style="font-size:18px;font-weight:bold;color:#D97706;margin-top:8px">
-                    Total: Rs. ${order.total.toLocaleString()}
+                    Total: ${currency} ${order.total.toLocaleString()}
                 </div>
             </div>
 
@@ -95,9 +107,9 @@ async function sendOrderConfirmation(order, items) {
 
     try {
         await transporter.sendMail({
-            from: process.env.SMTP_FROM || `"GBMarket" <${process.env.SMTP_USER}>`,
+            from: process.env.SMTP_FROM || `"${storeName}" <${process.env.SMTP_USER}>`,
             to: order.customer_email,
-            subject: `Order Confirmed — GB-${order.id}`,
+            subject: `Order Confirmed — ${orderPrefix}-${order.id}`,
             html,
         });
         console.log(`[Mailer] Order confirmation sent to ${order.customer_email} for order ${order.id}`);

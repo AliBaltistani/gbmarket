@@ -14,6 +14,34 @@ module.exports = function (db, requireAdmin, upload) {
         }
     });
 
+    // GET /api/payments/methods (public — available payment methods for checkout)
+    router.get('/methods', (req, res, next) => {
+        try {
+            // COD is always available
+            const methods = [
+                { id: 'COD', label: 'Cash on Delivery', description: 'Pay when your order arrives', color: null }
+            ];
+            // Derive additional methods from active payment accounts
+            const activeAccounts = db.prepare('SELECT DISTINCT method, title FROM payment_accounts WHERE is_active = 1').all();
+            const METHOD_META = {
+                'easypaisa': { label: 'Easypaisa', description: 'Send via Easypaisa & upload receipt', color: '#4CAF50' },
+                'jazzcash': { label: 'JazzCash', description: 'Send via JazzCash & upload receipt', color: '#E4002B' },
+                'bank_transfer': { label: 'Bank Transfer', description: 'Transfer to our bank account', color: '#1565C0' },
+            };
+            const seen = new Set();
+            for (const acc of activeAccounts) {
+                if (!seen.has(acc.method)) {
+                    seen.add(acc.method);
+                    const meta = METHOD_META[acc.method] || { label: acc.title || acc.method, description: 'Upload payment receipt', color: '#666' };
+                    methods.push({ id: acc.method, label: meta.label, description: meta.description, color: meta.color });
+                }
+            }
+            res.json(methods);
+        } catch (error) {
+            next(error);
+        }
+    });
+
     // GET /api/payments/accounts (public — for checkout display)
     router.get('/accounts', (req, res, next) => {
         try {

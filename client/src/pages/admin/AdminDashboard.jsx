@@ -17,9 +17,13 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { getOrders } from '../../api/orders';
 import { getProducts } from '../../api/products';
+import { useSettings } from '../../context/SettingsContext';
+import { useCurrency } from '../../hooks/useCurrency';
 
 export default function AdminDashboard() {
     const navigate = useNavigate();
+    const { settings } = useSettings();
+    const { formatPrice } = useCurrency();
     const [isLoading, setIsLoading] = useState(true);
     const [stats, setStats] = useState([]);
     const [recentOrders, setRecentOrders] = useState([]);
@@ -40,16 +44,16 @@ export default function AdminDashboard() {
 
                 setStats([
                     { title: 'Total Orders', value: totalOrders.toString(), change: 'Lifetime total', isPositive: true, icon: ShoppingBag, color: 'bg-[#F5A623]/20 text-[#D97706]' },
-                    { title: 'Total Revenue', value: `Rs. ${totalRevenue.toLocaleString()}`, change: 'Lifetime gross', isPositive: true, icon: DollarSign, color: 'bg-emerald-100 text-emerald-700' },
+                    { title: 'Total Revenue', value: formatPrice(totalRevenue), change: 'Lifetime gross', isPositive: true, icon: DollarSign, color: 'bg-emerald-100 text-emerald-700' },
                     { title: 'Total Products', value: totalProducts.toString(), change: 'Active in catalog', isPositive: true, icon: Package, color: 'bg-blue-100 text-blue-700' },
                     { title: 'Low Stock Alert', value: `${lowStockCount} Items`, change: lowStockCount > 0 ? 'Action needed' : 'Stock healthy', isPositive: lowStockCount === 0, icon: AlertTriangle, color: lowStockCount > 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700' },
                 ]);
 
                 // Map recent 5 orders
                 const latest5 = ordersData.slice(0, 5).map(o => ({
-                    id: `GB-${o.id}`,
+                    id: `${settings.order_id_prefix || 'ORD'}-${o.id}`,
                     customer: o.customer_name,
-                    total: `Rs. ${o.total.toLocaleString()}`,
+                    total: formatPrice(o.total),
                     status: o.status,
                     date: new Date(o.created_at).toLocaleDateString()
                 }));
@@ -90,7 +94,7 @@ export default function AdminDashboard() {
                         Store Overview
                     </h1>
                     <p className="text-xs text-[#3A2E1F]/70">
-                        Real-time metrics and order activity from your GBMarket store
+                        Real-time metrics and order activity from your {settings.store_name || ''} store
                     </p>
                 </div>
 

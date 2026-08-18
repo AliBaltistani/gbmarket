@@ -13,11 +13,11 @@ export function AuthProvider({ children }) {
 
     // Set up axios defaults and interceptor once
     useEffect(() => {
-        const token = localStorage.getItem('gbmarket_admin_token');
+        const token = localStorage.getItem('store_admin_token');
 
         // Add request interceptor to attach JWT
         const requestInterceptor = api.interceptors.request.use((config) => {
-            const currentToken = localStorage.getItem('gbmarket_admin_token');
+            const currentToken = localStorage.getItem('store_admin_token');
             if (currentToken) {
                 config.headers.Authorization = `Bearer ${currentToken}`;
             }
@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
                 setIsAuthenticated(true);
             } catch (error) {
                 console.error('Invalid or expired token, logging out.');
-                localStorage.removeItem('gbmarket_admin_token');
+                localStorage.removeItem('store_admin_token');
                 setIsAuthenticated(false);
                 setAdminUsername(null);
             } finally {
@@ -56,7 +56,7 @@ export function AuthProvider({ children }) {
             const response = await api.post('/auth/login', { username, password });
             const { token, username: returnedUsername } = response.data;
 
-            localStorage.setItem('gbmarket_admin_token', token);
+            localStorage.setItem('store_admin_token', token);
             setIsAuthenticated(true);
             setAdminUsername(returnedUsername);
             return { success: true };
@@ -69,7 +69,7 @@ export function AuthProvider({ children }) {
     };
 
     const logout = () => {
-        localStorage.removeItem('gbmarket_admin_token');
+        localStorage.removeItem('store_admin_token');
         setIsAuthenticated(false);
         setAdminUsername(null);
     };

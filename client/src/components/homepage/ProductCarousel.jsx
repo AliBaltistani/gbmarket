@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Flame, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProducts } from '../../api/products';
+import { useCurrency } from '../../hooks/useCurrency';
 
 export default function ProductCarousel({ config }) {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
+    const { formatPrice } = useCurrency();
 
     const heading = config?.heading || 'Products';
     const badge = config?.badge || '';
@@ -109,7 +111,7 @@ export default function ProductCarousel({ config }) {
                                                 <img src={item.image_url || '/placeholder.png'} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.png'; }} />
                                             </div>
                                             <span className="text-xs font-bold text-[#3A2E1F] line-clamp-1 group-hover:text-[#D97706] transition-colors">{item.name}</span>
-                                            <span className="text-xs font-extrabold text-[#D97706] mt-0.5">Starting from Rs. {item.base_price}</span>
+                                            <span className="text-xs font-extrabold text-[#D97706] mt-0.5">Starting from {formatPrice(item.base_price)}</span>
                                         </Link>
                                     ))}
                                 </div>

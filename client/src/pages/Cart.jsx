@@ -13,14 +13,14 @@ export default function Cart() {
 
     const subtotal = cartItems.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0);
     const freeShippingThreshold = Number(settings?.free_shipping_threshold) || 5000;
-    const shippingFee = subtotal >= freeShippingThreshold || subtotal === 0 ? 0 : 250;
+    const shippingFee = subtotal >= freeShippingThreshold || subtotal === 0 ? 0 : (Number(settings?.default_shipping_fee) || 350);
     const grandTotal = subtotal + shippingFee;
 
     const isCartEmpty = cartItems.length === 0;
 
     return (
         <div className="space-y-10 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-            <SEO title="Shopping Cart" description="Review your selected premium dry fruits and nuts before checkout." noindex={true} />
+            <SEO title={`Shopping Cart - ${settings?.store_name || 'Store'}`} description={settings?.store_tagline || "Review your selected items before checkout."} noindex={true} />
             {/* HEADER BANNER */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-[#E8DEC8] pb-6">
                 <div>
@@ -137,8 +137,8 @@ export default function Cart() {
                         <ShoppingBag className="w-10 h-10" />
                     </div>
                     <div className="space-y-2">
-                        <h2 className="font-heading font-bold text-3xl text-[#3A2E1F]">{settings.cart_empty_heading || 'Your Cart is Empty'}</h2>
-                        <p className="text-sm text-[#3A2E1F]/70 leading-relaxed font-body">{settings.cart_empty_text || "Looks like you haven't added any fresh Gilgit dry fruits or nuts to your cart yet."}</p>
+                        <h2 className="font-heading font-bold text-3xl text-[#3A2E1F]">{settings.empty_cart_heading || 'Your Cart is Empty'}</h2>
+                        <p className="text-sm text-[#3A2E1F]/70 leading-relaxed font-body">{settings.empty_cart_text || "Looks like you haven't added any products to your cart yet."}</p>
                     </div>
                     <Link to="/shop" className="inline-flex items-center gap-2 px-8 py-3 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-sm rounded-full transition-colors shadow-sm">
                         <span>Explore Products</span><ArrowRight className="w-4 h-4" />

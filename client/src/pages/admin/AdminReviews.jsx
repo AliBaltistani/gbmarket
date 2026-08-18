@@ -131,7 +131,7 @@ export default function AdminReviews() {
                                     </div>
                                     {r.title && <p className="text-sm font-bold text-[#3A2E1F]">"{r.title}"</p>}
                                     {r.comment && <p className="text-xs text-[#3A2E1F]/70 leading-relaxed">{r.comment}</p>}
-                                    <p className="text-[10px] text-[#3A2E1F]/40">{new Date(r.created_at).toLocaleDateString('en-PK', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                                    <p className="text-[10px] text-[#3A2E1F]/40">{new Date(r.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                                 </div>
 
                                 {/* Right: actions */}

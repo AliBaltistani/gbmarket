@@ -52,9 +52,9 @@ const PRODUCT_TEMPLATE_HEADERS = [
     'rating', 'review_count'
 ];
 const PRODUCT_SAMPLE_ROW = [
-    'Premium Hunza Almonds', 'Dry Fruits', '1500', '100',
-    'Finest almonds from Hunza valley.', 'Pure mountain almonds',
-    'Hunza Valley, GB', '12 months', 'Store in cool dry place',
+    'Premium Organic Almonds', 'Nuts', '1500', '100',
+    'High-quality organic almonds.', 'Fresh premium almonds',
+    'Farm Direct', '12 months', 'Store in cool dry place',
     '0', '1', '0',
     '500g:1500,1kg:2800',
     'https://yourdomain.com/uploads/almonds.jpg',
@@ -63,7 +63,7 @@ const PRODUCT_SAMPLE_ROW = [
 ];
 
 const CATEGORY_TEMPLATE_HEADERS = ['name', 'slug', 'image_url'];
-const CATEGORY_SAMPLE_ROW = ['Dry Fruits', 'dry-fruits', 'https://yourdomain.com/uploads/dry-fruits.jpg'];
+const CATEGORY_SAMPLE_ROW = ['Nuts & Seeds', 'nuts-seeds', 'https://yourdomain.com/uploads/category.jpg'];
 
 export default function BulkImportModal({ isOpen, onClose, mode, onImport }) {
     // mode: 'products' | 'categories'

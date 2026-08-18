@@ -18,9 +18,9 @@ const categories = [
 const products = [
     // ===== ALMONDS (2) =====
     {
-        name: 'Premium Kaghan Almonds (Paper-Shell)',
-        slug: 'premium-kaghan-almonds',
-        description: 'High-quality naturally sun-dried almonds from the Kaghan valley. Thin-shelled and rich in flavor with a satisfying crunch.',
+        name: 'Premium Paper-Shell Almonds',
+        slug: 'premium-paper-shell-almonds',
+        description: 'High-quality naturally sun-dried almonds. Thin-shelled and rich in flavor with a satisfying crunch.',
         category_slug: 'almonds',
         image_url: 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&q=80&w=600',
         base_price: 650,
@@ -41,9 +41,9 @@ const products = [
     },
     // ===== WALNUTS (2) =====
     {
-        name: 'Gilgit Paper-Shell Walnuts',
-        slug: 'gilgit-paper-shell-walnuts',
-        description: 'Famous paper-shell walnuts from Gilgit. Easy to crack by hand, high oil content, and extremely nutritious. Omega-3 rich brain food.',
+        name: 'Premium Paper-Shell Walnuts',
+        slug: 'premium-paper-shell-walnuts',
+        description: 'Premium paper-shell walnuts. Easy to crack by hand, high oil content, and extremely nutritious. Omega-3 rich brain food.',
         category_slug: 'walnuts',
         image_url: 'https://images.unsplash.com/photo-1596769062638-e6ed3f46f496?auto=format&fit=crop&q=80&w=600',
         base_price: 1100,
@@ -89,7 +89,7 @@ const products = [
     {
         name: 'Chilgoza Pine Nuts (Chilas Grade-A)',
         slug: 'chilgoza-pine-nuts-chilas',
-        description: '100% organic Chilgoza from the ancient pine forests of Chilas. Rich in healthy fats and uniquely flavored. A mountain luxury.',
+        description: '100% organic Chilgoza from ancient pine forests. Rich in healthy fats and uniquely flavored. A premium luxury.',
         category_slug: 'pine-nuts',
         image_url: 'https://images.unsplash.com/photo-1629828343714-c1884dd00ed3?auto=format&fit=crop&q=80&w=600',
         base_price: 3200,
@@ -100,7 +100,7 @@ const products = [
     {
         name: 'Shelled Chilgoza Kernels',
         slug: 'shelled-chilgoza-kernels',
-        description: 'Pre-shelled Chilgoza pine nut kernels, ready to eat. The buttery, rich taste of GB mountains without the cracking effort.',
+        description: 'Pre-shelled Chilgoza pine nut kernels, ready to eat. Buttery, rich taste of premium pine nuts without the cracking effort.',
         category_slug: 'pine-nuts',
         image_url: 'https://images.unsplash.com/photo-1543362906-acfc16c67564?auto=format&fit=crop&q=80&w=600',
         base_price: 5500,
@@ -110,9 +110,9 @@ const products = [
     },
     // ===== DRIED APRICOTS (2) =====
     {
-        name: 'Hunza Sun-Dried Apricots',
-        slug: 'hunza-sun-dried-apricots',
-        description: 'Golden, sweet and fleshy dried apricots directly brought from the orchards of Hunza. No chemicals, 100% natural drying under mountain sun.',
+        name: 'Sun-Dried Apricots (Golden)',
+        slug: 'sun-dried-apricots-golden',
+        description: 'Golden, sweet and fleshy dried apricots from high-altitude orchards. No chemicals, 100% natural sun-drying process.',
         category_slug: 'dried-apricots',
         image_url: 'https://images.unsplash.com/photo-1599879207869-7c87c2fb2402?auto=format&fit=crop&q=80&w=600',
         base_price: 750,
@@ -121,9 +121,9 @@ const products = [
         is_featured: 1
     },
     {
-        name: 'Hunza Apricot Kernels (Bitter)',
-        slug: 'hunza-apricot-kernels',
-        description: 'Organic bitter apricot kernels from Hunza Valley. Rich in Vitamin B17 and traditionally used as a health supplement.',
+        name: 'Bitter Apricot Kernels (Organic)',
+        slug: 'bitter-apricot-kernels',
+        description: 'Organic bitter apricot kernels. Rich in Vitamin B17 and traditionally used as a health supplement.',
         category_slug: 'dried-apricots',
         image_url: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&q=80&w=600',
         base_price: 550,
@@ -133,9 +133,9 @@ const products = [
     },
     // ===== DRIED MULBERRIES (2) =====
     {
-        name: 'Skardu Sweet White Mulberries',
-        slug: 'skardu-white-mulberries',
-        description: 'Chewy, candy-like dried white mulberries from Skardu. A fantastic natural sweetener packed with iron and Vitamin C.',
+        name: 'Sweet White Mulberries (Dried)',
+        slug: 'sweet-white-mulberries',
+        description: 'Chewy, candy-like dried white mulberries. A fantastic natural sweetener packed with iron and Vitamin C.',
         category_slug: 'dried-mulberries',
         image_url: 'https://images.unsplash.com/photo-1604130635338-04ff4fa31ae8?auto=format&fit=crop&q=80&w=600',
         base_price: 600,
@@ -146,7 +146,7 @@ const products = [
     {
         name: 'Black Mulberries (Shahtoot)',
         slug: 'black-mulberries-shahtoot',
-        description: 'Dark, intensely sweet black mulberries sun-dried in Gilgit. Rich in antioxidants and a rare traditional delicacy.',
+        description: 'Dark, intensely sweet black mulberries naturally sun-dried. Rich in antioxidants and a rare traditional delicacy.',
         category_slug: 'dried-mulberries',
         image_url: 'https://images.unsplash.com/photo-1569947086269-af4f1a33b3de?auto=format&fit=crop&q=80&w=600',
         base_price: 700,
@@ -202,8 +202,8 @@ const products = [
     },
     // ===== MIXED NUTS (2) =====
     {
-        name: 'GBMarket 5-Nut Power Mix',
-        slug: 'gbmarket-5-nut-mix',
+        name: '5-Nut Power Mix (Premium)',
+        slug: 'premium-5-nut-mix',
         description: 'A special power-packed blend of almonds, walnuts, cashews, pistachios, and raisins. The ultimate healthy trail mix.',
         category_slug: 'mixed-nuts',
         image_url: 'https://images.unsplash.com/photo-1594951468249-f79a953eacc2?auto=format&fit=crop&q=80&w=600',

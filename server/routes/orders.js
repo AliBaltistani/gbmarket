@@ -146,8 +146,10 @@ module.exports = function (db, requireAdmin) {
                 }
 
                 const thresholdRow = db.prepare("SELECT value FROM settings WHERE key = 'free_shipping_threshold'").get();
+                const shippingFeeRow = db.prepare("SELECT value FROM settings WHERE key = 'default_shipping_fee'").get();
                 const freeShippingThreshold = thresholdRow ? Number(thresholdRow.value) : 5000;
-                const shippingFee = serverSubtotal >= freeShippingThreshold ? 0 : 350;
+                const defaultShippingFee = shippingFeeRow ? Number(shippingFeeRow.value) : 350;
+                const shippingFee = serverSubtotal >= freeShippingThreshold ? 0 : defaultShippingFee;
                 const grandTotal = serverSubtotal + shippingFee;
 
                 const paymentMethod = orderData.payment_method || 'COD';

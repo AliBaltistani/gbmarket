@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import api from '../api/api';
 import { useSettings } from '../context/SettingsContext';
+import { useCurrency } from '../hooks/useCurrency';
 
 const STATUSES = ['Pending', 'Processing', 'Shipped', 'Delivered'];
 
@@ -17,6 +18,7 @@ const statusConfig = {
 
 export default function TrackOrder() {
     const { settings } = useSettings();
+    const { formatPrice } = useCurrency();
     const [orderId, setOrderId] = useState('');
     const [phone, setPhone] = useState('');
     const [order, setOrder] = useState(null);
@@ -52,8 +54,8 @@ export default function TrackOrder() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-10 pb-16">
             <SEO
                 title="Track Your Order"
-                description={`Track your ${settings.store_name || 'GBMarket'} order status in real-time. Enter your order number and phone to get instant updates.`}
-                canonical="https://gbmarket.pk/track-order"
+                description={`Track your ${settings.store_name || 'Store'} order status in real-time. Enter your order number and phone to get instant updates.`}
+                canonical={`${settings.site_url || window.location.origin}/track-order`}
             />
 
             {/* HERO */}
@@ -97,7 +99,7 @@ export default function TrackOrder() {
                                 required
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
-                                placeholder="e.g. 0300 1234567"
+                                placeholder={settings?.phone_placeholder || "Phone Number"}
                                 className="w-full px-4 py-3 bg-[#F5EFE0]/40 border border-[#E8DEC8] rounded-2xl text-sm text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                             />
                         </div>
@@ -205,7 +207,7 @@ export default function TrackOrder() {
                             <div className="space-y-1">
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#3A2E1F]/50 block">Order Date</span>
                                 <span className="text-sm font-bold text-[#3A2E1F]">
-                                    {new Date(order.created_at).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                    {new Date(order.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
                                 </span>
                             </div>
                             <div className="space-y-1">
@@ -220,7 +222,7 @@ export default function TrackOrder() {
                             </div>
                             <div className="space-y-1">
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#3A2E1F]/50 block">Total</span>
-                                <span className="text-sm font-extrabold text-[#D97706]">Rs. {order.total?.toLocaleString()}</span>
+                                <span className="text-sm font-extrabold text-[#D97706]">{formatPrice(order.total)}</span>
                             </div>
                         </div>
 
@@ -245,7 +247,7 @@ export default function TrackOrder() {
                                                 </td>
                                                 <td className="px-4 py-3 text-xs text-[#3A2E1F]/70 hidden sm:table-cell">{item.weight_option}</td>
                                                 <td className="px-4 py-3 text-xs text-center text-[#3A2E1F]">{item.quantity}</td>
-                                                <td className="px-4 py-3 text-xs text-right font-bold text-[#3A2E1F]">Rs. {item.price?.toLocaleString()}</td>
+                                                <td className="px-4 py-3 text-xs text-right font-bold text-[#3A2E1F]">{formatPrice(item.price)}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -253,10 +255,10 @@ export default function TrackOrder() {
 
                                 <div className="bg-[#F5EFE0]/60 px-4 py-3 flex justify-between items-center border-t border-[#E8DEC8]">
                                     <span className="text-xs text-[#3A2E1F]/70">
-                                        Subtotal: Rs. {order.subtotal?.toLocaleString()}
-                                        {order.shipping_fee > 0 && ` + Shipping: Rs. ${order.shipping_fee}`}
+                                        Subtotal: {formatPrice(order.subtotal)}
+                                        {order.shipping_fee > 0 && ` + Shipping: ${formatPrice(order.shipping_fee)}`}
                                     </span>
-                                    <span className="font-heading font-extrabold text-[#3A2E1F]">Rs. {order.total?.toLocaleString()}</span>
+                                    <span className="font-heading font-extrabold text-[#3A2E1F]">{formatPrice(order.total)}</span>
                                 </div>
                             </div>
                         )}

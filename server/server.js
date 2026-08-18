@@ -145,9 +145,10 @@ app.use('/api/', generalLimiter);
 app.get('/api/health', (req, res) => {
     try {
         db.prepare('SELECT 1').get();
-        res.json({ status: 'GBMarket API is running', database: 'connected' });
+        const storeName = db.prepare('SELECT value FROM settings WHERE key = ?').get('store_name')?.value || 'Store';
+        res.json({ status: `${storeName} API is running`, database: 'connected' });
     } catch (error) {
-        res.status(503).json({ status: 'GBMarket API is running', database: 'disconnected' });
+        res.status(503).json({ status: 'API is running', database: 'disconnected' });
     }
 });
 

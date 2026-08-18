@@ -12,6 +12,7 @@ import BulkImportModal from '../../components/admin/BulkImportModal';
 import { getProducts, createProduct, updateProduct, deleteProduct, uploadImage } from '../../api/products';
 import { getCategories } from '../../api/categories';
 import api from '../../api/api';
+import { useCurrency } from '../../hooks/useCurrency';
 import toast from 'react-hot-toast';
 
 const EMPTY_FORM = {
@@ -26,6 +27,7 @@ export default function AdminProducts() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const { formatPrice } = useCurrency();
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 6;
     const [products, setProducts] = useState([]);
@@ -298,7 +300,7 @@ export default function AdminProducts() {
                                                 </td>
                                                 <td className="py-3.5 px-4">
                                                     <div>
-                                                        <span className="font-extrabold text-sm text-[#3A2E1F]">Rs. {p.base_price?.toLocaleString()}</span>
+                                                        <span className="font-extrabold text-sm text-[#3A2E1F]">{formatPrice(p.base_price)}</span>
                                                         {p.discount_percent > 0 && (
                                                             <span className="ml-1.5 text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-full border border-rose-200">-{p.discount_percent}%</span>
                                                         )}
@@ -367,14 +369,14 @@ export default function AdminProducts() {
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Product Title</label>
                         <input required type="text" value={fd.name} onChange={e => set('name', e.target.value)}
-                            placeholder="e.g. Premium Hunza Dried Apricots" className={inputCls} />
+                            placeholder="e.g. Premium Organic Almonds" className={inputCls} />
                     </div>
 
                     {/* Short Description */}
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Tagline / Short Description</label>
                         <input type="text" value={fd.short_description} onChange={e => set('short_description', e.target.value)}
-                            placeholder="e.g. Sun-dried natural apricots from Hunza valley" className={inputCls} />
+                            placeholder="e.g. High-quality organic almonds" className={inputCls} />
                     </div>
 
                     {/* Category + Stock */}
@@ -414,7 +416,7 @@ export default function AdminProducts() {
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-bold text-[#3A2E1F]/60 uppercase">Origin</label>
                                 <input type="text" value={fd.origin} onChange={e => set('origin', e.target.value)}
-                                    placeholder="e.g. Hunza Valley, GB" className={inputCls} />
+                                    placeholder="e.g. Farm Direct" className={inputCls} />
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-bold text-[#3A2E1F]/60 uppercase">Shelf Life</label>

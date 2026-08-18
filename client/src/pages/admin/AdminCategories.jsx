@@ -270,7 +270,7 @@ export default function AdminCategories() {
                             type="text"
                             value={categoryName}
                             onChange={(e) => setCategoryName(e.target.value)}
-                            placeholder="e.g. Skardu Walnuts"
+                            placeholder="e.g. Premium Nuts"
                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                         />
                     </div>

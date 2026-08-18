@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Star, ShoppingBag, Check, Zap } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useSettings } from '../context/SettingsContext';
 import { useCurrency } from '../hooks/useCurrency';
 
 export default function ProductCard({ product }) {
     const { addItem } = useCart();
+    const { settings } = useSettings();
     const { formatPrice } = useCurrency();
     const navigate = useNavigate();
     const [isAdded, setIsAdded] = useState(false);
@@ -30,7 +32,7 @@ export default function ProductCard({ product }) {
 
     // Safely support both camelCase (dummy data) and snake_case (SQLite API)
     const price = base_price || basePrice || 0;
-    const catName = category_name || category || 'Dry Fruits';
+    const catName = category_name || category || 'Products';
     const displayRating = rating !== undefined && rating !== null ? Number(rating).toFixed(1) : '4.8';
     const displayReviews = review_count || reviewsCount || 25;
     const itemStock = stock !== undefined ? Number(stock) : (stockStatus === 'Out of Stock' ? 0 : 20);
@@ -38,7 +40,7 @@ export default function ProductCard({ product }) {
     const isLowStock = !isOutOfStock && itemStock > 0 && itemStock < 5;
 
     // Image fallback logic
-    const imageSrc = (images && images[0]) ? images[0] : (image_url || 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&q=80&w=800');
+    const imageSrc = (images && images[0]) ? images[0] : (image_url || '/placeholder.png');
 
     // Parse weight options with fallbacks
     let parsedWeightOptions = [
@@ -105,7 +107,7 @@ export default function ProductCard({ product }) {
                 <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 z-10 pointer-events-none">
                     {(isNew || is_featured === 1) && (
                         <span className="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-[#F5A623] text-[#3A2E1F] rounded-full shadow-xs">
-                            Featured
+                            {settings?.product_badge_text || 'Featured'}
                         </span>
                     )}
                     {isLowStock && (

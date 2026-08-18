@@ -26,29 +26,39 @@ const db = require('../db/db');
 
 function getDynamicDomain() {
     try {
-        const row = db.prepare('SELECT value FROM settings WHERE key = ?').get('site_url');
-        const siteUrl = row ? (row.value || 'https://gbmarket.pk') : 'https://gbmarket.pk';
+        const siteRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('site_url');
+        const nameRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('store_name');
+        const currRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('currency_symbol');
+        const siteUrl = siteRow?.value || '';
+        const storeName = nameRow?.value || 'Store';
+        const currency = currRow?.value || '$';
         return {
             siteUrl,
-            hostname: new URL(siteUrl).hostname
+            hostname: siteUrl ? new URL(siteUrl).hostname : 'localhost',
+            storeName,
+            currency
         };
     } catch {
-        return { siteUrl: 'https://gbmarket.pk', hostname: 'gbmarket.pk' };
+        return { siteUrl: '', hostname: 'localhost', storeName: 'Store', currency: '$' };
     }
 }
 
-const { hostname, siteUrl } = getDynamicDomain();
-const fromAddress = process.env.SMTP_FROM || process.env.SMTP_USER || `noreply@${hostname}`;
-const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER || null;
+function getEmailConfig() {
+    const { hostname, siteUrl, storeName, currency } = getDynamicDomain();
+    const fromAddr = process.env.SMTP_FROM || process.env.SMTP_USER || `noreply@${hostname}`;
+    const adminAddr = process.env.ADMIN_EMAIL || process.env.SMTP_USER || null;
+    return { siteUrl, storeName, currency, fromAddress: fromAddr, adminEmail: adminAddr };
+}
 
 /**
  * Send order confirmation email to customer
  */
 async function sendOrderConfirmation(order, items) {
     if (!transporter || !order.customer_email) return;
+    const { siteUrl, storeName, currency, fromAddress } = getEmailConfig();
 
     const itemRows = items.map(i =>
-        `<tr><td style="padding:8px;border-bottom:1px solid #eee">${i.product_name}</td><td style="padding:8px;border-bottom:1px solid #eee">${i.weight_option}</td><td style="padding:8px;border-bottom:1px solid #eee">${i.quantity}</td><td style="padding:8px;border-bottom:1px solid #eee">Rs. ${i.price}</td></tr>`
+        `<tr><td style="padding:8px;border-bottom:1px solid #eee">${i.product_name}</td><td style="padding:8px;border-bottom:1px solid #eee">${i.weight_option}</td><td style="padding:8px;border-bottom:1px solid #eee">${i.quantity}</td><td style="padding:8px;border-bottom:1px solid #eee">${currency} ${i.price}</td></tr>`
     ).join('');
 
     const html = `
@@ -64,20 +74,20 @@ async function sendOrderConfirmation(order, items) {
                     <thead><tr style="background:#F5EFE0"><th style="padding:8px;text-align:left">Product</th><th style="padding:8px">Weight</th><th style="padding:8px">Qty</th><th style="padding:8px">Price</th></tr></thead>
                     <tbody>${itemRows}</tbody>
                 </table>
-                <p style="font-size:18px;font-weight:bold;text-align:right">Total: Rs. ${order.total}</p>
+                <p style="font-size:18px;font-weight:bold;text-align:right">Total: ${currency} ${order.total}</p>
                 <hr style="border:none;border-top:1px solid #E8DEC8;margin:16px 0">
                 <p style="font-size:12px;color:#666">Delivery Address: ${order.address}</p>
-                <p style="font-size:12px;color:#666">Payment: Cash on Delivery (COD)</p>
-                <p style="margin-top:20px;font-size:12px;color:#999">— GBMarket Team</p>
+                <p style="font-size:12px;color:#666">Payment: ${order.payment_method || 'Cash on Delivery'}</p>
+                <p style="margin-top:20px;font-size:12px;color:#999">— ${storeName} Team</p>
             </div>
         </div>
     `;
 
     try {
         await transporter.sendMail({
-            from: `"GBMarket" <${fromAddress}>`,
+            from: `"${storeName}" <${fromAddress}>`,
             to: order.customer_email,
-            subject: `Order Confirmed #${order.id} — GBMarket`,
+            subject: `Order Confirmed #${order.id} — ${storeName}`,
             html
         });
         console.log(`[Email] Order confirmation sent to ${order.customer_email}`);
@@ -90,17 +100,19 @@ async function sendOrderConfirmation(order, items) {
  * Send new order notification to admin
  */
 async function sendAdminNotification(order, items) {
-    if (!transporter || !adminEmail) return;
+    if (!transporter) return;
+    const { storeName, currency, fromAddress, adminEmail } = getEmailConfig();
+    if (!adminEmail) return;
 
-    const itemList = items.map(i => `• ${i.product_name} (${i.weight_option}) x${i.quantity} — Rs. ${i.price}`).join('\n');
+    const itemList = items.map(i => `• ${i.product_name} (${i.weight_option}) x${i.quantity} — ${currency} ${i.price}`).join('\n');
 
-    const text = `New Order #${order.id}\n\nCustomer: ${order.customer_name}\nPhone: ${order.phone}\nAddress: ${order.address}\nTotal: Rs. ${order.total}\n\nItems:\n${itemList}`;
+    const text = `New Order #${order.id}\n\nCustomer: ${order.customer_name}\nPhone: ${order.phone}\nAddress: ${order.address}\nTotal: ${currency} ${order.total}\n\nItems:\n${itemList}`;
 
     try {
         await transporter.sendMail({
-            from: `"GBMarket Orders" <${fromAddress}>`,
+            from: `"${storeName} Orders" <${fromAddress}>`,
             to: adminEmail,
-            subject: `New Order #${order.id} — Rs. ${order.total}`,
+            subject: `New Order #${order.id} — ${currency} ${order.total}`,
             text
         });
         console.log(`[Email] Admin notification sent for order #${order.id}`);
@@ -112,7 +124,9 @@ async function sendAdminNotification(order, items) {
  * Send contact form submission to admin email
  */
 async function sendContactFormEmail(name, email, subject, message) {
-    if (!transporter || !adminEmail) {
+    if (!transporter) return;
+    const { storeName, fromAddress, adminEmail } = getEmailConfig();
+    if (!adminEmail) {
         console.log('[Email] Contact form email skipped — SMTP not configured or no admin email.');
         return;
     }
@@ -132,14 +146,14 @@ async function sendContactFormEmail(name, email, subject, message) {
                     <p style="font-weight:bold;margin:0 0 8px 0;font-size:12px;text-transform:uppercase;color:#666">Message:</p>
                     <p style="margin:0;white-space:pre-wrap;line-height:1.6">${message}</p>
                 </div>
-                <p style="margin-top:20px;font-size:12px;color:#999">— Sent via GBMarket Contact Form</p>
+                <p style="margin-top:20px;font-size:12px;color:#999">— Sent via ${storeName} Contact Form</p>
             </div>
         </div>
     `;
 
     try {
         await transporter.sendMail({
-            from: `"GBMarket Contact" <${fromAddress}>`,
+            from: `"${storeName} Contact" <${fromAddress}>`,
             replyTo: email,
             to: adminEmail,
             subject: `[Contact] ${subject} — from ${name}`,
@@ -157,6 +171,7 @@ async function sendContactFormEmail(name, email, subject, message) {
  */
 async function sendOrderStatusEmail(order, newStatus) {
     if (!transporter || !order.customer_email) return;
+    const { siteUrl, storeName, currency, fromAddress } = getEmailConfig();
 
     const statusConfig = {
         'Processing': { emoji: '🔄', color: '#2563EB', label: 'Processing', desc: 'Your order is being prepared and packed.' },
@@ -179,7 +194,7 @@ async function sendOrderStatusEmail(order, newStatus) {
                 <div style="background:#F5EFE0;padding:16px;border-radius:12px;margin:16px 0;border:1px solid #E8DEC8">
                     <p style="margin:0"><strong>Order ID:</strong> #${order.id}</p>
                     <p style="margin:8px 0 0 0"><strong>Status:</strong> <span style="color:${config.color};font-weight:bold">${config.label}</span></p>
-                    <p style="margin:8px 0 0 0"><strong>Total:</strong> Rs. ${order.total}</p>
+                    <p style="margin:8px 0 0 0"><strong>Total:</strong> ${currency} ${order.total}</p>
                 </div>
                 <p style="margin:16px 0">
                     <a href="${siteUrl}/track-order" 
@@ -187,14 +202,14 @@ async function sendOrderStatusEmail(order, newStatus) {
                         Track Your Order →
                     </a>
                 </p>
-                <p style="margin-top:20px;font-size:12px;color:#999">— GBMarket Team</p>
+                <p style="margin-top:20px;font-size:12px;color:#999">— ${storeName} Team</p>
             </div>
         </div>
     `;
 
     try {
         await transporter.sendMail({
-            from: `"GBMarket" <${fromAddress}>`,
+            from: `"${storeName}" <${fromAddress}>`,
             to: order.customer_email,
             subject: `${config.emoji} Order #${order.id} — ${config.label}`,
             html

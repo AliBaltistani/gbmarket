@@ -39,9 +39,9 @@ export default function Contact() {
     return (
         <div className="space-y-12 pb-16">
             <SEO
-                title="Contact Us"
-                description={settings.store_tagline || "Get in touch with GBMarket for bulk orders, order inquiries, or customer support. We're here to help!"}
-                canonical="https://gbmarket.pk/contact"
+                title={`Contact Us - ${settings.store_name || 'Our Store'}`}
+                description={settings.store_tagline || "Get in touch with us for bulk orders, order inquiries, or customer support. We're here to help!"}
+                canonical={`${window.location.origin}/contact`}
                 structuredData={{
                     "@context": "https://schema.org",
                     "@type": "BreadcrumbList",
@@ -50,13 +50,13 @@ export default function Contact() {
                             "@type": "ListItem",
                             "position": 1,
                             "name": "Home",
-                            "item": "https://gbmarket.pk/"
+                            "item": window.location.origin
                         },
                         {
                             "@type": "ListItem",
                             "position": 2,
                             "name": "Contact Us",
-                            "item": "https://gbmarket.pk/contact"
+                            "item": `${window.location.origin}/contact`
                         }
                     ]
                 }}
@@ -72,7 +72,7 @@ export default function Contact() {
                         Contact {settings.store_name || 'Us'}
                     </h1>
                     <p className="text-sm text-[#3A2E1F]/70 font-body">
-                        Have a question about our dry fruit harvests, bulk corporate orders, or order status? We are here to assist!
+                        {settings.contact_page_subtitle || 'Have a question about our products, bulk corporate orders, or order status? We are here to assist!'}
                     </p>
                 </div>
             </section>
@@ -199,7 +199,7 @@ export default function Contact() {
                                     </div>
                                     <div>
                                         <strong className="block text-[#3A2E1F] font-bold">Store Location & Warehouse</strong>
-                                        <span>{settings.contact_address || 'Pakistan'}</span>
+                                        <span>{settings.contact_address || ''}</span>
                                     </div>
                                 </div>
 
@@ -241,8 +241,8 @@ export default function Contact() {
                                 </span>
                                 <div className="w-full h-48 bg-[#F5EFE0] rounded-2xl border border-[#E8DEC8] overflow-hidden">
                                     <iframe
-                                        title="GBMarket Location"
-                                        src={settings.map_embed_url || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d102146.12648415714!2d74.249495!3d35.918968!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38e649e3742ea395%3A0xe543594b28867aab!2sGilgit%2C%20Gilgit-Baltistan%2C%20Pakistan!5e0!3m2!1sen!2s!4v1700000000000"}
+                                        title={`${settings.store_name || 'Store'} Location`}
+                                        src={settings.map_embed_url || ''}
                                         width="100%"
                                         height="100%"
                                         style={{ border: 0 }}

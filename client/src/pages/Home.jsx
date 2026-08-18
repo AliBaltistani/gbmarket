@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SEO from '../components/SEO';
 import { getHomepageSections } from '../api/homepage';
+import { useSettings } from '../context/SettingsContext';
 
 // Dynamic Section Components
 import HeroBanner from '../components/homepage/HeroBanner';
@@ -22,6 +23,7 @@ const SECTION_COMPONENTS = {
 };
 
 export default function Home() {
+    const { settings } = useSettings();
     const [sections, setSections] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -44,7 +46,7 @@ export default function Home() {
             <div className="space-y-10 sm:space-y-16 pb-16">
                 <SEO
                     title="Home"
-                    description="Shop premium organic dry fruits and nuts from Gilgit-Baltistan."
+                    description={settings.store_tagline || ""}
                 />
                 <div className="max-w-7xl mx-auto mt-3">
                     <div className="rounded-3xl bg-[#F5EFE0]/40 border border-[#E8DEC8] animate-pulse h-72 mx-4" />
@@ -63,21 +65,21 @@ export default function Home() {
     return (
         <div className="space-y-10 sm:space-y-16 pb-16">
             <SEO
-                title="Buy Organic Dry Fruits & Nuts Online in Pakistan"
-                description="Shop premium organic dry fruits and nuts from Gilgit-Baltistan. Handpicked almonds, walnuts, pine nuts, and sun-dried apricots delivered across Pakistan."
-                canonical="https://gbmarket.pk/"
+                title={settings.store_tagline ? `${settings.store_name} - ${settings.store_tagline}` : ""}
+                description={settings.store_tagline || ""}
+                canonical={settings.site_url || ""}
                 structuredData={{
                     "@context": "https://schema.org",
                     "@type": "Organization",
-                    "name": "GBMarket",
-                    "url": "https://gbmarket.pk",
-                    "logo": "https://gbmarket.pk/icons.svg",
+                    "name": settings.store_name || "",
+                    "url": settings.site_url || "",
+                    "logo": `${settings.site_url || ""}/icons.svg`,
                     "contactPoint": {
                         "@type": "ContactPoint",
-                        "telephone": "+92-XXX-XXXXXXX",
+                        ...(settings.contact_phone ? { "telephone": settings.contact_phone } : {}),
                         "contactType": "customer service",
-                        "areaServed": "PK",
-                        "availableLanguage": "English"
+                        ...(settings.country_code ? { "areaServed": settings.country_code } : {}),
+                        "availableLanguage": settings.locale?.split('_')[0] || "en"
                     }
                 }}
             />

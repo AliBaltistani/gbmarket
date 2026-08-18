@@ -32,7 +32,7 @@ export default function AdminSettings() {
         // General
         storeName: settings.store_name || '',
         storeTagline: settings.store_tagline || '',
-        siteBaseUrl: settings.site_url || 'https://gbmarket.pk',
+        siteBaseUrl: settings.site_url || '',
         logoPreview: settings.logo_url || '/placeholder.png',
         faviconPreview: settings.favicon_url || '/vite.svg',
 
@@ -62,6 +62,11 @@ export default function AdminSettings() {
         freeShippingThreshold: settings.free_shipping_threshold || '',
         defaultShippingFee: settings.default_shipping_fee || '',
         shippingInfoText: settings.shipping_info_text || '',
+        shippingTabHeading: settings.shipping_tab_heading || '',
+        shippingBullet1: settings.shipping_bullet_1 || '',
+        shippingBullet2: settings.shipping_bullet_2 || '',
+        shippingBullet3: settings.shipping_bullet_3 || '',
+        shippingBullet4: settings.shipping_bullet_4 || '',
         orderPrefix: settings.order_prefix || 'GB',
         skuPrefix: settings.sku_prefix || 'GBM',
         phonePattern: settings.phone_pattern || '',
@@ -204,6 +209,11 @@ export default function AdminSettings() {
                 free_shipping_threshold: formData.freeShippingThreshold,
                 default_shipping_fee: formData.defaultShippingFee,
                 shipping_info_text: formData.shippingInfoText,
+                shipping_tab_heading: formData.shippingTabHeading,
+                shipping_bullet_1: formData.shippingBullet1,
+                shipping_bullet_2: formData.shippingBullet2,
+                shipping_bullet_3: formData.shippingBullet3,
+                shipping_bullet_4: formData.shippingBullet4,
                 order_prefix: formData.orderPrefix,
                 sku_prefix: formData.skuPrefix,
                 phone_pattern: formData.phonePattern,
@@ -335,7 +345,7 @@ export default function AdminSettings() {
                                             type="text"
                                             value={formData.storeName}
                                             onChange={(e) => handleInputChange('storeName', e.target.value)}
-                                            placeholder="e.g. GBMarket"
+                                            placeholder="e.g. My Store"
                                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
                                     </div>
@@ -363,7 +373,7 @@ export default function AdminSettings() {
                                             type="url"
                                             value={formData.siteBaseUrl}
                                             onChange={(e) => handleInputChange('siteBaseUrl', e.target.value)}
-                                            placeholder="https://gbmarket.pk"
+                                            placeholder="https://example.com"
                                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
                                     </div>
@@ -604,7 +614,7 @@ export default function AdminSettings() {
                                             type="text"
                                             value={formData.whatsappNumber}
                                             onChange={(e) => handleInputChange('whatsappNumber', e.target.value)}
-                                            placeholder="+92 300 1234567"
+                                            placeholder="+1 234 567 8900"
                                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
                                     </div>
@@ -928,7 +938,7 @@ export default function AdminSettings() {
                                                 type="text"
                                                 value={formData.phonePlaceholder}
                                                 onChange={(e) => handleInputChange('phonePlaceholder', e.target.value)}
-                                                placeholder="0300 1234567"
+                                                placeholder="Phone Number"
                                                 className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                             />
                                         </div>
@@ -944,6 +954,25 @@ export default function AdminSettings() {
                                             onChange={(e) => handleInputChange('shippingInfoText', e.target.value)}
                                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
+                                    </div>
+
+                                    <div className="space-y-4 pt-4 border-t border-[#E8DEC8]">
+                                        <h3 className="text-sm font-bold text-[#3A2E1F]">Fallback Shipping Tab Content</h3>
+                                        <p className="text-[10px] text-[#3A2E1F]/60">Used in the Product Detail page if the primary 'Shipping Info Content' is empty.</p>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Shipping Tab Heading</label>
+                                            <input type="text" value={formData.shippingTabHeading} onChange={(e) => handleInputChange('shippingTabHeading', e.target.value)} placeholder="Nationwide Delivery" className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                        </div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div className="space-y-1.5"><label className="text-[10px] font-bold text-[#3A2E1F] uppercase tracking-wider block">Bullet 1</label>
+                                                <input type="text" value={formData.shippingBullet1} onChange={(e) => handleInputChange('shippingBullet1', e.target.value)} placeholder="Orders dispatched within 24 hours." className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" /></div>
+                                            <div className="space-y-1.5"><label className="text-[10px] font-bold text-[#3A2E1F] uppercase tracking-wider block">Bullet 2</label>
+                                                <input type="text" value={formData.shippingBullet2} onChange={(e) => handleInputChange('shippingBullet2', e.target.value)} placeholder="Delivery time: 2–3 business days." className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" /></div>
+                                            <div className="space-y-1.5"><label className="text-[10px] font-bold text-[#3A2E1F] uppercase tracking-wider block">Bullet 3 (Threshold varies)</label>
+                                                <input type="text" value={formData.shippingBullet3} onChange={(e) => handleInputChange('shippingBullet3', e.target.value)} placeholder="Free shipping on all orders above the threshold." className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" /></div>
+                                            <div className="space-y-1.5"><label className="text-[10px] font-bold text-[#3A2E1F] uppercase tracking-wider block">Bullet 4</label>
+                                                <input type="text" value={formData.shippingBullet4} onChange={(e) => handleInputChange('shippingBullet4', e.target.value)} placeholder="Tracked delivery via courier service." className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" /></div>
+                                        </div>
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

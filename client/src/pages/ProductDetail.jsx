@@ -9,6 +9,7 @@ import ProductCard from '../components/ProductCard';
 import { getProductBySlug, getProducts } from '../api/products';
 import { useCart } from '../context/CartContext';
 import { useSettings } from '../context/SettingsContext';
+import { useCurrency } from '../hooks/useCurrency';
 import SEO from '../components/SEO';
 import api from '../api/api';
 
@@ -46,6 +47,7 @@ export default function ProductDetail() {
     const navigate = useNavigate();
     const { addItem } = useCart();
     const { settings } = useSettings();
+    const { formatPrice } = useCurrency();
 
     const [product, setProduct] = useState(null);
     const [relatedProducts, setRelatedProducts] = useState([]);
@@ -176,8 +178,8 @@ export default function ProductDetail() {
         <div className="space-y-8 sm:space-y-12 pb-28 md:pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
             <SEO
                 title={product.name}
-                description={product.description?.substring(0, 160) || `Buy ${product.name} - premium organic dry fruit.`}
-                canonical={`https://gbmarket.pk/product/${product.slug}`}
+                description={product.description?.substring(0, 160) || `Buy ${product.name} - ${settings.store_tagline || 'quality products at great prices.'}`}
+                canonical={`${settings.site_url || window.location.origin}/product/${product.slug}`}
                 ogImage={product.image_url}
                 type="product"
                 structuredData={{
@@ -186,14 +188,14 @@ export default function ProductDetail() {
                         {
                             "@type": "Product",
                             "name": product.name,
-                            "description": product.description || `Buy ${product.name} - premium organic dry fruit.`,
-                            "image": product.image_url || "https://gbmarket.pk/placeholder.png",
+                            "description": product.description || `Buy ${product.name} - ${settings.store_tagline || 'quality products at great prices.'}`,
+                            "image": product.image_url || `${settings.site_url || window.location.origin}/placeholder.png`,
                             "offers": {
                                 "@type": "Offer",
                                 "price": product.base_price,
                                 "priceCurrency": settings.currency_code || "PKR",
                                 "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-                                "url": `https://gbmarket.pk/product/${product.slug}`
+                                "url": `${settings.site_url || window.location.origin}/product/${product.slug}`
                             },
                             ...(product.review_count > 0 ? {
                                 "aggregateRating": {
@@ -206,10 +208,10 @@ export default function ProductDetail() {
                         {
                             "@type": "BreadcrumbList",
                             "itemListElement": [
-                                { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://gbmarket.pk/" },
-                                { "@type": "ListItem", "position": 2, "name": "Shop", "item": "https://gbmarket.pk/shop" },
-                                { "@type": "ListItem", "position": 3, "name": product.category_name, "item": `https://gbmarket.pk/shop?category=${product.category_slug}` },
-                                { "@type": "ListItem", "position": 4, "name": product.name, "item": `https://gbmarket.pk/product/${product.slug}` }
+                                { "@type": "ListItem", "position": 1, "name": "Home", "item": `${settings.site_url || window.location.origin}/` },
+                                { "@type": "ListItem", "position": 2, "name": "Shop", "item": `${settings.site_url || window.location.origin}/shop` },
+                                { "@type": "ListItem", "position": 3, "name": product.category_name, "item": `${settings.site_url || window.location.origin}/shop?category=${product.category_slug}` },
+                                { "@type": "ListItem", "position": 4, "name": product.name, "item": `${settings.site_url || window.location.origin}/product/${product.slug}` }
                             ]
                         }
                     ]
@@ -293,19 +295,19 @@ export default function ProductDetail() {
                                 <span className="text-xs text-[#3A2E1F]/70 block">Selected Pack</span>
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-2xl sm:text-3xl font-black font-heading text-[#3A2E1F]">
-                                        {settings.currency_symbol || 'Rs. '} {product.discount_percent > 0
-                                            ? Math.round(currentPrice * (1 - product.discount_percent / 100)).toLocaleString()
-                                            : currentPrice.toLocaleString()}
+                                        {product.discount_percent > 0
+                                            ? formatPrice(Math.round(currentPrice * (1 - product.discount_percent / 100)))
+                                            : formatPrice(currentPrice)}
                                     </span>
                                     {product.discount_percent > 0 && (
                                         <>
-                                            <span className="text-sm text-[#3A2E1F]/40 line-through">{settings.currency_symbol || 'Rs. '} {currentPrice.toLocaleString()}</span>
+                                            <span className="text-sm text-[#3A2E1F]/40 line-through">{formatPrice(currentPrice)}</span>
                                             <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">-{product.discount_percent}%</span>
                                         </>
                                     )}
                                 </div>
                             </div>
-                            <span className="text-xs text-[#D97706] font-bold">({settings.currency_symbol || 'Rs. '} {selectedWeight.price} / {selectedWeight.label})</span>
+                            <span className="text-xs text-[#D97706] font-bold">({formatPrice(selectedWeight.price)} / {selectedWeight.label})</span>
                         </div>
                     )}
 
@@ -338,7 +340,7 @@ export default function ProductDetail() {
                                     <button key={option.label} type="button" onClick={() => setSelectedWeight(option)}
                                         className={`py-3 px-4 rounded-2xl border text-xs font-bold transition-all text-center flex flex-col items-center gap-1 cursor-pointer active:scale-95 ${selectedWeight?.label === option.label ? 'bg-[#F5A623] border-[#D97706] text-[#3A2E1F] ring-2 ring-[#F5A623]/40' : 'bg-white border-[#E8DEC8] text-[#3A2E1F]/80 hover:bg-[#F5EFE0]'}`}>
                                         <span className="text-sm font-black">{option.label}</span>
-                                        <span className="text-[11px] text-[#3A2E1F]/70">{settings.currency_symbol || 'Rs. '} {option.price}</span>
+                                        <span className="text-[11px] text-[#3A2E1F]/70">{formatPrice(option.price)}</span>
                                     </button>
                                 ))}
                             </div>
@@ -375,7 +377,7 @@ export default function ProductDetail() {
 
                     <div className="grid grid-cols-3 gap-2 pt-4 border-t border-[#E8DEC8] text-center text-[11px] text-[#3A2E1F]/70">
                         <div className="flex flex-col items-center gap-1"><Truck className="w-4 h-4 text-[#D97706]" /><span>Fast Shipping</span></div>
-                        <div className="flex flex-col items-center gap-1"><ShieldCheck className="w-4 h-4 text-[#D97706]" /><span>100% Organic</span></div>
+                        <div className="flex flex-col items-center gap-1"><ShieldCheck className="w-4 h-4 text-[#D97706]" /><span>{settings.product_badge_text || 'Premium Quality'}</span></div>
                         <div className="flex flex-col items-center gap-1"><RefreshCw className="w-4 h-4 text-[#D97706]" /><span>Easy Return</span></div>
                     </div>
                 </div>
@@ -431,17 +433,17 @@ export default function ProductDetail() {
                     {/* Shipping */}
                     {activeTab === 'shipping' && (
                         <div className="space-y-3 text-xs sm:text-sm text-[#3A2E1F]/80 leading-relaxed font-body">
-                            <h3 className="font-heading font-bold text-lg text-[#3A2E1F]">Nationwide Delivery</h3>
-                            <ul className="list-disc list-inside space-y-1.5 text-xs">
-                                <li>Orders dispatched within 24 hours.</li>
-                                <li>Delivery time: 2–3 business days.</li>
-                                {settings.shipping_info_text ? (
-                                    <li>{settings.shipping_info_text}</li>
-                                ) : (
-                                    <li>Free shipping on all orders above Rs. 3,000.</li>
-                                )}
-                                <li>Tracked delivery via courier service.</li>
-                            </ul>
+                            <h3 className="font-heading font-bold text-lg text-[#3A2E1F]">{settings.shipping_tab_heading || 'Nationwide Delivery'}</h3>
+                            {settings.shipping_info_text ? (
+                                <div className="whitespace-pre-wrap text-xs">{settings.shipping_info_text}</div>
+                            ) : (
+                                <ul className="list-disc list-inside space-y-1.5 text-xs">
+                                    <li>{settings.shipping_bullet_1 || 'Orders dispatched within 24 hours.'}</li>
+                                    <li>{settings.shipping_bullet_2 || 'Delivery time: 2–3 business days.'}</li>
+                                    <li>{settings.shipping_bullet_3 || `Free shipping on all orders above ${formatPrice(settings.free_shipping_threshold || 3000)}.`}</li>
+                                    <li>{settings.shipping_bullet_4 || 'Tracked delivery via courier service.'}</li>
+                                </ul>
+                            )}
                         </div>
                     )}
 
@@ -527,7 +529,7 @@ export default function ProductDetail() {
                                             <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block mb-1.5">Review Title</label>
                                             <input type="text" value={reviewForm.title}
                                                 onChange={e => setReviewForm(p => ({ ...p, title: e.target.value }))}
-                                                placeholder="e.g. Best almonds I've had!"
+                                                placeholder="e.g. Great quality product!"
                                                 className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
                                         </div>
                                         <div>
@@ -567,7 +569,7 @@ export default function ProductDetail() {
                 <div>
                     <span className="text-[10px] text-[#3A2E1F]/60 block leading-tight font-bold uppercase tracking-wider">Total ({selectedWeight?.label || '500g'})</span>
                     <span className="text-lg font-black font-heading text-[#3A2E1F]">
-                        {settings.currency_symbol || 'Rs. '} {product.discount_percent > 0 ? Math.round(currentPrice * (1 - product.discount_percent / 100)).toLocaleString() : currentPrice.toLocaleString()}
+                        {product.discount_percent > 0 ? formatPrice(Math.round(currentPrice * (1 - product.discount_percent / 100))) : formatPrice(currentPrice)}
                     </span>
                 </div>
                 <button type="button" onClick={handleAddToCart} disabled={isOutOfStock}

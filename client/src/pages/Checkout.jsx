@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Truck, CheckCircle2, ChevronRight, Loader2, AlertCircle, ShieldCheck, Upload, X, CreditCard, Banknote, Smartphone, Building2, Camera } from 'lucide-react';
+import { ArrowLeft, MapPin, Truck, CheckCircle2, ChevronRight, Loader2, AlertCircle, ShieldCheck, Upload, X, CreditCard, Banknote, Smartphone, Building2, Camera, Wallet } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useSettings } from '../context/SettingsContext';
 import { createOrder } from '../api/orders';
-import { getPaymentAccounts } from '../api/payments';
+import { getPaymentAccounts, getPaymentMethods } from '../api/payments';
 import { useCurrency } from '../hooks/useCurrency';
 import toast from 'react-hot-toast';
 import SEO from '../components/SEO';
 
-const PAYMENT_METHODS = [
-    { id: 'COD', label: 'Cash on Delivery', icon: Banknote, description: 'Pay when your order arrives' },
-    { id: 'easypaisa', label: 'Easypaisa', icon: Smartphone, description: 'Send via Easypaisa & upload receipt', color: '#4CAF50' },
-    { id: 'jazzcash', label: 'JazzCash', icon: Smartphone, description: 'Send via JazzCash & upload receipt', color: '#E4002B' },
-    { id: 'bank_transfer', label: 'Bank Transfer', icon: Building2, description: 'Transfer to our bank account', color: '#1565C0' },
-];
+// Icon mapping for payment methods (UI-only, labels/descriptions come from API)
+const METHOD_ICONS = {
+    'COD': Banknote,
+    'easypaisa': Smartphone,
+    'jazzcash': Smartphone,
+    'bank_transfer': Building2,
+};
 
 export default function Checkout() {
     const navigate = useNavigate();
@@ -31,6 +32,7 @@ export default function Checkout() {
     });
     const [paymentMethod, setPaymentMethod] = useState('COD');
     const [paymentAccounts, setPaymentAccounts] = useState([]);
+    const [paymentMethods, setPaymentMethods] = useState([]);
     const [receiptFile, setReceiptFile] = useState(null);
     const [receiptPreview, setReceiptPreview] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -38,26 +40,30 @@ export default function Checkout() {
 
     const subtotal = cartItems.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0);
     const freeShippingThreshold = Number(settings?.free_shipping_threshold) || 5000;
-    const shippingFee = subtotal >= freeShippingThreshold || subtotal === 0 ? 0 : 350;
+    const shippingFee = subtotal >= freeShippingThreshold || subtotal === 0 ? 0 : (Number(settings?.default_shipping_fee) || 350);
     const grandTotal = subtotal + shippingFee;
 
     const isOnlinePayment = paymentMethod !== 'COD';
     const selectedAccount = paymentAccounts.find(a => a.method === paymentMethod);
 
-    // Fetch payment accounts on mount
+    // Fetch payment methods and accounts on mount
     useEffect(() => {
-        const fetchAccounts = async () => {
+        const fetchPaymentData = async () => {
             setLoadingAccounts(true);
             try {
-                const accounts = await getPaymentAccounts();
+                const [accounts, methods] = await Promise.all([
+                    getPaymentAccounts(),
+                    getPaymentMethods()
+                ]);
                 setPaymentAccounts(accounts);
+                setPaymentMethods(methods);
             } catch (err) {
-                console.log('Could not load payment accounts:', err.message);
+                console.log('Could not load payment data:', err.message);
             } finally {
                 setLoadingAccounts(false);
             }
         };
-        fetchAccounts();
+        fetchPaymentData();
     }, []);
 
     const handleChange = (e) => {
@@ -163,7 +169,7 @@ export default function Checkout() {
 
     return (
         <div className="space-y-10 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-            <SEO title="Checkout" description="Complete your order for premium organic dry fruits from Gilgit-Baltistan." noindex={true} />
+            <SEO title={`Checkout - ${settings?.store_name || 'Store'}`} description={settings?.store_tagline || "Complete your secure checkout process."} noindex={true} />
 
             {/* BREADCRUMB */}
             <nav className="flex items-center gap-2 text-xs font-semibold text-[#3A2E1F]/70 pb-2">
@@ -200,10 +206,9 @@ export default function Checkout() {
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Phone Number</label>
                                 <input type="tel" name="phone" required
-                                    pattern="^(03\d{9}|\+923\d{9})$"
-                                    title="Please enter a valid Pakistani phone number (e.g. 03001234567 or +923001234567)"
+                                    title="Please enter a valid phone number"
                                     className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-sm text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623] transition-all placeholder:text-[#3A2E1F]/40"
-                                    value={formData.phone} onChange={handleChange} placeholder="0300 1234567" />
+                                    value={formData.phone} onChange={handleChange} placeholder={settings?.phone_placeholder || "Phone Number"} />
                             </div>
                             <div className="space-y-1.5 sm:col-span-2">
                                 <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Email <span className="text-[#3A2E1F]/40 font-normal normal-case">(optional — for order updates)</span></label>
@@ -226,13 +231,9 @@ export default function Checkout() {
                             <CreditCard className="w-5 h-5 text-[#D97706]" /> Payment Method
                         </h2>
                         <div className="space-y-3">
-                            {PAYMENT_METHODS.map((method) => {
-                                const Icon = method.icon;
+                            {paymentMethods.map((method) => {
+                                const Icon = METHOD_ICONS[method.id] || Wallet;
                                 const isSelected = paymentMethod === method.id;
-                                const hasAccount = method.id === 'COD' || paymentAccounts.some(a => a.method === method.id);
-
-                                // Don't show method if no account is configured (except COD)
-                                if (method.id !== 'COD' && !hasAccount && !loadingAccounts) return null;
 
                                 return (
                                     <label
@@ -383,7 +384,7 @@ export default function Checkout() {
                                 <span className="font-heading font-extrabold text-2xl text-[#3A2E1F]">{formatPrice(grandTotal)}</span>
                             </div>
                             <span className="text-right text-[10px] text-[#3A2E1F]/60">
-                                {isOnlinePayment ? `Pay via ${PAYMENT_METHODS.find(m => m.id === paymentMethod)?.label}` : 'Payment on delivery'}
+                                {isOnlinePayment ? `Pay via ${paymentMethods.find(m => m.id === paymentMethod)?.label || paymentMethod}` : 'Payment on delivery'}
                             </span>
                         </div>
                     </div>

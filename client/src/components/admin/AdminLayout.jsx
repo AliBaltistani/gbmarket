@@ -56,7 +56,7 @@ export default function AdminLayout() {
                                 <Leaf className="w-5 h-5 fill-current" />
                             </div>
                             <span className="font-heading font-extrabold text-lg text-[#3A2E1F]">
-                                {settings.store_name || 'GBMarket'} <span className="text-[#D97706] text-sm font-bold ml-1">Admin</span>
+                                {settings.store_name || 'Store'} <span className="text-[#D97706] text-sm font-bold ml-1">Admin</span>
                             </span>
                         </>
                     )}
@@ -104,7 +104,7 @@ export default function AdminLayout() {
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-xl font-bold font-heading tracking-tight text-[#3A2E1F] leading-none">
-                                            {settings.store_name || 'GBMarket'}
+                                            {settings.store_name || 'Store'}
                                         </span>
                                         <span className="text-[10px] font-semibold text-[#D97706] uppercase tracking-widest leading-tight mt-0.5">
                                             Control Center

@@ -43,7 +43,7 @@ export default function Header() {
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-2xl font-bold font-heading tracking-tight text-[#3A2E1F] leading-none">
-                                            {settings.store_name || 'GBMarket'}
+                                            {settings.store_name || 'Store'}
                                         </span>
                                     </div>
                                 </>
@@ -136,7 +136,7 @@ export default function Header() {
                     <form onSubmit={handleSearchSubmit} className="relative mb-3" role="search">
                         <input
                             type="text"
-                            placeholder="Search dry fruits..."
+                            placeholder={settings.search_placeholder || "Search products..."}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             aria-label="Search products"

@@ -1,19 +1,24 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { CheckCircle2, ArrowRight, Package, Truck, Phone, ChevronRight } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
+import { useCurrency } from '../hooks/useCurrency';
+import { getPaymentMethods } from '../api/payments';
 
 export default function OrderConfirmation() {
     const location = useLocation();
     const { orderId, total, count, paymentMethod, isOnlinePayment } = location.state || {};
     const { settings } = useSettings();
+    const { formatPrice } = useCurrency();
+    const [paymentLabels, setPaymentLabels] = useState({});
 
-    const paymentLabels = {
-        'COD': 'Cash on Delivery (COD)',
-        'easypaisa': 'Easypaisa',
-        'jazzcash': 'JazzCash',
-        'bank_transfer': 'Bank Transfer'
-    };
+    useEffect(() => {
+        getPaymentMethods().then(methods => {
+            const labels = {};
+            methods.forEach(m => { labels[m.id] = m.label; });
+            setPaymentLabels(labels);
+        }).catch(() => { });
+    }, []);
 
     useEffect(() => {
         // window.scrollTo(0, 0); // Handled by RouteTransition
@@ -32,10 +37,10 @@ export default function OrderConfirmation() {
 
                 <div className="space-y-3">
                     <h1 className="text-3xl sm:text-4xl font-extrabold font-heading text-[#3A2E1F] tracking-tight">
-                        Order Placed Successfully!
+                        {settings.order_success_heading || "Order Placed Successfully!"}
                     </h1>
                     <p className="text-sm text-[#3A2E1F]/70 max-w-md mx-auto font-body leading-relaxed">
-                        Thank you for choosing {settings.store_name || 'GBMarket'}. Your fresh organic naturally sun-dried items are being prepared for dispatch.
+                        Thank you for choosing {settings.store_name || ''}. {settings.order_success_text || "Your items are being prepared for dispatch."}
                     </p>
                 </div>
             </div>
@@ -49,13 +54,13 @@ export default function OrderConfirmation() {
                     <div className="space-y-1.5 flex flex-col items-center sm:items-start text-center sm:text-left">
                         <Package className="w-6 h-6 text-[#D97706] mb-1" />
                         <span className="text-[11px] font-bold uppercase tracking-wider text-[#3A2E1F]/60 block">Order Reference</span>
-                        <span className="font-mono font-bold text-sm text-[#3A2E1F]">#{orderId ? `${settings.order_prefix || 'GB'}-${new Date().getFullYear()}-${orderId}` : `${settings.order_prefix || 'GB'}-${new Date().getFullYear()}-X`}</span>
+                        <span className="font-mono font-bold text-sm text-[#3A2E1F]">#{orderId ? `${settings.order_prefix || 'UD'}-${new Date().getFullYear()}-${orderId}` : `${settings.order_prefix || ''}-${new Date().getFullYear()}-X`}</span>
                     </div>
 
                     <div className="space-y-1.5 flex flex-col items-center sm:items-start text-center sm:text-left">
                         <Truck className="w-6 h-6 text-[#D97706] mb-1" />
                         <span className="text-[11px] font-bold uppercase tracking-wider text-[#3A2E1F]/60 block">Status & Est. Delivery</span>
-                        <span className="text-sm font-bold text-[#3A2E1F]">Processing (2-3 Days)</span>
+                        <span className="text-sm font-bold text-[#3A2E1F]">{settings.delivery_estimate_text || "Processing (2-3 Days)"}</span>
                     </div>
 
                     <div className="space-y-1.5 flex flex-col items-center sm:items-start text-center sm:text-left">
@@ -63,7 +68,7 @@ export default function OrderConfirmation() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                         <span className="text-[11px] font-bold uppercase tracking-wider text-[#3A2E1F]/60 block">Payment Method</span>
-                        <span className="text-sm font-bold text-[#3A2E1F]">{paymentLabels[paymentMethod] || 'Cash on Delivery (COD)'}</span>
+                        <span className="text-sm font-bold text-[#3A2E1F]">{paymentLabels[paymentMethod] || paymentMethod || 'N/A'}</span>
                     </div>
                 </div>
 
@@ -82,7 +87,7 @@ export default function OrderConfirmation() {
                 {total && (
                     <div className="bg-[#F5EFE0]/60 rounded-2xl p-4 flex items-center justify-between border border-[#E8DEC8]/50 mt-4">
                         <span className="text-xs font-semibold text-[#3A2E1F]/80">{isOnlinePayment ? 'Total amount paid:' : 'Total amount to pay on delivery:'}</span>
-                        <span className="font-heading font-extrabold text-lg text-[#3A2E1F]">{settings.currency_symbol || 'Rs. '}{total.toLocaleString()}</span>
+                        <span className="font-heading font-extrabold text-lg text-[#3A2E1F]">{formatPrice(total)}</span>
                     </div>
                 )}
             </div>

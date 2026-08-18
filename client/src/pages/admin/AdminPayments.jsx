@@ -109,7 +109,7 @@ export default function AdminPayments() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#E8DEC8] pb-4">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-extrabold font-heading text-[#3A2E1F]">Payment Accounts</h1>
-                    <p className="text-xs text-[#3A2E1F]/70">Manage your Easypaisa, JazzCash, and Bank accounts for online payments</p>
+                    <p className="text-xs text-[#3A2E1F]/70">Manage your online payment accounts for customer checkout</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button type="button" onClick={loadAccounts} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold bg-[#FFFDF9] border border-[#E8DEC8] hover:bg-[#F5EFE0] text-[#3A2E1F] transition-all">
@@ -130,7 +130,7 @@ export default function AdminPayments() {
                 ) : accounts.length === 0 ? (
                     <AdminEmptyState
                         title="No Payment Accounts"
-                        description="Add your Easypaisa, JazzCash, or Bank accounts so customers can pay online."
+                        description="Add your payment accounts so customers can pay online."
                         actionLabel="Add Payment Account"
                         onAction={openAddModal}
                     />
@@ -225,7 +225,7 @@ export default function AdminPayments() {
                                 value={formData.account_number}
                                 onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
                                 className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-sm text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623] placeholder:text-[#3A2E1F]/40 font-mono"
-                                placeholder="03001234567"
+                                placeholder="Account Number"
                             />
                         </div>
                         <div className="space-y-1.5">
@@ -235,7 +235,7 @@ export default function AdminPayments() {
                                 value={formData.account_name}
                                 onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
                                 className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-sm text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623] placeholder:text-[#3A2E1F]/40"
-                                placeholder="GBMarket Official"
+                                placeholder="Account Holder Name"
                             />
                         </div>
                     </div>

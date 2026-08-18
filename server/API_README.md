@@ -1,6 +1,6 @@
-# GBMarket Backend API Documentation
+# Store Backend API Documentation
 
-This directory contains the Express backend for GBMarket, using a local SQLite database (`gbmarket.db`).
+This directory contains the Express backend for the Store, using a local SQLite database (`store.db`).
 
 ## Setup and Run
 ```bash
@@ -56,7 +56,7 @@ curl "http://localhost:5000/api/products?search=almond"
 
 #### Get Product by Slug
 \`\`\`bash
-curl http://localhost:5000/api/products/premium-kaghan-almonds-reg
+curl http://localhost:5000/api/products/premium-paper-shell-almonds
 \`\`\`
 
 #### Create a Product
@@ -98,22 +98,22 @@ curl http://localhost:5000/api/orders
 #### Create an Order (with Items)
 \`\`\`bash
 curl -X POST -H "Content-Type: application/json" -d '{
-  "customer_name": "Ali Khan",
-  "phone": "03001234567",
-  "address": "123 Test St, Lahore",
+  "customer_name": "John Doe",
+  "phone": "1234567890",
+  "address": "123 Test St, City",
   "total": 3100,
   "payment_method": "COD",
   "items": [
     {
       "product_id": 1,
-      "product_name": "Premium Kaghan Almonds",
+      "product_name": "Premium Paper-Shell Almonds",
       "weight_option": "1kg",
       "quantity": 1,
       "price": 2450
     },
     {
       "product_id": 5,
-      "product_name": "Hunza Sun-Dried Apricots",
+      "product_name": "Sun-Dried Apricots (Golden)",
       "weight_option": "500g",
       "quantity": 1,
       "price": 650
@@ -144,8 +144,8 @@ curl http://localhost:5000/api/settings
 #### Update Settings (Admin Only)
 ```bash
 curl -X PUT -H "Content-Type: application/json" -H "Authorization: Bearer <jwt-token>" -d '{
-  "store_name": "GBMarket Updated",
-  "currency_symbol": "Rs."
+  "store_name": "Store Updated",
+  "currency_symbol": "$"
 }' http://localhost:5000/api/settings
 ```
 *Returns:* The fully updated JSON setting map representing the live state. Supports partial updates (only the submitted keys get replaced).

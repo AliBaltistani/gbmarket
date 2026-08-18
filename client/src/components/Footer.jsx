@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Leaf, Mail, Send, Heart, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
+import { getCategories } from '../api/categories';
 
 export default function Footer() {
     const { settings } = useSettings();
+    const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        getCategories().then(cats => setCategories(cats.slice(0, 6))).catch(() => { });
+    }, []);
+
     const handleSubmit = (e) => {
         e.preventDefault();
     };
@@ -62,14 +69,14 @@ export default function Footer() {
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-2xl font-bold font-heading text-white">
-                                            {settings.store_name || 'GBMarket'}
+                                            {settings.store_name || 'Store'}
                                         </span>
                                     </div>
                                 </>
                             )}
                         </Link>
                         <p className="text-sm text-[#F5EFE0]/80 leading-relaxed">
-                            {settings.footer_about_text || 'Your trusted destination for handpicked organic almonds, walnuts, pistachios, pine nuts, and exotic dried fruits directly from Gilgit-Baltistan.'}
+                            {settings.footer_about_text || 'Your trusted destination for premium quality products, carefully sourced and delivered to your doorstep.'}
                         </p>
                     </div>
 
@@ -77,11 +84,11 @@ export default function Footer() {
                     <div>
                         <h3 className="text-lg font-bold font-heading text-white mb-4 text-[#F5A623]">Shop Categories</h3>
                         <ul className="space-y-2.5 text-sm text-[#F5EFE0]/80">
-                            <li><Link to="/shop?category=almonds" className="hover:text-[#F5A623] transition-colors">Almonds & Walnuts</Link></li>
-                            <li><Link to="/shop?category=pistachios" className="hover:text-[#F5A623] transition-colors">Pistachios & Cashews</Link></li>
-                            <li><Link to="/shop?category=pine-nuts" className="hover:text-[#F5A623] transition-colors">Pine Nuts (Chilgoza)</Link></li>
-                            <li><Link to="/shop?category=dried-apricots" className="hover:text-[#F5A623] transition-colors">Dried Apricots & Mulberries</Link></li>
-                            <li><Link to="/shop?category=dates" className="hover:text-[#F5A623] transition-colors">Royal Ajwa Dates</Link></li>
+                            {categories.length > 0 ? categories.map(cat => (
+                                <li key={cat.id || cat.slug}><Link to={`/shop?category=${cat.slug}`} className="hover:text-[#F5A623] transition-colors">{cat.name}</Link></li>
+                            )) : (
+                                <li><Link to="/shop" className="hover:text-[#F5A623] transition-colors">Browse All Products</Link></li>
+                            )}
                         </ul>
                     </div>
 
@@ -89,7 +96,7 @@ export default function Footer() {
                     <div>
                         <h3 className="text-lg font-bold font-heading text-white mb-4 text-[#F5A623]">Company & Support</h3>
                         <ul className="space-y-2.5 text-sm text-[#F5EFE0]/80">
-                            <li><Link to="/about" className="hover:text-[#F5A623] transition-colors">About {settings.store_name || 'GBMarket'}</Link></li>
+                            <li><Link to="/about" className="hover:text-[#F5A623] transition-colors">About {settings.store_name || 'Store'}</Link></li>
                             <li><Link to="/contact" className="hover:text-[#F5A623] transition-colors">Contact Us</Link></li>
                             <li><Link to="/track-order" className="hover:text-[#F5A623] transition-colors">Track Order</Link></li>
                             <li><Link to="/cart" className="hover:text-[#F5A623] transition-colors">View Cart</Link></li>
@@ -130,7 +137,7 @@ export default function Footer() {
             {/* Bottom Bar */}
             <div className="border-t border-[#F5EFE0]/10 bg-[#2A2116] py-6">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#F5EFE0]/60">
-                    <p>© {new Date().getFullYear()} {settings.store_name || 'GBMarket'}. All rights reserved.</p>
+                    <p>© {new Date().getFullYear()} {settings.store_name || 'Store'}. All rights reserved.</p>
                     <div className="flex items-center gap-6">
                         <Link to="/privacy" className="hover:text-[#F5A623] transition-colors duration-200">
                             Privacy Policy

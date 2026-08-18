@@ -8,7 +8,7 @@ import { useSettings } from '../context/SettingsContext';
  */
 export function useCurrency() {
     const { settings } = useSettings();
-    const symbol = settings?.currency_symbol || 'Rs. ';
+    const symbol = settings?.currency_symbol || '$';
 
     const formatPrice = (amount) => {
         const num = Number(amount) || 0;

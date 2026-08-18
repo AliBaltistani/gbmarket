@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Leaf } from 'lucide-react';
+import { useSettings } from '../context/SettingsContext';
 
 export default function RouteTransition({ children }) {
+    const { settings } = useSettings();
     const location = useLocation();
     const [displayLocation, setDisplayLocation] = useState(location);
     const [isTransitioning, setIsTransitioning] = useState(false);
@@ -60,7 +62,7 @@ export default function RouteTransition({ children }) {
                             <Leaf className="w-5 h-5 fill-current animate-pulse" />
                         </div>
                     </div>
-                    <h2 className="text-[#3A2E1F] font-extrabold font-heading text-xl tracking-tight">GBMarket</h2>
+                    <h2 className="text-[#3A2E1F] font-extrabold font-heading text-xl tracking-tight">{settings?.store_name || 'Store Loading...'}</h2>
                     <p className="text-[#3A2E1F]/60 text-xs font-semibold uppercase tracking-widest mt-1 animate-pulse">
                         {isInitialLoad ? "Initializing Store..." : "Loading Fresh Goods..."}
                     </p>

@@ -182,43 +182,43 @@ function initDb() {
   // Migration for new keys like site_url, working_hours, map_embed_url
   const existSiteUrl = db.prepare('SELECT COUNT(*) as count FROM settings WHERE key = ?').get('site_url');
   if (existSiteUrl.count === 0) {
-    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('site_url', 'https://gbmarket.pk');
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('site_url', '');
   }
 
   const existWorkingHours = db.prepare('SELECT COUNT(*) as count FROM settings WHERE key = ?').get('working_hours');
   if (existWorkingHours.count === 0) {
-    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('working_hours', 'Mon - Sat: 9:00 AM - 8:00 PM (PKT)');
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('working_hours', 'Mon - Sat: 9:00 AM - 8:00 PM');
   }
 
   const existMapUrl = db.prepare('SELECT COUNT(*) as count FROM settings WHERE key = ?').get('map_embed_url');
   if (existMapUrl.count === 0) {
-    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('map_embed_url', 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d102146.12648415714!2d74.249495!3d35.918968!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38e649e3742ea395%3A0xe543594b28867aab!2sGilgit%2C%20Gilgit-Baltistan%2C%20Pakistan!5e0!3m2!1sen!2s!4v1700000000000');
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('map_embed_url', '');
   }
 
   // --- CMS Pages Migrations ---
   const existPrivacy = db.prepare('SELECT COUNT(*) as count FROM settings WHERE key = ?').get('privacy_policy_content');
   if (existPrivacy.count === 0) {
-    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('privacy_policy_content', '<h2 class="text-xl font-bold text-[#3A2E1F] my-4">1. Introduction</h2><p class="mb-4">GBMarket values your privacy and is committed to protecting your personal data...</p><h2 class="text-xl font-bold text-[#3A2E1F] my-4">Contact Us</h2><p class="mb-4">If you have any questions, please contact us.</p>');
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('privacy_policy_content', '<h2 class="text-xl font-bold text-[#3A2E1F] my-4">1. Introduction</h2><p class="mb-4">We value your privacy and are committed to protecting your personal data...</p><h2 class="text-xl font-bold text-[#3A2E1F] my-4">Contact Us</h2><p class="mb-4">If you have any questions, please contact us.</p>');
   }
 
   const existAboutStory = db.prepare('SELECT COUNT(*) as count FROM settings WHERE key = ?').get('about_story_heading');
   if (existAboutStory.count === 0) {
-    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('about_hero_heading', 'Pure Mountain Goodness Direct From Gilgit-Baltistan');
-    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('about_hero_subheading', 'GBMarket was founded with a single mission: bringing the untouched, nutrient-dense organic dry fruits of Northern Pakistan straight to your family\'s table.');
-    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('about_story_heading', 'Sourced From High Altitude Orchards');
-    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('about_story_text', 'Nestled between the Karakoram and Himalayan mountain ranges, Gilgit-Baltistan produces some of the world\'s finest walnuts, paper-shell almonds, Chilgoza pine nuts, and sun-dried apricots.\n\nFed by pure glacier meltwater and ripened in intense high-altitude sunlight, our dry fruits are richer in natural oils, antioxidants, and crunch compared to commercial store-bought alternatives.');
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('about_hero_heading', 'Welcome to Our Store');
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('about_hero_subheading', 'We are dedicated to bringing you the finest quality products, sourced with care and delivered to your doorstep.');
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('about_story_heading', 'Our Story');
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('about_story_text', 'We are passionate about delivering the highest quality products to our customers. Every item in our collection is carefully sourced and quality-checked to ensure you receive nothing but the best.\n\nOur commitment to excellence means we work directly with trusted suppliers, ensuring authenticity and freshness in every order.');
   }
 
   // Add new dynamic settings if they don't exist
   const newSettings = [
-    { key: 'currency_code', val: 'PKR' },
-    { key: 'locale', val: 'en_PK' },
+    { key: 'currency_code', val: 'USD' },
+    { key: 'locale', val: 'en_US' },
     { key: 'default_shipping_fee', val: '350' },
     { key: 'shipping_info_text', val: 'Orders dispatched within 24 hours.\nDelivery time: 2–3 business days.\nFree shipping on all orders above the threshold.\nTracked delivery via courier service.' },
     { key: 'order_prefix', val: 'GB' },
     { key: 'sku_prefix', val: 'GBM' },
     { key: 'phone_pattern', val: '^(\\d{10,15}|\\+\\d{10,15})$' },
-    { key: 'phone_placeholder', val: '0300 1234567' },
+    { key: 'phone_placeholder', val: 'Phone Number' },
     { key: 'search_placeholder', val: 'Search products...' },
     { key: 'chatbot_name', val: 'AI Assistant' },
     { key: 'footer_tagline', val: 'Crafted with love for healthy living' },
@@ -229,7 +229,12 @@ function initDb() {
     { key: 'footer_feature_3_title', val: '7-Day Fresh Guarantee' },
     { key: 'footer_feature_3_text', val: '100% money back or replacement' },
     { key: 'product_badge_text', val: '100% Organic' },
-    { key: 'empty_cart_text', val: 'Looks like you haven\'t added any products to your cart yet.' }
+    { key: 'empty_cart_text', val: 'Looks like you haven\'t added any products to your cart yet.' },
+    { key: 'shipping_tab_heading', val: 'Nationwide Delivery' },
+    { key: 'shipping_bullet_1', val: 'Orders dispatched within 24 hours.' },
+    { key: 'shipping_bullet_2', val: 'Delivery time: 2–3 business days.' },
+    { key: 'shipping_bullet_3', val: 'Free shipping on all orders above the threshold.' },
+    { key: 'shipping_bullet_4', val: 'Tracked delivery via courier service.' }
   ];
 
   const checkSetting = db.prepare('SELECT COUNT(*) as count FROM settings WHERE key = ?');
@@ -247,50 +252,55 @@ function initDb() {
   const { count } = db.prepare('SELECT COUNT(*) as count FROM settings').get();
   if (count === 0) {
     const seedSettings = {
-      store_name: 'GBMarket',
-      store_tagline: 'Premium Dry Fruits & Nuts from the Mountains of Gilgit-Baltistan',
-      site_url: 'https://gbmarket.pk',
+      store_name: 'My Store',
+      store_tagline: 'Premium quality products delivered to your doorstep',
+      site_url: '',
       logo_url: '/placeholder.png',
       favicon_url: '/vite.svg',
       footer_logo_url: '/placeholder.png',
-      contact_email: 'info@gbmarket.pk',
-      contact_phone: '+92 300 0000000',
-      contact_address: 'Main Bazar, Gilgit, Gilgit-Baltistan, Pakistan',
-      working_hours: 'Mon - Sat: 9:00 AM - 8:00 PM (PKT)',
-      map_embed_url: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d102146.12648415714!2d74.249495!3d35.918968!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38e649e3742ea395%3A0xe543594b28867aab!2sGilgit%2C%20Gilgit-Baltistan%2C%20Pakistan!5e0!3m2!1sen!2s!4v1700000000000',
-      hero_heading: 'From the Highest Mountains of the World to Your Table.',
-      hero_subheading: 'Experience the pure, 100% natural, and organic taste of Gilgit-Baltistan.',
+      contact_email: '',
+      contact_phone: '',
+      contact_address: '',
+      working_hours: 'Mon - Sat: 9:00 AM - 8:00 PM',
+      map_embed_url: '',
+      hero_heading: 'Premium Quality Products Delivered to Your Door.',
+      hero_subheading: 'Discover our carefully curated collection of premium products.',
       hero_image_url: 'https://images.unsplash.com/photo-1596769062638-e6ed3f46f496?auto=format&fit=crop&q=80&w=1200',
-      social_facebook: 'https://facebook.com/gbmarket.pk',
-      social_instagram: 'https://instagram.com/gbmarket.pk',
-      social_whatsapp: '+92 300 1234567',
-      footer_about_text: 'GBMarket brings the finest, freshest, and most organic dry fruits straight from the majestic mountains of Gilgit-Baltistan to your doorstep.',
-      currency_symbol: 'Rs. ',
-      currency_code: 'PKR',
-      locale: 'en_PK',
+      social_facebook: '',
+      social_instagram: '',
+      social_whatsapp: '',
+      footer_about_text: 'Your trusted destination for premium quality products, carefully sourced and delivered to your doorstep.',
+      currency_symbol: '$ ',
+      currency_code: 'USD',
+      locale: 'en_US',
       free_shipping_threshold: '3000',
       default_shipping_fee: '350',
       shipping_info_text: 'Orders dispatched within 24 hours.\nDelivery time: 2–3 business days.\nFree shipping on all orders above the threshold.\nTracked delivery via courier service.',
-      order_prefix: 'GB',
-      sku_prefix: 'GBM',
+      shipping_tab_heading: 'Nationwide Delivery',
+      shipping_bullet_1: 'Orders dispatched within 24 hours.',
+      shipping_bullet_2: 'Delivery time: 2–3 business days.',
+      shipping_bullet_3: 'Free shipping on all orders above the threshold.',
+      shipping_bullet_4: 'Tracked delivery via courier service.',
+      order_prefix: 'ORD',
+      sku_prefix: 'SKU',
       phone_pattern: '^(\\d{10,15}|\\+\\d{10,15})$',
-      phone_placeholder: '0300 1234567',
+      phone_placeholder: 'Phone Number',
       search_placeholder: 'Search products...',
       chatbot_name: 'AI Assistant',
-      footer_tagline: 'Crafted with love for healthy living',
+      footer_tagline: 'Crafted with care for quality living',
       footer_feature_1_title: 'Free Express Shipping',
       footer_feature_1_text: 'On all orders over the threshold',
       footer_feature_2_title: '100% Quality Guaranteed',
       footer_feature_2_text: 'Direct from trusted sources',
-      footer_feature_3_title: '7-Day Fresh Guarantee',
+      footer_feature_3_title: '7-Day Satisfaction Guarantee',
       footer_feature_3_text: '100% money back or replacement',
-      product_badge_text: '100% Organic',
+      product_badge_text: 'Premium Quality',
       empty_cart_text: 'Looks like you haven\'t added any products to your cart yet.',
       privacy_policy_content: '<h2 class="text-xl font-bold text-[#3A2E1F] my-4">1. Introduction</h2><p class="mb-4">We value your privacy and are committed to protecting your personal data...</p><h2 class="text-xl font-bold text-[#3A2E1F] my-4">Contact Us</h2><p class="mb-4">If you have any questions, please contact us.</p>',
-      about_hero_heading: 'Pure Mountain Goodness Direct From Gilgit-Baltistan',
-      about_hero_subheading: 'GBMarket was founded with a single mission: bringing the untouched, nutrient-dense organic dry fruits of Northern Pakistan straight to your family\'s table.',
-      about_story_heading: 'Sourced From High Altitude Orchards',
-      about_story_text: 'Nestled between the Karakoram and Himalayan mountain ranges, Gilgit-Baltistan produces some of the world\'s finest walnuts, paper-shell almonds, Chilgoza pine nuts, and sun-dried apricots.\n\nFed by pure glacier meltwater and ripened in intense high-altitude sunlight, our dry fruits are richer in natural oils, antioxidants, and crunch compared to commercial store-bought alternatives.',
+      about_hero_heading: 'Welcome to Our Store',
+      about_hero_subheading: 'We are dedicated to bringing you the finest quality products, sourced with care and delivered to your doorstep.',
+      about_story_heading: 'Our Story',
+      about_story_text: 'We are passionate about delivering the highest quality products to our customers. Every item in our collection is carefully sourced and quality-checked to ensure you receive nothing but the best.\n\nOur commitment to excellence means we work directly with trusted suppliers, ensuring authenticity and freshness in every order.',
       about_story_image: 'https://images.unsplash.com/photo-1596769062638-e6ed3f46f496?auto=format&fit=crop&q=80&w=800'
     };
     const insertSetting = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)');
@@ -312,31 +322,31 @@ function initDb() {
       insertSection.run('hero_banner', 'Hero Banner', JSON.stringify({
         slides: [
           {
-            badge: 'Fresh Harvest 2026',
-            title: '100% Organic & Sun-Dried Mountain Produce',
-            subtitle: 'Handpicked paper-shell almonds & walnuts from the high-altitude orchards of Gilgit-Baltistan.',
-            ctaText: 'Explore Harvest',
+            badge: 'New Collection 2026',
+            title: 'Premium Quality Products For Your Lifestyle',
+            subtitle: 'Discover our handpicked selection of premium products, sourced from trusted suppliers.',
+            ctaText: 'Shop Now',
             ctaLink: '/shop',
             image: 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&q=80&w=800',
-            highlight: 'Premium Grade Paper-Shell Almonds'
+            highlight: 'Curated Premium Selection'
           },
           {
-            badge: 'Pure Mountain Oils',
-            title: 'Cold-Pressed Hunza Apricot & Almond Oils',
-            subtitle: 'Raw, unrefined superfood oils extracted directly from wild Gilgit mountain harvests.',
-            ctaText: 'Shop Pure Oils',
+            badge: 'Best Sellers',
+            title: 'Top Rated Products Our Customers Love',
+            subtitle: 'Browse our most popular items, rated 5 stars by thousands of happy customers.',
+            ctaText: 'View Best Sellers',
             ctaLink: '/shop',
             image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&q=80&w=800',
-            highlight: '100% Unpasteurized & Nutrient Rich'
+            highlight: 'Trusted By Thousands'
           },
           {
-            badge: 'Limited Reserve',
-            title: 'Wild Mountain Pine Nuts (Chilgoza)',
-            subtitle: 'Exquisite grade-A pine nuts harvested straight from natural pine forests of Gilgit-Baltistan.',
-            ctaText: 'Discover Chilgoza',
+            badge: 'Limited Edition',
+            title: 'Exclusive Products Available Now',
+            subtitle: 'Get your hands on our exclusive limited-edition products before they sell out.',
+            ctaText: 'Discover More',
             ctaLink: '/shop',
             image: 'https://images.unsplash.com/photo-1543362906-acfc16c67564?auto=format&fit=crop&q=80&w=800',
-            highlight: 'Direct Sourced Mountain Luxury'
+            highlight: 'Premium Quality Guaranteed'
           }
         ]
       }), 0);
@@ -344,12 +354,12 @@ function initDb() {
       // 2. Category Showcase
       insertSection.run('category_showcase', 'Browse Categories', JSON.stringify({
         heading: 'Browse Categories',
-        description: 'Auto-scrolling organic mountain dry fruit varieties'
+        description: 'Explore our product categories'
       }), 1);
 
       // 3. Featured Products Grid
-      insertSection.run('product_grid', 'Featured Dry Fruits', JSON.stringify({
-        heading: 'Featured Dry Fruits',
+      insertSection.run('product_grid', 'Featured Products', JSON.stringify({
+        heading: 'Featured Products',
         badge: 'Best Seller Collection',
         filter: 'featured',
         maxItems: 6
@@ -357,9 +367,9 @@ function initDb() {
 
       // 4. New Arrivals Carousel
       insertSection.run('product_carousel', 'New Arrivals', JSON.stringify({
-        heading: 'New Arrivals Strip',
-        badge: 'Fresh Batch Harvest',
-        description: 'Handpicked items from this season\'s first harvest.',
+        heading: 'New Arrivals',
+        badge: 'Just Landed',
+        description: 'Check out our latest additions to the store.',
         filter: 'new',
         maxItems: 8
       }), 3);
@@ -368,7 +378,7 @@ function initDb() {
       insertSection.run('banner_image', 'Promotional Banner', JSON.stringify({
         image: 'https://images.unsplash.com/photo-1596769062638-e6ed3f46f496?auto=format&fit=crop&q=80&w=1200',
         link: '/shop',
-        alt: 'Shop Organic Dry Fruits from Gilgit-Baltistan'
+        alt: 'Shop Our Premium Products'
       }), 4);
 
       // 6. Promo Cards
@@ -376,17 +386,17 @@ function initDb() {
         cards: [
           {
             badge: 'Save Up to 20% OFF',
-            heading: 'Organic Mountain Dry Fruit Bundles',
-            body: 'Get our curated 5-Nut Power Mix paired with authentic Hunza Sun-Dried Apricots at special discounted rates this season.',
-            ctaText: 'Shop Deal Bundles',
+            heading: 'Bundle Deals & Combo Packs',
+            body: 'Get our curated product bundles at special discounted rates this season.',
+            ctaText: 'Shop Deals',
             ctaLink: '/shop',
             theme: 'dark'
           },
           {
             badge: 'Free Express Delivery',
-            heading: 'Fast Shipping Across Pakistan',
-            body: 'Enjoy free insured doorstep shipping on all orders over Rs. 3,000. Freshly sealed packs delivered right to your home.',
-            ctaText: 'Explore Fresh Nuts',
+            heading: 'Fast Shipping Nationwide',
+            body: 'Enjoy free insured doorstep shipping on qualifying orders. Carefully packed and delivered to your home.',
+            ctaText: 'Explore Products',
             ctaLink: '/shop',
             theme: 'light'
           }
@@ -397,9 +407,9 @@ function initDb() {
       insertSection.run('reviews', 'Customer Reviews', JSON.stringify({
         heading: 'What Our Customers Say',
         reviews: [
-          { name: 'Ahmed Khan', rating: 5, text: 'Best quality almonds I have ever tasted. Truly organic and fresh from the mountains!', location: 'Islamabad' },
-          { name: 'Fatima Ali', rating: 5, text: 'The Hunza apricots are amazing. My whole family loves them. Will order again!', location: 'Lahore' },
-          { name: 'Bilal Shah', rating: 4, text: 'Great pine nuts and fast delivery. Packaging was excellent and everything was fresh.', location: 'Karachi' }
+          { name: 'Sarah Johnson', rating: 5, text: 'Best quality products I have ever purchased. Truly premium and exactly as described!', location: 'New York' },
+          { name: 'Michael Chen', rating: 5, text: 'Amazing products and fast delivery. My whole family loves them. Will order again!', location: 'Los Angeles' },
+          { name: 'Emily Davis', rating: 4, text: 'Great selection and fast delivery. Packaging was excellent and everything arrived fresh.', location: 'Chicago' }
         ]
       }), 6);
     });
@@ -412,9 +422,9 @@ function initDb() {
   if (paCount === 0) {
     const insertPA = db.prepare('INSERT INTO payment_accounts (method, title, account_number, account_name, instructions, is_active) VALUES (?, ?, ?, ?, ?, 1)');
     const paTrx = db.transaction(() => {
-      insertPA.run('easypaisa', 'Easypaisa', '03001234567', 'GBMarket Official', 'Send payment to the above Easypaisa number and upload the screenshot as proof.');
-      insertPA.run('jazzcash', 'JazzCash', '03009876543', 'GBMarket Official', 'Send payment to the above JazzCash number and upload the transaction screenshot.');
-      insertPA.run('bank_transfer', 'Bank Transfer (HBL)', 'PK36HABB0012345678901234', 'GBMarket Pvt Ltd', 'Transfer the total amount to the above bank account and upload the receipt screenshot. Bank: Habib Bank Limited.');
+      insertPA.run('easypaisa', 'Mobile Wallet', '1234567890', 'Store Official', 'Send payment to the above number and upload the screenshot as proof.');
+      insertPA.run('jazzcash', 'Mobile Payment', '0987654321', 'Store Official', 'Send payment to the above number and upload the transaction screenshot.');
+      insertPA.run('bank_transfer', 'Bank Transfer', 'XX00BANK0012345678901234', 'Store Official', 'Transfer the total amount to the above bank account and upload the receipt screenshot.');
     });
     paTrx();
     console.log('Default payment accounts seeded.');
