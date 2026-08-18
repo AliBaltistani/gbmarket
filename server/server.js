@@ -47,6 +47,13 @@ if (isCloudinaryConfigured()) {
 const app = express();
 
 // ==========================================
+// S0: TRUST PROXY (REQUIRED FOR RATE LIMITING BEHIND REVERSE PROXIES)
+// ==========================================
+// Enable trusting the immediate proxy so `express-rate-limit` identifies client IPs
+// correctly (avoids blocking all users as one IP when deployed on Render, Vercel, etc.)
+app.set('trust proxy', 1);
+
+// ==========================================
 // S4: SECURITY HEADERS (Helmet)
 // ==========================================
 app.use(helmet({
@@ -152,6 +159,7 @@ app.use('/api/payments', require('./routes/payments')(db, requireAdmin, upload))
 app.use('/api/chatbot', require('./routes/chatbot')(db));
 app.use('/api/reviews', require('./routes/reviews')(db, requireAdmin));
 app.use('/sitemap.xml', require('./routes/sitemap')(db));
+app.use('/robots.txt', require('./routes/robots')(db));
 
 // ==========================================
 // C7: API 404 CATCH-ALL
