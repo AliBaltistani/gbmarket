@@ -1,13 +1,23 @@
 const express = require('express');
 
-module.exports = function (db, requireAdmin, upload) {
+const { getUploadMiddleware, isCloudinaryConfigured } = require('../config/cloudinary');
+const uploadSite = getUploadMiddleware('site');
+
+module.exports = function (db, requireAdmin, _legacyUpload) {
     const router = express.Router();
 
     // POST /api/upload
-    router.post('/', requireAdmin, upload.single('image'), (req, res, next) => {
+    router.post('/', requireAdmin, uploadSite.single('image'), (req, res, next) => {
         try {
             if (!req.file) return res.status(400).json({ error: 'No image provided' });
-            const imageUrl = `/uploads/${req.file.filename}`;
+
+            let imageUrl;
+            if (isCloudinaryConfigured()) {
+                imageUrl = req.file.path; // Cloudinary secure_url is stored in req.file.path
+            } else {
+                imageUrl = `/uploads/${req.file.filename}`;
+            }
+
             res.status(201).json({ url: imageUrl });
         } catch (error) {
             next(error);

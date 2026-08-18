@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const { getUploadMiddleware, isCloudinaryConfigured } = require('./config/cloudinary');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { v4: uuidv4 } = require('uuid');
@@ -35,6 +36,12 @@ const sanitizeValue = (val) => {
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.includes('replace_this')) {
     console.error('FATAL: JWT_SECRET environment variable is not set or is still the default placeholder. Please set a secure value in your .env file.');
     process.exit(1);
+}
+
+if (isCloudinaryConfigured()) {
+    console.log('✅ Using Cloudinary for image storage');
+} else {
+    console.log('⚠️ Using local disk storage (dev fallback) — set CLOUDINARY_* env vars in .env for production');
 }
 
 const app = express();
@@ -94,29 +101,7 @@ app.use('/uploads', express.static(uploadDir));
 // ==========================================
 // S6 & S7: SECURE MULTER CONFIG
 // ==========================================
-const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadDir),
-    filename: (req, file, cb) => {
-        const ext = path.extname(file.originalname).toLowerCase();
-        const safeExt = ALLOWED_EXTENSIONS.includes(ext) ? ext : '.png';
-        cb(null, `${uuidv4()}${safeExt}`);
-    }
-});
-
-const upload = multer({
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 },
-    fileFilter: (req, file, cb) => {
-        if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-            cb(null, true);
-        } else {
-            cb(new Error('Only JPEG, PNG, WebP, and GIF images are allowed'));
-        }
-    }
-});
+const upload = getUploadMiddleware('general');
 
 // ==========================================
 // S3: RATE LIMITING

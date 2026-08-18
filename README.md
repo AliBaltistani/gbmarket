@@ -70,6 +70,12 @@ The platform is designed with a modern, responsive UI focused on a seamless shop
    * Storefront: `http://localhost:5173`
    * Admin Login: `http://localhost:5173/admin/login` (Check seeds configuration for default credentials).
 
+## 🖼️ Image Storage (Production)
+
+By default, uploaded images are stored temporarily on local disk (fine for local development). For production deployment:
+* Sign up for a free Cloudinary account and set `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` in your `.env` file.
+* If migrating an existing deployment from local storage to Cloudinary, previously uploaded images will need to be manually re-uploaded through the admin panel, since old `/uploads/...` URLs won't resolve on hosts without persistent local storage.
+
 ## 🗺️ Architectural Highlights
 
 * **Dynamic Sitemap**: Driven by `/sitemap.xml` express route handling database queries injecting `lastmod` data to notify search engines.
