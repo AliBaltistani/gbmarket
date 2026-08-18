@@ -149,3 +149,19 @@ curl -X PUT -H "Content-Type: application/json" -H "Authorization: Bearer <jwt-t
 }' http://localhost:5000/api/settings
 ```
 *Returns:* The fully updated JSON setting map representing the live state. Supports partial updates (only the submitted keys get replaced).
+
+---
+
+### 5. File Uploads
+
+#### Upload General Images (Products, Categories, Site)
+```bash
+curl -X POST -H "Authorization: Bearer <jwt-token>" -F "image=@/path/to/image.jpg" http://localhost:5000/api/upload
+```
+*Returns:* `{ "url": "..." }`. Note that this will return a Cloudinary URL (`secure_url`) when `CLOUDINARY_*` env vars are configured, with local disk storage as an automatic fallback for development when they're not set.
+
+#### Upload Payment Receipts (Public)
+```bash
+curl -X POST -F "image=@/path/to/receipt.jpg" http://localhost:5000/api/payments/receipt-upload
+```
+*Returns:* `{ "url": "..." }`. Same Cloudinary/local fallback logic as general uploads.
