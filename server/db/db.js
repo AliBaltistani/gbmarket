@@ -2,9 +2,14 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
 
-const dbPath = path.resolve(__dirname, 'gbmarket.db');
+const dbPath = process.env.DB_PATH
+  ? path.resolve(process.env.DB_PATH)
+  : path.resolve(__dirname, 'gbmarket.db');
+
 const isProduction = process.env.NODE_ENV === 'production';
 const db = new Database(dbPath, isProduction ? {} : { verbose: console.log });
+
+console.log('Using database at: ' + dbPath);
 
 // Enable foreign keys
 db.pragma('foreign_keys = ON');

@@ -7,7 +7,10 @@ module.exports = function (db) {
         try {
             // Retrieve dynamic site URL from settings
             const settingsRows = db.prepare('SELECT value FROM settings WHERE key = ?').get('site_url');
-            const siteUrl = settingsRows ? (settingsRows.value || 'https://gbmarket.pk') : 'https://gbmarket.pk';
+
+            // Fall back to actual request host if site_url is not configured
+            const fallbackUrl = req.protocol + '://' + req.get('host');
+            const siteUrl = (settingsRows && settingsRows.value) ? settingsRows.value : fallbackUrl;
 
             // Normalize trailing slash
             const baseUrl = siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl;
