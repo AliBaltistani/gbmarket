@@ -32,6 +32,7 @@ export default function AdminSettings() {
         // General
         storeName: settings.store_name || '',
         storeTagline: settings.store_tagline || '',
+        siteBaseUrl: settings.site_url || '',
         logoPreview: settings.logo_url || '/placeholder.png',
         faviconPreview: settings.favicon_url || '/vite.svg',
 
@@ -42,11 +43,10 @@ export default function AdminSettings() {
         contactEmail: settings.contact_email || '',
         contactPhone: settings.contact_phone || '',
         contactAddress: settings.contact_address || '',
+        workingHours: settings.working_hours || 'Mon - Sat: 9:00 AM - 8:00 PM (PKT)',
+        mapEmbedUrl: settings.map_embed_url || 'https://www.google.com/maps/embed?pb=...',
 
-        // Homepage Hero
-        heroHeading: settings.hero_heading || '',
-        heroSubheading: settings.hero_subheading || '',
-        heroImagePreview: settings.hero_image_url || '/placeholder.png',
+
 
         // Social Links
         facebookUrl: settings.social_facebook || '',
@@ -58,21 +58,54 @@ export default function AdminSettings() {
 
         // Store Settings
         currencySymbol: settings.currency_symbol || '',
-        freeShippingThreshold: settings.free_shipping_threshold || ''
+        currencyCode: settings.currency_code || 'PKR',
+        freeShippingThreshold: settings.free_shipping_threshold || '',
+        defaultShippingFee: settings.default_shipping_fee || '',
+        shippingInfoText: settings.shipping_info_text || '',
+        shippingTabHeading: settings.shipping_tab_heading || '',
+        shippingBullet1: settings.shipping_bullet_1 || '',
+        shippingBullet2: settings.shipping_bullet_2 || '',
+        shippingBullet3: settings.shipping_bullet_3 || '',
+        shippingBullet4: settings.shipping_bullet_4 || '',
+        orderPrefix: settings.order_prefix || 'GB',
+        skuPrefix: settings.sku_prefix || 'GBM',
+        phonePattern: settings.phone_pattern || '',
+        phonePlaceholder: settings.phone_placeholder || '',
+        searchPlaceholder: settings.search_placeholder || '',
+        chatbotName: settings.chatbot_name || '',
+        footerTagline: settings.footer_tagline || '',
+        footerFeature1Title: settings.footer_feature_1_title || '',
+        footerFeature1Text: settings.footer_feature_1_text || '',
+        footerFeature2Title: settings.footer_feature_2_title || '',
+        footerFeature2Text: settings.footer_feature_2_text || '',
+        footerFeature3Title: settings.footer_feature_3_title || '',
+        footerFeature3Text: settings.footer_feature_3_text || '',
+        productBadgeText: settings.product_badge_text || '',
+        emptyCartText: settings.empty_cart_text || '',
+        locale: settings.locale || 'en_PK',
+
+        // Static Pages CMS
+        privacyPolicyContent: settings.privacy_policy_content || '',
+        aboutHeroHeading: settings.about_hero_heading || '',
+        aboutHeroSubheading: settings.about_hero_subheading || '',
+        aboutStoryHeading: settings.about_story_heading || '',
+        aboutStoryText: settings.about_story_text || '',
+        aboutStoryImagePreview: settings.about_story_image || 'https://images.unsplash.com/photo-1596769062638-e6ed3f46f496?auto=format&fit=crop&q=80&w=800'
     });
 
     const logoInputRef = useRef(null);
     const faviconInputRef = useRef(null);
-    const heroImageInputRef = useRef(null);
     const footerLogoInputRef = useRef(null);
+    const aboutStoryImageRef = useRef(null);
 
     // Tab items configuration
     const tabs = [
         { id: 'general', label: 'General', icon: Store },
         { id: 'contact', label: 'Contact Info', icon: Mail },
-        { id: 'hero', label: 'Homepage Hero', icon: LayoutTemplate },
         { id: 'social', label: 'Social Links', icon: Share2 },
         { id: 'footer', label: 'Footer', icon: Info },
+        { id: 'about', label: 'About Info', icon: LayoutTemplate },
+        { id: 'privacy', label: 'Privacy Policies', icon: LayoutTemplate },
         { id: 'store', label: 'Store Settings', icon: Sliders },
     ];
 
@@ -107,14 +140,16 @@ export default function AdminSettings() {
         }
     };
 
-    const handleHeroImageChange = (e) => {
+    const handleAboutStoryImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             const previewUrl = URL.createObjectURL(file);
-            setFormData(prev => ({ ...prev, heroImagePreview: previewUrl }));
-            toast.success('Hero image preview updated!');
+            setFormData(prev => ({ ...prev, aboutStoryImagePreview: previewUrl }));
+            toast.success('About Story Image preview updated!');
         }
     };
+
+
 
     const handleSaveSettings = async (e) => {
         if (e) e.preventDefault();
@@ -144,32 +179,63 @@ export default function AdminSettings() {
                 finalFaviconUrl = data.url;
             }
 
-            let finalHeroImageUrl = formData.heroImagePreview;
-            if (heroImageInputRef.current && heroImageInputRef.current.files[0]) {
+            let finalAboutStoryImage = formData.aboutStoryImagePreview;
+            if (aboutStoryImageRef.current && aboutStoryImageRef.current.files[0]) {
                 const fd = new FormData();
-                fd.append('image', heroImageInputRef.current.files[0]);
+                fd.append('image', aboutStoryImageRef.current.files[0]);
                 const { data } = await api.post('/upload', fd);
-                finalHeroImageUrl = data.url;
+                finalAboutStoryImage = data.url;
             }
 
             const payload = {
                 store_name: formData.storeName,
                 store_tagline: formData.storeTagline,
+                site_url: formData.siteBaseUrl,
                 logo_url: finalLogoUrl,
                 favicon_url: finalFaviconUrl,
                 footer_logo_url: finalFooterLogoUrl,
                 contact_email: formData.contactEmail,
                 contact_phone: formData.contactPhone,
                 contact_address: formData.contactAddress,
-                hero_heading: formData.heroHeading,
-                hero_subheading: formData.heroSubheading,
-                hero_image_url: finalHeroImageUrl,
+                working_hours: formData.workingHours,
+                map_embed_url: formData.mapEmbedUrl,
+
                 social_facebook: formData.facebookUrl,
                 social_instagram: formData.instagramUrl,
                 social_whatsapp: formData.whatsappNumber,
                 footer_about_text: formData.footerAboutText,
                 currency_symbol: formData.currencySymbol,
-                free_shipping_threshold: formData.freeShippingThreshold
+                currency_code: formData.currencyCode,
+                free_shipping_threshold: formData.freeShippingThreshold,
+                default_shipping_fee: formData.defaultShippingFee,
+                shipping_info_text: formData.shippingInfoText,
+                shipping_tab_heading: formData.shippingTabHeading,
+                shipping_bullet_1: formData.shippingBullet1,
+                shipping_bullet_2: formData.shippingBullet2,
+                shipping_bullet_3: formData.shippingBullet3,
+                shipping_bullet_4: formData.shippingBullet4,
+                order_prefix: formData.orderPrefix,
+                sku_prefix: formData.skuPrefix,
+                phone_pattern: formData.phonePattern,
+                phone_placeholder: formData.phonePlaceholder,
+                search_placeholder: formData.searchPlaceholder,
+                chatbot_name: formData.chatbotName,
+                footer_tagline: formData.footerTagline,
+                footer_feature_1_title: formData.footerFeature1Title,
+                footer_feature_1_text: formData.footerFeature1Text,
+                footer_feature_2_title: formData.footerFeature2Title,
+                footer_feature_2_text: formData.footerFeature2Text,
+                footer_feature_3_title: formData.footerFeature3Title,
+                footer_feature_3_text: formData.footerFeature3Text,
+                product_badge_text: formData.productBadgeText,
+                empty_cart_text: formData.emptyCartText,
+                locale: formData.locale,
+                privacy_policy_content: formData.privacyPolicyContent,
+                about_hero_heading: formData.aboutHeroHeading,
+                about_hero_subheading: formData.aboutHeroSubheading,
+                about_story_heading: formData.aboutStoryHeading,
+                about_story_text: formData.aboutStoryText,
+                about_story_image: finalAboutStoryImage
             };
 
             await updateSettings(payload);
@@ -177,7 +243,7 @@ export default function AdminSettings() {
             setFormData(prev => ({
                 ...prev,
                 logoPreview: finalLogoUrl,
-                heroImagePreview: finalHeroImageUrl,
+
                 faviconPreview: finalFaviconUrl,
                 footerLogoPreview: finalFooterLogoUrl
             }));
@@ -279,7 +345,7 @@ export default function AdminSettings() {
                                             type="text"
                                             value={formData.storeName}
                                             onChange={(e) => handleInputChange('storeName', e.target.value)}
-                                            placeholder="e.g. GBMarket"
+                                            placeholder="e.g. My Store"
                                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
                                     </div>
@@ -296,6 +362,49 @@ export default function AdminSettings() {
                                             placeholder="Enter brand tagline..."
                                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
+                                    </div>
+
+                                    {/* Site Base URL */}
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                            Site Base URL
+                                        </label>
+                                        <input
+                                            type="url"
+                                            value={formData.siteBaseUrl}
+                                            onChange={(e) => handleInputChange('siteBaseUrl', e.target.value)}
+                                            placeholder="https://example.com"
+                                            className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                        />
+                                    </div>
+
+                                    {/* Additional General Settings */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Locale (SEO base)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.locale}
+                                                onChange={(e) => handleInputChange('locale', e.target.value)}
+                                                placeholder="en_PK"
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Search Placeholder Text
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.searchPlaceholder}
+                                                onChange={(e) => handleInputChange('searchPlaceholder', e.target.value)}
+                                                placeholder="Search products..."
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
                                     </div>
 
                                     {/* Logo Upload Area */}
@@ -425,80 +534,38 @@ export default function AdminSettings() {
                                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
                                     </div>
-                                </div>
-                            </div>
-                        )}
 
-                        {/* HOMEPAGE HERO */}
-                        {activeTab === 'hero' && (
-                            <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
-                                <div className="border-b border-[#E8DEC8] pb-4">
-                                    <h2 className="font-heading font-extrabold text-xl text-[#3A2E1F] flex items-center gap-2">
-                                        <LayoutTemplate className="w-5 h-5 text-[#D97706]" /> Homepage Hero Section
-                                    </h2>
-                                    <p className="text-xs text-[#3A2E1F]/70 mt-1">
-                                        Customize the main banner text and imagery featured on the home page
-                                    </p>
-                                </div>
-
-                                <div className="space-y-5">
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
-                                            Hero Heading Text
+                                            Working Hours
                                         </label>
                                         <input
                                             type="text"
-                                            value={formData.heroHeading}
-                                            onChange={(e) => handleInputChange('heroHeading', e.target.value)}
-                                            className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
-                                            Hero Subheading Paragraph
-                                        </label>
-                                        <textarea
-                                            rows={3}
-                                            value={formData.heroSubheading}
-                                            onChange={(e) => handleInputChange('heroSubheading', e.target.value)}
+                                            value={formData.workingHours}
+                                            onChange={(e) => handleInputChange('workingHours', e.target.value)}
+                                            placeholder="e.g. Mon - Sat: 9am - 8pm"
                                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
                                     </div>
 
-                                    {/* Hero Image Upload Area */}
-                                    <div className="space-y-2 pt-2">
+                                    <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
-                                            Hero Banner Photo
+                                            Google Maps Embed URL
                                         </label>
                                         <input
-                                            type="file"
-                                            ref={heroImageInputRef}
-                                            accept="image/*"
-                                            className="hidden"
-                                            onChange={handleHeroImageChange}
+                                            type="url"
+                                            value={formData.mapEmbedUrl}
+                                            onChange={(e) => handleInputChange('mapEmbedUrl', e.target.value)}
+                                            placeholder="https://www.google.com/maps/embed?pb=..."
+                                            className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
-                                        <div className="space-y-3">
-                                            <div className="aspect-16/7 w-full bg-[#F5EFE0] border border-[#E8DEC8] rounded-2xl overflow-hidden relative shadow-xs">
-                                                <img
-                                                    src={formData.heroImagePreview}
-                                                    alt="Hero Banner Preview"
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => heroImageInputRef.current?.click()}
-                                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-xs rounded-full shadow-xs transition-all"
-                                            >
-                                                <UploadCloud className="w-3.5 h-3.5" />
-                                                <span>Replace Hero Image</span>
-                                            </button>
-                                        </div>
+                                        <p className="text-[10px] text-[#3A2E1F]/60">Got to Google Maps {'->'} Share {'->'} Embed a map {'->'} Copy the HTML `src` link ONLY.</p>
                                     </div>
                                 </div>
                             </div>
                         )}
+
+
 
                         {/* SOCIAL LINKS */}
                         {activeTab === 'social' && (
@@ -547,7 +614,20 @@ export default function AdminSettings() {
                                             type="text"
                                             value={formData.whatsappNumber}
                                             onChange={(e) => handleInputChange('whatsappNumber', e.target.value)}
-                                            placeholder="+92 300 1234567"
+                                            placeholder="+1 234 567 8900"
+                                            className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                            Chatbot Display Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.chatbotName}
+                                            onChange={(e) => handleInputChange('chatbotName', e.target.value)}
+                                            placeholder="AI Assistant"
                                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
                                     </div>
@@ -578,6 +658,37 @@ export default function AdminSettings() {
                                             onChange={(e) => handleInputChange('footerAboutText', e.target.value)}
                                             className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                         />
+                                    </div>
+
+                                    <div className="space-y-1.5 mt-4">
+                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                            Footer Bottom Tagline
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.footerTagline}
+                                            onChange={(e) => handleInputChange('footerTagline', e.target.value)}
+                                            placeholder="Crafted with love for healthy living"
+                                            className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                        />
+                                    </div>
+
+                                    <div className="pt-4 border-t border-[#E8DEC8] space-y-4">
+                                        <h3 className="text-xs font-bold text-[#3A2E1F]">Footer Feature Columns</h3>
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                            <div className="space-y-1.5">
+                                                <input type="text" value={formData.footerFeature1Title} onChange={(e) => handleInputChange('footerFeature1Title', e.target.value)} placeholder="Feature 1 Title" className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-3 py-2 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                                <input type="text" value={formData.footerFeature1Text} onChange={(e) => handleInputChange('footerFeature1Text', e.target.value)} placeholder="Feature 1 Subtext" className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-3 py-2 text-[10px] text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <input type="text" value={formData.footerFeature2Title} onChange={(e) => handleInputChange('footerFeature2Title', e.target.value)} placeholder="Feature 2 Title" className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-3 py-2 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                                <input type="text" value={formData.footerFeature2Text} onChange={(e) => handleInputChange('footerFeature2Text', e.target.value)} placeholder="Feature 2 Subtext" className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-3 py-2 text-[10px] text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <input type="text" value={formData.footerFeature3Title} onChange={(e) => handleInputChange('footerFeature3Title', e.target.value)} placeholder="Feature 3 Title" className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-3 py-2 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                                <input type="text" value={formData.footerFeature3Text} onChange={(e) => handleInputChange('footerFeature3Text', e.target.value)} placeholder="Feature 3 Subtext" className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-3 py-2 text-[10px] text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {/* Footer Logo Upload Area */}
@@ -620,6 +731,98 @@ export default function AdminSettings() {
                             </div>
                         )}
 
+                        {/* ABOUT INFO */}
+                        {activeTab === 'about' && (
+                            <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+                                <div className="border-b border-[#E8DEC8] pb-4">
+                                    <h2 className="font-heading font-extrabold text-xl text-[#3A2E1F] flex items-center gap-2">
+                                        <LayoutTemplate className="w-5 h-5 text-[#D97706]" /> About Us Layout
+                                    </h2>
+                                    <p className="text-xs text-[#3A2E1F]/70 mt-1">
+                                        Manage textual and image content for the About Us page.
+                                    </p>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div className="space-y-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block"> Hero Heading </label>
+                                            <input type="text" value={formData.aboutHeroHeading} onChange={(e) => handleInputChange('aboutHeroHeading', e.target.value)} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block"> Hero Subheading </label>
+                                            <textarea rows={2} value={formData.aboutHeroSubheading} onChange={(e) => handleInputChange('aboutHeroSubheading', e.target.value)} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block"> Story Heading </label>
+                                            <input type="text" value={formData.aboutStoryHeading} onChange={(e) => handleInputChange('aboutStoryHeading', e.target.value)} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block"> Story Text/Paragraph </label>
+                                            <textarea rows={5} value={formData.aboutStoryText} onChange={(e) => handleInputChange('aboutStoryText', e.target.value)} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                        </div>
+
+                                        {/* About Image Upload */}
+                                        <div className="space-y-2 pt-2 border-t border-[#E8DEC8]">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                About Us Story Image
+                                            </label>
+                                            <input
+                                                type="file"
+                                                ref={aboutStoryImageRef}
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handleAboutStoryImageChange}
+                                            />
+                                            <div className="flex flex-col sm:flex-row items-center gap-5 p-5 bg-[#F5EFE0]/40 border border-[#E8DEC8] rounded-2xl">
+                                                <div className="w-24 h-24 rounded-2xl bg-white border border-[#E8DEC8] p-2 flex items-center justify-center shrink-0 shadow-xs">
+                                                    <img
+                                                        src={formData.aboutStoryImagePreview}
+                                                        alt="About Story Image Preview"
+                                                        className="max-h-full max-w-full object-cover rounded-xl"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2 text-center sm:text-left flex-1">
+                                                    <h4 className="text-xs font-bold text-[#3A2E1F]">Story Feature Image</h4>
+                                                    <p className="text-[11px] text-[#3A2E1F]/60">
+                                                        High quality landscape image (4:3 ratio recommended)
+                                                    </p>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => aboutStoryImageRef.current?.click()}
+                                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-xs rounded-full shadow-xs transition-all"
+                                                    >
+                                                        <UploadCloud className="w-3.5 h-3.5" />
+                                                        <span>Upload Image</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* PRIVACY POLICY */}
+                        {activeTab === 'privacy' && (
+                            <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+                                <div className="border-b border-[#E8DEC8] pb-4">
+                                    <h2 className="font-heading font-extrabold text-xl text-[#3A2E1F] flex items-center gap-2">
+                                        <LayoutTemplate className="w-5 h-5 text-[#D97706]" /> Privacy Policy HTML
+                                    </h2>
+                                    <p className="text-xs text-[#3A2E1F]/70 mt-1">
+                                        Privacy Content Editor Supports standard raw HTML editing
+                                    </p>
+                                </div>
+                                <div className="space-y-6">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block"> Raw HTML Source </label>
+                                        <textarea rows={15} value={formData.privacyPolicyContent} onChange={(e) => handleInputChange('privacyPolicyContent', e.target.value)} className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs font-mono text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* STORE SETTINGS */}
                         {activeTab === 'store' && (
                             <div className="bg-[#FFFDF9] border border-[#E8DEC8] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
@@ -649,7 +852,34 @@ export default function AdminSettings() {
 
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
-                                                Free Shipping Threshold (PKR)
+                                                Currency ISO Code
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.currencyCode}
+                                                onChange={(e) => handleInputChange('currencyCode', e.target.value)}
+                                                placeholder="e.g. PKR"
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Default Shipping Fee (Fixed)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={formData.defaultShippingFee}
+                                                onChange={(e) => handleInputChange('defaultShippingFee', e.target.value)}
+                                                placeholder="e.g. 350"
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Free Shipping Threshold
                                             </label>
                                             <input
                                                 type="number"
@@ -658,6 +888,117 @@ export default function AdminSettings() {
                                                 onChange={(e) => handleInputChange('freeShippingThreshold', e.target.value)}
                                                 placeholder="e.g. 5000"
                                                 className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Order Prefix
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.orderPrefix}
+                                                onChange={(e) => handleInputChange('orderPrefix', e.target.value)}
+                                                placeholder="e.g. GB"
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                SKU Prefix
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.skuPrefix}
+                                                onChange={(e) => handleInputChange('skuPrefix', e.target.value)}
+                                                placeholder="e.g. GBM"
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Phone Validation Regex
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.phonePattern}
+                                                onChange={(e) => handleInputChange('phonePattern', e.target.value)}
+                                                placeholder="^(\d{10,15})$"
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-mono focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Phone Placeholder Mask
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.phonePlaceholder}
+                                                onChange={(e) => handleInputChange('phonePlaceholder', e.target.value)}
+                                                placeholder="Phone Number"
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                            Shipping Info Content (Product Detail)
+                                        </label>
+                                        <textarea
+                                            rows={4}
+                                            value={formData.shippingInfoText}
+                                            onChange={(e) => handleInputChange('shippingInfoText', e.target.value)}
+                                            className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-4 pt-4 border-t border-[#E8DEC8]">
+                                        <h3 className="text-sm font-bold text-[#3A2E1F]">Fallback Shipping Tab Content</h3>
+                                        <p className="text-[10px] text-[#3A2E1F]/60">Used in the Product Detail page if the primary 'Shipping Info Content' is empty.</p>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">Shipping Tab Heading</label>
+                                            <input type="text" value={formData.shippingTabHeading} onChange={(e) => handleInputChange('shippingTabHeading', e.target.value)} placeholder="Nationwide Delivery" className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] font-bold focus:outline-none focus:ring-2 focus:ring-[#F5A623]" />
+                                        </div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div className="space-y-1.5"><label className="text-[10px] font-bold text-[#3A2E1F] uppercase tracking-wider block">Bullet 1</label>
+                                                <input type="text" value={formData.shippingBullet1} onChange={(e) => handleInputChange('shippingBullet1', e.target.value)} placeholder="Orders dispatched within 24 hours." className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" /></div>
+                                            <div className="space-y-1.5"><label className="text-[10px] font-bold text-[#3A2E1F] uppercase tracking-wider block">Bullet 2</label>
+                                                <input type="text" value={formData.shippingBullet2} onChange={(e) => handleInputChange('shippingBullet2', e.target.value)} placeholder="Delivery time: 2–3 business days." className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" /></div>
+                                            <div className="space-y-1.5"><label className="text-[10px] font-bold text-[#3A2E1F] uppercase tracking-wider block">Bullet 3 (Threshold varies)</label>
+                                                <input type="text" value={formData.shippingBullet3} onChange={(e) => handleInputChange('shippingBullet3', e.target.value)} placeholder="Free shipping on all orders above the threshold." className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" /></div>
+                                            <div className="space-y-1.5"><label className="text-[10px] font-bold text-[#3A2E1F] uppercase tracking-wider block">Bullet 4</label>
+                                                <input type="text" value={formData.shippingBullet4} onChange={(e) => handleInputChange('shippingBullet4', e.target.value)} placeholder="Tracked delivery via courier service." className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]" /></div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Product Badge Text
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.productBadgeText}
+                                                onChange={(e) => handleInputChange('productBadgeText', e.target.value)}
+                                                placeholder="e.g. 100% Organic"
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
+                                                Empty Cart Alert Text
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.emptyCartText}
+                                                onChange={(e) => handleInputChange('emptyCartText', e.target.value)}
+                                                placeholder="No products in cart..."
+                                                className="w-full bg-[#F5EFE0]/50 border border-[#E8DEC8] rounded-xl px-4 py-2.5 text-xs text-[#3A2E1F] focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                                             />
                                         </div>
                                     </div>

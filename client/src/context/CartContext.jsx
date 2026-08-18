@@ -8,24 +8,30 @@ export const useCart = () => useContext(CartContext);
 export const CartProvider = ({ children }) => {
     const [cartItems, setCartItems] = useState(() => {
         try {
-            const stored = localStorage.getItem('gbmarket_cart');
+            const stored = localStorage.getItem('store_cart');
             return stored ? JSON.parse(stored) : [];
         } catch (error) {
             return [];
         }
     });
 
+    const [lastAddedItem, setLastAddedItem] = useState(null);
+
     useEffect(() => {
-        localStorage.setItem('gbmarket_cart', JSON.stringify(cartItems));
+        localStorage.setItem('store_cart', JSON.stringify(cartItems));
     }, [cartItems]);
 
     const addItem = (product, weightOption, quantity) => {
+        const selectedWeightLabel = weightOption?.label || 'Standard';
+        const selectedPrice = weightOption?.price || product.base_price || product.basePrice || 0;
+        const itemQuantity = quantity || 1;
+
         setCartItems(prev => {
             // Check if item with same id and weight already exists
-            const existingKey = prev.findIndex(item => item.product_id === product.id && item.weight_option === weightOption.label);
+            const existingKey = prev.findIndex(item => item.product_id === product.id && item.weight_option === selectedWeightLabel);
             if (existingKey >= 0) {
                 const updated = [...prev];
-                updated[existingKey].quantity += quantity;
+                updated[existingKey].quantity += itemQuantity;
                 return updated;
             }
             return [...prev, {
@@ -33,12 +39,29 @@ export const CartProvider = ({ children }) => {
                 slug: product.slug,
                 product_name: product.name,
                 image: product.images?.[0] || product.image_url,
-                weight_option: weightOption?.label || 'Standard',
-                price: weightOption?.price || product.base_price || product.basePrice || 0,
-                quantity: quantity || 1
+                weight_option: selectedWeightLabel,
+                price: selectedPrice,
+                quantity: itemQuantity
             }];
         });
-        toast.success(`Added ${quantity} x ${product.name} to cart.`);
+
+        // Set last added item state for mobile sticky bar notification
+        setLastAddedItem({
+            product_id: product.id,
+            slug: product.slug,
+            product_name: product.name,
+            image: product.images?.[0] || product.image_url,
+            weight_option: selectedWeightLabel,
+            price: selectedPrice,
+            quantity: itemQuantity,
+            timestamp: Date.now()
+        });
+
+        toast.success(`Added ${itemQuantity} x ${product.name} to cart.`);
+    };
+
+    const dismissLastAddedItem = () => {
+        setLastAddedItem(null);
     };
 
     const removeItem = (productId, weightOption) => {
@@ -61,7 +84,7 @@ export const CartProvider = ({ children }) => {
     };
 
     return (
-        <CartContext.Provider value={{ cartItems, addItem, removeItem, updateQuantity, clearCart }}>
+        <CartContext.Provider value={{ cartItems, addItem, removeItem, updateQuantity, clearCart, lastAddedItem, dismissLastAddedItem }}>
             {children}
         </CartContext.Provider>
     );

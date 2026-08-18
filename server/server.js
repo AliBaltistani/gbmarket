@@ -3,475 +3,207 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const multer = require('multer');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const { v4: uuidv4 } = require('uuid');
+const xss = require('xss');
+const morgan = require('morgan');
 const db = require('./db/db');
 const requireAdmin = require('./middleware/requireAdmin');
+const { safeErrorMessage } = require('./helpers');
 
-// Fail fast if JWT_SECRET is not configured
-if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'replace_this_with_a_long_random_string') {
+// ==========================================
+// C1: XSS SANITIZATION HELPER
+// ==========================================
+const sanitizeValue = (val) => {
+    if (typeof val === 'string') return xss(val);
+    if (Array.isArray(val)) return val.map(sanitizeValue);
+    if (val && typeof val === 'object') {
+        const cleaned = {};
+        for (const [k, v] of Object.entries(val)) {
+            cleaned[k] = sanitizeValue(v);
+        }
+        return cleaned;
+    }
+    return val;
+};
+
+// ==========================================
+// STARTUP VALIDATION
+// ==========================================
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.includes('replace_this')) {
     console.error('FATAL: JWT_SECRET environment variable is not set or is still the default placeholder. Please set a secure value in your .env file.');
     process.exit(1);
 }
 
 const app = express();
+
+// ==========================================
+// S4: SECURITY HEADERS (Helmet)
+// ==========================================
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: false
+}));
+
+// F10: Structured HTTP request logging
+app.use(morgan(':date[iso] :method :url :status :res[content-length] - :response-time ms'));
+
+// ==========================================
+// S5: STRICT CORS CONFIGURATION
+// ==========================================
+const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
+    .split(',')
+    .map(origin => origin.trim());
+
 app.use(cors({
-    origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true
 }));
-app.use(express.json());
 
-// Set up /uploads directory and static serving
+// ==========================================
+// S8: JSON BODY SIZE LIMIT
+// ==========================================
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: true, limit: '100kb' }));
+
+// C1: Sanitize all incoming request body strings
+app.use((req, res, next) => {
+    if (req.body && typeof req.body === 'object') {
+        req.body = sanitizeValue(req.body);
+    }
+    next();
+});
+
+// ==========================================
+// STATIC FILE SERVING
+// ==========================================
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
 }
 app.use('/uploads', express.static(uploadDir));
 
-// Multer config
+// ==========================================
+// S6 & S7: SECURE MULTER CONFIG
+// ==========================================
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, uploadDir),
-    filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase();
+        const safeExt = ALLOWED_EXTENSIONS.includes(ext) ? ext : '.png';
+        cb(null, `${uuidv4()}${safeExt}`);
+    }
 });
+
 const upload = multer({
     storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) cb(null, true);
-        else cb(new Error('Only images are allowed'));
-    }
-});
-
-// Helper function to build dynamic queries
-const parseJSON = (str) => {
-    try { return JSON.parse(str); } catch (e) { return null; }
-};
-
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'GBMarket API is running' });
-});
-
-// ==========================================
-// AUTH & UPLOAD ENDPOINTS
-// ==========================================
-
-// POST /api/auth/login
-app.post('/api/auth/login', (req, res) => {
-    try {
-        const { username, password } = req.body;
-        const user = db.prepare('SELECT * FROM admin_users WHERE username = ?').get(username);
-
-        if (!user || !bcrypt.compareSync(password, user.password_hash)) {
-            return res.status(401).json({ error: 'Invalid username or password' });
-        }
-
-        const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '7d' });
-        res.json({ token, username: user.username });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// GET /api/auth/me
-app.get('/api/auth/me', requireAdmin, (req, res) => {
-    res.json({ username: req.admin.username });
-});
-
-// POST /api/upload
-app.post('/api/upload', requireAdmin, upload.single('image'), (req, res) => {
-    try {
-        if (!req.file) return res.status(400).json({ error: 'No image provided' });
-        // Return relative URL so it works in any environment
-        const imageUrl = `/uploads/${req.file.filename}`;
-        res.status(201).json({ url: imageUrl });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
-
-// ==========================================
-// SETTINGS ENDPOINTS
-// ==========================================
-
-// GET /api/settings
-app.get('/api/settings', (req, res) => {
-    try {
-        const settingsRows = db.prepare('SELECT * FROM settings').all();
-        const settingsObj = {};
-        for (let row of settingsRows) {
-            settingsObj[row.key] = row.value;
-        }
-        res.json(settingsObj);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// PUT /api/settings
-app.put('/api/settings', requireAdmin, (req, res) => {
-    try {
-        const payload = req.body;
-        const updateSetting = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value');
-
-        const trx = db.transaction(() => {
-            for (const [key, value] of Object.entries(payload)) {
-                updateSetting.run(key, typeof value === 'string' ? value : String(value));
-            }
-        });
-        trx();
-
-        const settingsRows = db.prepare('SELECT * FROM settings').all();
-        const settingsObj = {};
-        for (let row of settingsRows) {
-            settingsObj[row.key] = row.value;
-        }
-        res.json(settingsObj);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
-
-// ==========================================
-// CATEGORIES ENDPOINTS
-// ==========================================
-
-// GET /api/categories (with product count)
-app.get('/api/categories', (req, res) => {
-    try {
-        const categories = db.prepare(`
-            SELECT c.*, COUNT(p.id) as productCount
-            FROM categories c
-            LEFT JOIN products p ON p.category_id = c.id
-            GROUP BY c.id
-            ORDER BY c.name ASC
-        `).all();
-        res.json(categories);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// POST /api/categories
-app.post('/api/categories', requireAdmin, (req, res) => {
-    try {
-        const { name, slug } = req.body;
-        if (!name || !slug) return res.status(400).json({ error: 'Name and slug are required' });
-
-        const stmt = db.prepare('INSERT INTO categories (name, slug) VALUES (?, ?)');
-        const info = stmt.run(name, slug);
-        res.status(201).json({ id: info.lastInsertRowid, name, slug });
-    } catch (error) {
-        if (error.message.includes('UNIQUE constraint')) {
-            return res.status(409).json({ error: 'A category with this slug already exists' });
-        }
-        res.status(400).json({ error: error.message });
-    }
-});
-
-// PUT /api/categories/:id
-app.put('/api/categories/:id', requireAdmin, (req, res) => {
-    try {
-        const { id } = req.params;
-        const { name, slug } = req.body;
-        if (!name || !slug) return res.status(400).json({ error: 'Name and slug are required' });
-
-        const stmt = db.prepare('UPDATE categories SET name = ?, slug = ? WHERE id = ?');
-        const info = stmt.run(name, slug, id);
-        if (info.changes === 0) return res.status(404).json({ error: 'Category not found' });
-        res.json({ id: Number(id), name, slug });
-    } catch (error) {
-        if (error.message.includes('UNIQUE constraint')) {
-            return res.status(409).json({ error: 'A category with this slug already exists' });
-        }
-        res.status(400).json({ error: error.message });
-    }
-});
-
-// DELETE /api/categories/:id
-app.delete('/api/categories/:id', requireAdmin, (req, res) => {
-    try {
-        const { id } = req.params;
-        // With ON DELETE SET NULL, products under this category will become uncategorized
-        const stmt = db.prepare('DELETE FROM categories WHERE id = ?');
-        const info = stmt.run(id);
-        if (info.changes === 0) return res.status(404).json({ error: 'Category not found' });
-        res.json({ message: 'Category deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-
-// ==========================================
-// PRODUCTS ENDPOINTS
-// ==========================================
-
-// GET /api/products
-app.get('/api/products', (req, res) => {
-    try {
-        const { category, search, featured } = req.query;
-
-        let query = `
-      SELECT p.*, c.name as category_name, c.slug as category_slug 
-      FROM products p 
-      LEFT JOIN categories c ON p.category_id = c.id 
-      WHERE 1=1
-    `;
-        const params = [];
-
-        if (category) {
-            query += ' AND c.slug = ?';
-            params.push(category);
-        }
-
-        if (search) {
-            query += ' AND (p.name LIKE ? OR p.description LIKE ?)';
-            params.push(`%${search}%`, `%${search}%`);
-        }
-
-        if (featured === 'true') {
-            query += ' AND p.is_featured = 1';
-        }
-
-        query += ' ORDER BY p.id DESC';
-
-        const products = db.prepare(query).all(...params).map(p => ({
-            ...p,
-            weight_options: parseJSON(p.weight_options)
-        }));
-
-        res.json(products);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// GET /api/products/:slug
-app.get('/api/products/:slug', (req, res) => {
-    try {
-        const { slug } = req.params;
-        const product = db.prepare(`
-      SELECT p.*, c.name as category_name, c.slug as category_slug 
-      FROM products p 
-      LEFT JOIN categories c ON p.category_id = c.id 
-      WHERE p.slug = ?
-    `).get(slug);
-
-        if (!product) return res.status(404).json({ error: 'Product not found' });
-
-        product.weight_options = parseJSON(product.weight_options);
-        res.json(product);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// POST /api/products
-app.post('/api/products', requireAdmin, (req, res) => {
-    try {
-        const {
-            name, slug, description, category_id, image_url, base_price, stock, weight_options, is_featured
-        } = req.body;
-
-        // Validate required fields
-        if (!name || !slug) return res.status(400).json({ error: 'Product name and slug are required' });
-        if (base_price === undefined || base_price === null || Number(base_price) < 0) {
-            return res.status(400).json({ error: 'A valid base price is required' });
-        }
-
-        const stmt = db.prepare(`
-      INSERT INTO products (
-        name, slug, description, category_id, image_url, base_price, stock, weight_options, is_featured
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-        const info = stmt.run(
-            name, slug, description, category_id || null, image_url, Number(base_price),
-            stock || 0,
-            typeof weight_options === 'string' ? weight_options : JSON.stringify(weight_options),
-            is_featured || 0
-        );
-
-        res.status(201).json({ id: info.lastInsertRowid, message: 'Product created successfully' });
-    } catch (error) {
-        if (error.message.includes('UNIQUE constraint')) {
-            return res.status(409).json({ error: 'A product with this slug already exists. Please use a different name.' });
-        }
-        res.status(400).json({ error: error.message });
-    }
-});
-
-// PUT /api/products/:id
-app.put('/api/products/:id', requireAdmin, (req, res) => {
-    try {
-        const { id } = req.params;
-        const {
-            name, slug, description, category_id, image_url, base_price, stock, weight_options, is_featured
-        } = req.body;
-
-        const stmt = db.prepare(`
-      UPDATE products SET 
-        name = ?, slug = ?, description = ?, category_id = ?, image_url = ?, 
-        base_price = ?, stock = ?, weight_options = ?, is_featured = ?
-      WHERE id = ?
-    `);
-
-        const info = stmt.run(
-            name, slug, description, category_id, image_url, base_price,
-            stock,
-            typeof weight_options === 'string' ? weight_options : JSON.stringify(weight_options),
-            is_featured,
-            id
-        );
-
-        if (info.changes === 0) return res.status(404).json({ error: 'Product not found' });
-        res.json({ message: 'Product updated successfully' });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
-
-// DELETE /api/products/:id
-app.delete('/api/products/:id', requireAdmin, (req, res) => {
-    try {
-        const { id } = req.params;
-        const stmt = db.prepare('DELETE FROM products WHERE id = ?');
-        const info = stmt.run(id);
-
-        if (info.changes === 0) return res.status(404).json({ error: 'Product not found' });
-        res.json({ message: 'Product deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// ==========================================
-// ORDERS ENDPOINTS
-// ==========================================
-
-// GET /api/orders (optimized: single query for items)
-app.get('/api/orders', requireAdmin, (req, res) => {
-    try {
-        const orders = db.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
-        const allItems = db.prepare('SELECT * FROM order_items').all();
-
-        // Group items by order_id in a single pass
-        const itemsByOrderId = {};
-        for (const item of allItems) {
-            if (!itemsByOrderId[item.order_id]) itemsByOrderId[item.order_id] = [];
-            itemsByOrderId[item.order_id].push(item);
-        }
-
-        const ordersWithItems = orders.map(order => ({
-            ...order,
-            items: itemsByOrderId[order.id] || []
-        }));
-
-        res.json(ordersWithItems);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// POST /api/orders (with stock validation & server-side total)
-app.post('/api/orders', (req, res) => {
-    try {
-        const { customer_name, phone, address, payment_method, items } = req.body;
-
-        if (!customer_name || !phone || !address) {
-            return res.status(400).json({ error: 'Customer name, phone, and address are required' });
-        }
-        if (!items || !items.length) {
-            return res.status(400).json({ error: 'Order must contain at least one item' });
-        }
-
-        const processOrder = db.transaction((orderData, itemsData) => {
-            const getProduct = db.prepare('SELECT id, stock, base_price FROM products WHERE id = ?');
-
-            // 1. Validate stock for all items first
-            for (const item of itemsData) {
-                const product = getProduct.get(item.product_id);
-                if (!product) {
-                    throw new Error(`Product with ID ${item.product_id} not found`);
-                }
-                if (product.stock < item.quantity) {
-                    throw new Error(`Insufficient stock for "${item.product_name}". Available: ${product.stock}, Requested: ${item.quantity}`);
-                }
-            }
-
-            // 2. Calculate order total server-side (don't trust client)
-            let serverTotal = 0;
-            for (const item of itemsData) {
-                serverTotal += Number(item.price) * Number(item.quantity);
-            }
-
-            // 3. Insert Order with server-calculated total
-            const insertOrder = db.prepare(`
-                INSERT INTO orders (customer_name, phone, address, total, payment_method)
-                VALUES (?, ?, ?, ?, ?)
-            `);
-            const orderInfo = insertOrder.run(
-                orderData.customer_name, orderData.phone, orderData.address, serverTotal, orderData.payment_method || 'COD'
-            );
-            const orderId = orderInfo.lastInsertRowid;
-
-            // 4. Insert Order Items & Decrement Stock
-            const insertItem = db.prepare(`
-                INSERT INTO order_items (order_id, product_id, product_name, weight_option, quantity, price)
-                VALUES (?, ?, ?, ?, ?, ?)
-            `);
-            const decrementStock = db.prepare('UPDATE products SET stock = stock - ? WHERE id = ?');
-
-            for (const item of itemsData) {
-                insertItem.run(orderId, item.product_id, item.product_name, item.weight_option, item.quantity, item.price);
-                decrementStock.run(item.quantity, item.product_id);
-            }
-
-            return orderId;
-        });
-
-        const newOrderId = processOrder({ customer_name, phone, address, payment_method }, items);
-        res.status(201).json({ id: newOrderId, message: 'Order created successfully' });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
-
-// PATCH /api/orders/:id/status (supports Cancelled with stock restoration)
-app.patch('/api/orders/:id/status', requireAdmin, (req, res) => {
-    try {
-        const { id } = req.params;
-        const { status } = req.body;
-
-        const validStatuses = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
-        if (!validStatuses.includes(status)) {
-            return res.status(400).json({ error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
-        }
-
-        const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
-        if (!order) return res.status(404).json({ error: 'Order not found' });
-
-        // If cancelling, restore stock
-        if (status === 'Cancelled' && order.status !== 'Cancelled') {
-            const restoreStock = db.transaction(() => {
-                const orderItems = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(id);
-                const incrementStock = db.prepare('UPDATE products SET stock = stock + ? WHERE id = ?');
-                for (const item of orderItems) {
-                    incrementStock.run(item.quantity, item.product_id);
-                }
-                db.prepare('UPDATE orders SET status = ? WHERE id = ?').run(status, id);
-            });
-            restoreStock();
+        if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+            cb(null, true);
         } else {
-            db.prepare('UPDATE orders SET status = ? WHERE id = ?').run(status, id);
+            cb(new Error('Only JPEG, PNG, WebP, and GIF images are allowed'));
         }
-
-        res.json({ message: 'Order status updated successfully' });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
     }
 });
 
+// ==========================================
+// S3: RATE LIMITING
+// ==========================================
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { error: 'Too many login attempts. Please try again after 15 minutes.' },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+const generalLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000,
+    max: 120,
+    message: { error: 'Too many requests. Please slow down.' },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+app.use('/api/', generalLimiter);
+
+// ==========================================
+// HEALTH CHECK
+// ==========================================
+app.get('/api/health', (req, res) => {
+    try {
+        db.prepare('SELECT 1').get();
+        const storeName = db.prepare('SELECT value FROM settings WHERE key = ?').get('store_name')?.value || 'Store';
+        res.json({ status: `${storeName} API is running`, database: 'connected' });
+    } catch (error) {
+        res.status(503).json({ status: 'API is running', database: 'disconnected' });
+    }
+});
+
+// ==========================================
+// C2: MOUNT ROUTE MODULES
+// ==========================================
+app.use('/api/auth', require('./routes/auth')(db, requireAdmin, authLimiter));
+app.use('/api/upload', require('./routes/upload')(db, requireAdmin, upload));
+app.use('/api/settings', require('./routes/settings')(db, requireAdmin));
+app.use('/api/categories', require('./routes/categories')(db, requireAdmin));
+app.use('/api/products', require('./routes/products')(db, requireAdmin));
+app.use('/api/orders', require('./routes/orders')(db, requireAdmin));
+app.use('/api/contact', require('./routes/contact')(db));
+app.use('/api/homepage', require('./routes/homepage')(db, requireAdmin));
+app.use('/api/payments', require('./routes/payments')(db, requireAdmin, upload));
+app.use('/api/chatbot', require('./routes/chatbot')(db));
+app.use('/api/reviews', require('./routes/reviews')(db, requireAdmin));
+app.use('/sitemap.xml', require('./routes/sitemap')(db));
+
+// ==========================================
+// C7: API 404 CATCH-ALL
+// ==========================================
+app.use('/api', (req, res) => {
+    res.status(404).json({ error: 'API endpoint not found' });
+});
+
+// ==========================================
+// S9 & C10: GLOBAL ERROR HANDLER
+// ==========================================
+app.use((err, req, res, next) => {
+    console.error(`[${new Date().toISOString()}] ERROR ${req.method} ${req.originalUrl}:`, err.message);
+
+    if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(413).json({ error: 'File is too large. Maximum size is 5MB.' });
+        }
+        return res.status(400).json({ error: `Upload error: ${err.message}` });
+    }
+
+    if (err.message === 'Not allowed by CORS') {
+        return res.status(403).json({ error: 'Origin not allowed' });
+    }
+
+    if (err.message.includes('Only JPEG') || err.message.includes('Only images')) {
+        return res.status(400).json({ error: err.message });
+    }
+
+    const statusCode = err.statusCode || 500;
+    res.status(statusCode).json({
+        error: statusCode === 500 ? 'Internal server error' : safeErrorMessage(err)
+    });
+});
+
+// ==========================================
+// START SERVER
+// ==========================================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

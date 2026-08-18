@@ -3,20 +3,24 @@ import { Link } from 'react-router-dom';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, ArrowLeft, ShieldCheck, Truck, Lock } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useSettings } from '../context/SettingsContext';
+import { useCurrency } from '../hooks/useCurrency';
+import SEO from '../components/SEO';
 
 export default function Cart() {
     const { cartItems, updateQuantity, removeItem, clearCart } = useCart();
     const { settings } = useSettings();
+    const { formatPrice } = useCurrency();
 
     const subtotal = cartItems.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0);
-    const freeShippingThreshold = settings?.free_shipping_threshold || 5000;
-    const shippingFee = subtotal >= freeShippingThreshold || subtotal === 0 ? 0 : 250;
+    const freeShippingThreshold = Number(settings?.free_shipping_threshold) || 5000;
+    const shippingFee = subtotal >= freeShippingThreshold || subtotal === 0 ? 0 : (Number(settings?.default_shipping_fee) || 350);
     const grandTotal = subtotal + shippingFee;
 
     const isCartEmpty = cartItems.length === 0;
 
     return (
         <div className="space-y-10 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+            <SEO title={`Shopping Cart - ${settings?.store_name || 'Store'}`} description={settings?.store_tagline || "Review your selected items before checkout."} noindex={true} />
             {/* HEADER BANNER */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-[#E8DEC8] pb-6">
                 <div>
@@ -63,7 +67,7 @@ export default function Cart() {
                                     </div>
 
                                     <div className="col-span-2 text-center text-xs font-semibold text-[#3A2E1F] hidden sm:block">
-                                        Rs. {(item.price || 0).toLocaleString()}
+                                        {formatPrice(item.price || 0)}
                                     </div>
 
                                     <div className="col-span-2 flex items-center justify-center">
@@ -80,7 +84,7 @@ export default function Cart() {
 
                                     <div className="col-span-2 text-right font-heading font-extrabold text-sm text-[#3A2E1F] w-full sm:w-auto flex sm:block justify-between items-center border-t sm:border-0 pt-2 sm:pt-0">
                                         <span className="sm:hidden text-xs text-[#3A2E1F]/60">Total:</span>
-                                        <span>Rs. {((item.price || 0) * (item.quantity || 1)).toLocaleString()}</span>
+                                        <span>{formatPrice((item.price || 0) * (item.quantity || 1))}</span>
                                     </div>
                                 </div>
                             ))}
@@ -102,22 +106,22 @@ export default function Cart() {
                             <div className="space-y-3 text-sm text-[#3A2E1F]/80">
                                 <div className="flex justify-between">
                                     <span>Subtotal</span>
-                                    <span className="font-bold text-[#3A2E1F]">Rs. {subtotal.toLocaleString()}</span>
+                                    <span className="font-bold text-[#3A2E1F]">{formatPrice(subtotal)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span>Shipping Fee</span>
                                     <span className="font-bold text-[#3A2E1F]">
-                                        {shippingFee === 0 ? <span className="text-emerald-700 font-bold">FREE</span> : `Rs. ${shippingFee}`}
+                                        {shippingFee === 0 ? <span className="text-emerald-700 font-bold">FREE</span> : formatPrice(shippingFee)}
                                     </span>
                                 </div>
                                 {subtotal > 0 && subtotal < freeShippingThreshold && (
                                     <div className="p-3 bg-[#F5EFE0]/70 rounded-2xl text-[11px] text-[#D97706] font-semibold">
-                                        Add <strong>Rs. {(freeShippingThreshold - subtotal).toLocaleString()}</strong> more to get <strong>Free Delivery</strong>!
+                                        Add <strong>{formatPrice(freeShippingThreshold - subtotal)}</strong> more to get <strong>Free Delivery</strong>!
                                     </div>
                                 )}
                                 <div className="pt-3 border-t border-[#E8DEC8] flex justify-between items-baseline">
                                     <span className="font-heading font-bold text-base text-[#3A2E1F]">Grand Total</span>
-                                    <span className="font-heading font-extrabold text-2xl text-[#3A2E1F]">Rs. {grandTotal.toLocaleString()}</span>
+                                    <span className="font-heading font-extrabold text-2xl text-[#3A2E1F]">{formatPrice(grandTotal)}</span>
                                 </div>
                             </div>
 
@@ -133,8 +137,8 @@ export default function Cart() {
                         <ShoppingBag className="w-10 h-10" />
                     </div>
                     <div className="space-y-2">
-                        <h2 className="font-heading font-bold text-3xl text-[#3A2E1F]">Your Cart is Empty</h2>
-                        <p className="text-sm text-[#3A2E1F]/70 leading-relaxed font-body">Looks like you haven't added any fresh Gilgit dry fruits or nuts to your cart yet.</p>
+                        <h2 className="font-heading font-bold text-3xl text-[#3A2E1F]">{settings.empty_cart_heading || 'Your Cart is Empty'}</h2>
+                        <p className="text-sm text-[#3A2E1F]/70 leading-relaxed font-body">{settings.empty_cart_text || "Looks like you haven't added any products to your cart yet."}</p>
                     </div>
                     <Link to="/shop" className="inline-flex items-center gap-2 px-8 py-3 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-sm rounded-full transition-colors shadow-sm">
                         <span>Explore Products</span><ArrowRight className="w-4 h-4" />

@@ -13,6 +13,8 @@
 }
 
 @layer base {
+
+  html,
   body {
     font-family: 'Plus Jakarta Sans', sans-serif;
     background-color: #F5EFE0;
@@ -36,4 +38,35 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* Custom Marquee & Auto-Scroll Utilities */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Hide scrollbars cleanly */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

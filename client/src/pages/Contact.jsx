@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, MessageSquare } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, MessageSquare, Loader2 } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
+import SEO from '../components/SEO';
+import api from '../api/api';
 
 export default function Contact() {
     const { settings } = useSettings();
     useEffect(() => {
-        window.scrollTo(0, 0);
+        // window.scrollTo(0, 0); // Handled by RouteTransition
     }, []);
 
     const [formSubmitted, setFormSubmitted] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState('');
     const [contactForm, setContactForm] = useState({
         name: '',
         email: '',
@@ -16,17 +20,47 @@ export default function Contact() {
         message: ''
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setFormSubmitted(true);
-        setTimeout(() => {
-            setFormSubmitted(false);
+        setIsSubmitting(true);
+        setSubmitError('');
+        try {
+            await api.post('/contact', contactForm);
+            setFormSubmitted(true);
             setContactForm({ name: '', email: '', subject: '', message: '' });
-        }, 4000);
+            setTimeout(() => setFormSubmitted(false), 5000);
+        } catch (err) {
+            setSubmitError(err.response?.data?.error || 'Failed to send message. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
         <div className="space-y-12 pb-16">
+            <SEO
+                title={`Contact Us - ${settings.store_name || 'Our Store'}`}
+                description={settings.store_tagline || "Get in touch with us for bulk orders, order inquiries, or customer support. We're here to help!"}
+                canonical={`${window.location.origin}/contact`}
+                structuredData={{
+                    "@context": "https://schema.org",
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [
+                        {
+                            "@type": "ListItem",
+                            "position": 1,
+                            "name": "Home",
+                            "item": window.location.origin
+                        },
+                        {
+                            "@type": "ListItem",
+                            "position": 2,
+                            "name": "Contact Us",
+                            "item": `${window.location.origin}/contact`
+                        }
+                    ]
+                }}
+            />
 
             {/* 1. HERO BANNER */}
             <section className="bg-gradient-to-r from-[#F5EFE0] via-[#F5A623]/20 to-[#F5EFE0] border-b border-[#E8DEC8] py-12 px-4 sm:px-6 lg:px-8 text-center rounded-3xl max-w-7xl mx-auto mt-4">
@@ -38,7 +72,7 @@ export default function Contact() {
                         Contact {settings.store_name || 'Us'}
                     </h1>
                     <p className="text-sm text-[#3A2E1F]/70 font-body">
-                        Have a question about our dry fruit harvests, bulk corporate orders, or order status? We are here to assist!
+                        {settings.contact_page_subtitle || 'Have a question about our products, bulk corporate orders, or order status? We are here to assist!'}
                     </p>
                 </div>
             </section>
@@ -63,6 +97,12 @@ export default function Contact() {
                             <div className="p-4 bg-emerald-100 border border-emerald-300 text-emerald-900 rounded-2xl text-xs font-bold flex items-center gap-3">
                                 <CheckCircle2 className="w-5 h-5 text-emerald-700" />
                                 <span>Thank you! Your message has been sent successfully. We will reply shortly.</span>
+                            </div>
+                        )}
+
+                        {submitError && (
+                            <div className="p-4 bg-red-100 border border-red-300 text-red-900 rounded-2xl text-xs font-bold flex items-center gap-3">
+                                <span>⚠️ {submitError}</span>
                             </div>
                         )}
 
@@ -127,10 +167,20 @@ export default function Contact() {
 
                             <button
                                 type="submit"
-                                className="w-full py-3.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-sm rounded-full shadow-md transition-all flex items-center justify-center gap-2"
+                                disabled={isSubmitting}
+                                className="w-full py-3.5 bg-[#F5A623] hover:bg-[#D97706] text-[#3A2E1F] hover:text-white font-bold text-sm rounded-full shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                             >
-                                <span>Send Message</span>
-                                <Send className="w-4 h-4" />
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <span>Sending...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>Send Message</span>
+                                        <Send className="w-4 h-4" />
+                                    </>
+                                )}
                             </button>
                         </form>
                     </div>
@@ -149,7 +199,7 @@ export default function Contact() {
                                     </div>
                                     <div>
                                         <strong className="block text-[#3A2E1F] font-bold">Store Location & Warehouse</strong>
-                                        <span>{settings.contact_address || 'Pakistan'}</span>
+                                        <span>{settings.contact_address || ''}</span>
                                     </div>
                                 </div>
 
@@ -179,7 +229,7 @@ export default function Contact() {
                                     </div>
                                     <div>
                                         <strong className="block text-[#3A2E1F] font-bold">Working Hours</strong>
-                                        <span>Mon - Sat: 9:00 AM - 8:00 PM (PKT)</span>
+                                        <span>{settings.working_hours || 'Mon - Sat: 9:00 AM - 8:00 PM (PKT)'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -189,10 +239,17 @@ export default function Contact() {
                                 <span className="text-xs font-bold text-[#3A2E1F] uppercase tracking-wider block">
                                     Find Us On Google Maps
                                 </span>
-                                <div className="w-full h-48 bg-[#F5EFE0] rounded-2xl border border-[#E8DEC8] flex flex-col items-center justify-center text-center p-4 space-y-2">
-                                    <MapPin className="w-8 h-8 text-[#D97706]" />
-                                    <span className="font-heading font-bold text-sm text-[#3A2E1F]">Gilgit-Baltistan Hub</span>
-                                    <span className="text-[11px] text-[#3A2E1F]/60">35.9208° N, 74.3144° E</span>
+                                <div className="w-full h-48 bg-[#F5EFE0] rounded-2xl border border-[#E8DEC8] overflow-hidden">
+                                    <iframe
+                                        title={`${settings.store_name || 'Store'} Location`}
+                                        src={settings.map_embed_url || ''}
+                                        width="100%"
+                                        height="100%"
+                                        style={{ border: 0 }}
+                                        allowFullScreen=""
+                                        loading="lazy"
+                                        referrerPolicy="no-referrer-when-downgrade"
+                                    />
                                 </div>
                             </div>
                         </div>

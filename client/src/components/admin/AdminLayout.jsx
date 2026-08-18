@@ -11,7 +11,10 @@ import {
     X,
     Leaf,
     UserCircle,
-    Settings
+    Settings,
+    LayoutTemplate,
+    CreditCard,
+    MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -25,8 +28,11 @@ export default function AdminLayout() {
 
     const navItems = [
         { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+        { name: 'Homepage', path: '/admin/homepage', icon: LayoutTemplate },
         { name: 'Products', path: '/admin/products', icon: Package },
         { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },
+        { name: 'Payments', path: '/admin/payments', icon: CreditCard },
+        { name: 'Reviews', path: '/admin/reviews', icon: MessageSquare },
         { name: 'Categories', path: '/admin/categories', icon: Tags },
         { name: 'Settings', path: '/admin/settings', icon: Settings },
     ];
@@ -50,7 +56,7 @@ export default function AdminLayout() {
                                 <Leaf className="w-5 h-5 fill-current" />
                             </div>
                             <span className="font-heading font-extrabold text-lg text-[#3A2E1F]">
-                                {settings.store_name || 'GBMarket'} <span className="text-[#D97706] text-sm font-bold ml-1">Admin</span>
+                                {settings.store_name || 'Store'} <span className="text-[#D97706] text-sm font-bold ml-1">Admin</span>
                             </span>
                         </>
                     )}
@@ -79,15 +85,14 @@ export default function AdminLayout() {
 
             {/* SIDEBAR (DESKTOP & MOBILE DRAWER) */}
             <aside className={`
-        fixed md:static inset-y-0 left-0 z-50
+        fixed md:sticky top-0 h-screen inset-y-0 left-0 z-50
         w-64 bg-[#F5EFE0]/80 border-r border-[#E8DEC8]
-        flex flex-col justify-between
+        flex flex-col justify-between shrink-0
         transform transition-transform duration-300 ease-in-out
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-                <div className="p-6 space-y-8">
-
-                    {/* Logo Brand Header */}
+                {/* Logo Brand Header (Fixed Top) */}
+                <div className="p-6 pb-4 shrink-0">
                     <div className="flex items-center justify-between">
                         <Link to="/admin/dashboard" className="flex items-center gap-3">
                             {settings.logo_url && !settings.logo_url.includes('placeholder') ? (
@@ -99,7 +104,7 @@ export default function AdminLayout() {
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-xl font-bold font-heading tracking-tight text-[#3A2E1F] leading-none">
-                                            {settings.store_name || 'GBMarket'}
+                                            {settings.store_name || 'Store'}
                                         </span>
                                         <span className="text-[10px] font-semibold text-[#D97706] uppercase tracking-widest leading-tight mt-0.5">
                                             Control Center
@@ -116,8 +121,10 @@ export default function AdminLayout() {
                             <X className="w-5 h-5" />
                         </button>
                     </div>
+                </div>
 
-                    {/* Navigation Items */}
+                {/* Navigation Items (Scrollable Middle Content) */}
+                <div className="px-6 py-2 flex-1 overflow-y-auto space-y-1.5">
                     <nav className="space-y-1.5">
                         <span className="text-[11px] font-bold uppercase tracking-wider text-[#3A2E1F]/50 px-3 block mb-2">
                             Management
@@ -146,13 +153,13 @@ export default function AdminLayout() {
                     </nav>
                 </div>
 
-                {/* Sidebar Footer / Logout */}
-                <div className="p-6 border-t border-[#E8DEC8]/80 space-y-4">
+                {/* Sidebar Footer / Logout (Fixed Bottom) */}
+                <div className="p-6 border-t border-[#E8DEC8]/80 space-y-4 shrink-0">
                     <div className="flex items-center gap-3 p-2 bg-[#FFFDF9]/60 rounded-2xl border border-[#E8DEC8]">
                         <UserCircle className="w-8 h-8 text-[#D97706]" />
                         <div className="flex flex-col text-xs overflow-hidden">
                             <span className="font-bold text-[#3A2E1F] truncate">{adminUsername || 'Store Admin'}</span>
-                            <span className="text-[10px] text-[#3A2E1F]/60 truncate">admin@gbmarket.pk</span>
+                            <span className="text-[10px] text-[#3A2E1F]/60 truncate">{settings.contact_email || 'admin'}</span>
                         </div>
                     </div>
 
