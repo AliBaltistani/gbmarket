@@ -2,7 +2,7 @@ const express = require('express');
 const { parseJSON } = require('../helpers');
 const { getWhatsAppLink } = require('../services/whatsappService');
 
-module.exports = function (db, requireAdmin) {
+module.exports = function (db, requireAdmin, broadcastToAdmins) {
     const router = express.Router();
 
     // GET /api/orders/track (public — order tracking by ID + phone)
@@ -192,6 +192,24 @@ module.exports = function (db, requireAdmin) {
                 console.log('[Email] Skipped:', emailErr.message);
             }
 
+            // WebSocket: Notify admin panel of new order
+            try {
+                broadcastToAdmins('new_order', {
+                    id: result.orderId,
+                    customer_name,
+                    customer_email: customer_email || null,
+                    phone,
+                    address,
+                    total: result.grandTotal,
+                    status: 'Pending',
+                    payment_method: payment_method || 'COD',
+                    created_at: new Date().toISOString(),
+                    items: result.validatedItems
+                });
+            } catch (wsErr) {
+                console.log('[WebSocket] Broadcast skipped:', wsErr.message);
+            }
+
             res.status(201).json({ id: result.orderId, message: 'Order created successfully' });
         } catch (error) {
             if (error.message.includes('Insufficient stock') || error.message.includes('not found')) {
@@ -252,6 +270,17 @@ module.exports = function (db, requireAdmin) {
                 console.log('[Email] Status notification skipped:', emailErr.message);
             }
 
+            // WebSocket: Notify admin panel of status change
+            try {
+                broadcastToAdmins('order_status_updated', {
+                    id: Number(id),
+                    status,
+                    previous_status: order.status
+                });
+            } catch (wsErr) {
+                console.log('[WebSocket] Broadcast skipped:', wsErr.message);
+            }
+
             // Generate WhatsApp link for admin
             const whatsappLink = getWhatsAppLink(order.phone, order, status);
 
@@ -279,6 +308,25 @@ module.exports = function (db, requireAdmin) {
             if (!order) return res.status(404).json({ error: 'Order not found' });
 
             db.prepare('UPDATE orders SET payment_status = ? WHERE id = ?').run(payment_status, id);
+
+            // Send payment status email to customer (fire-and-forget)
+            try {
+                const { sendPaymentStatusEmail } = require('../services/emailService');
+                sendPaymentStatusEmail(order, payment_status);
+            } catch (emailErr) {
+                console.log('[Email] Payment notification skipped:', emailErr.message);
+            }
+
+            // WebSocket: Notify admin panel of payment update
+            try {
+                broadcastToAdmins('payment_status_updated', {
+                    id: Number(id),
+                    payment_status
+                });
+            } catch (wsErr) {
+                console.log('[WebSocket] Broadcast skipped:', wsErr.message);
+            }
+
             res.json({ message: `Payment status updated to ${payment_status}` });
         } catch (error) {
             next(error);

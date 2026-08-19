@@ -18,6 +18,11 @@ if (isConfigured) {
         }
     });
     console.log('[Email] SMTP configured — email notifications enabled.');
+
+    // Verify SMTP connection on startup (async, non-blocking)
+    transporter.verify()
+        .then(() => console.log('[Email] ✅ SMTP connection verified successfully'))
+        .catch(err => console.error('[Email] ❌ SMTP verification failed:', err.message));
 } else {
     console.log('[Email] SMTP not configured — email notifications disabled. Set SMTP_HOST, SMTP_USER, SMTP_PASS to enable.');
 }
@@ -220,4 +225,56 @@ async function sendOrderStatusEmail(order, newStatus) {
     }
 }
 
-module.exports = { sendOrderConfirmation, sendAdminNotification, sendContactFormEmail, sendOrderStatusEmail };
+/**
+ * Send payment status update email to customer
+ */
+async function sendPaymentStatusEmail(order, paymentStatus) {
+    if (!transporter || !order.customer_email) return;
+    const { siteUrl, storeName, currency, fromAddress } = getEmailConfig();
+
+    const statusConfig = {
+        'Verified': { emoji: '✅', color: '#059669', label: 'Payment Verified', desc: 'Your payment has been verified successfully. Your order is now being processed.' },
+        'Rejected': { emoji: '❌', color: '#DC2626', label: 'Payment Rejected', desc: 'Unfortunately, your payment could not be verified. Please contact us or submit a new payment proof.' }
+    };
+
+    const config = statusConfig[paymentStatus];
+    if (!config) return;
+
+    const html = `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#3A2E1F">
+            <div style="background:${config.color};padding:20px;text-align:center;border-radius:12px 12px 0 0">
+                <h1 style="margin:0;color:white;font-size:22px">${config.emoji} ${config.label}</h1>
+            </div>
+            <div style="padding:24px;background:#FFFDF9;border:1px solid #E8DEC8;border-top:none;border-radius:0 0 12px 12px">
+                <p>Hi <strong>${order.customer_name}</strong>,</p>
+                <p>${config.desc}</p>
+                <div style="background:#F5EFE0;padding:16px;border-radius:12px;margin:16px 0;border:1px solid #E8DEC8">
+                    <p style="margin:0"><strong>Order ID:</strong> #${order.id}</p>
+                    <p style="margin:8px 0 0 0"><strong>Payment Status:</strong> <span style="color:${config.color};font-weight:bold">${paymentStatus}</span></p>
+                    <p style="margin:8px 0 0 0"><strong>Total:</strong> ${currency} ${order.total}</p>
+                </div>
+                <p style="margin:16px 0">
+                    <a href="${siteUrl}/track-order" 
+                       style="display:inline-block;padding:12px 24px;background:#F5A623;color:#3A2E1F;font-weight:bold;text-decoration:none;border-radius:24px">
+                        Track Your Order →
+                    </a>
+                </p>
+                <p style="margin-top:20px;font-size:12px;color:#999">— ${storeName} Team</p>
+            </div>
+        </div>
+    `;
+
+    try {
+        await transporter.sendMail({
+            from: `"${storeName}" <${fromAddress}>`,
+            to: order.customer_email,
+            subject: `${config.emoji} Payment ${paymentStatus} — Order #${order.id}`,
+            html
+        });
+        console.log(`[Email] Payment status (${paymentStatus}) sent to ${order.customer_email}`);
+    } catch (err) {
+        console.error(`[Email] Failed to send payment status update:`, err.message);
+    }
+}
+
+module.exports = { sendOrderConfirmation, sendAdminNotification, sendContactFormEmail, sendOrderStatusEmail, sendPaymentStatusEmail };

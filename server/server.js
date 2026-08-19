@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const http = require('http');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
@@ -13,6 +14,7 @@ const morgan = require('morgan');
 const db = require('./db/db');
 const requireAdmin = require('./middleware/requireAdmin');
 const { safeErrorMessage } = require('./helpers');
+const { initWebSocket, broadcastToAdmins } = require('./services/websocketService');
 
 // ==========================================
 // C1: XSS SANITIZATION HELPER
@@ -152,7 +154,7 @@ app.use('/api/upload', require('./routes/upload')(db, requireAdmin, upload));
 app.use('/api/settings', require('./routes/settings')(db, requireAdmin));
 app.use('/api/categories', require('./routes/categories')(db, requireAdmin));
 app.use('/api/products', require('./routes/products')(db, requireAdmin));
-app.use('/api/orders', require('./routes/orders')(db, requireAdmin));
+app.use('/api/orders', require('./routes/orders')(db, requireAdmin, broadcastToAdmins));
 app.use('/api/contact', require('./routes/contact')(db));
 app.use('/api/homepage', require('./routes/homepage')(db, requireAdmin));
 app.use('/api/payments', require('./routes/payments')(db, requireAdmin, upload));
@@ -199,4 +201,9 @@ app.use((err, req, res, next) => {
 // START SERVER
 // ==========================================
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const server = http.createServer(app);
+
+// Initialize WebSocket on the same HTTP server
+initWebSocket(server);
+
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

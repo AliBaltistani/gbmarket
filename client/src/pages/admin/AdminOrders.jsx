@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     ChevronDown,
     ChevronUp,
@@ -27,6 +27,7 @@ import { getOrders, updateOrderStatus } from '../../api/orders';
 import { updatePaymentStatus } from '../../api/payments';
 import { useSettings } from '../../context/SettingsContext';
 import { useCurrency } from '../../hooks/useCurrency';
+import { useAdminWebSocket } from '../../hooks/useAdminWebSocket';
 import toast from 'react-hot-toast';
 
 export default function AdminOrders() {
@@ -55,6 +56,32 @@ export default function AdminOrders() {
     useEffect(() => {
         loadOrders();
     }, []);
+
+    // Real-time WebSocket updates
+    const onNewOrder = useCallback((order) => {
+        setOrders(prev => [order, ...prev]);
+        toast.success(`🆕 New Order #${order.id} from ${order.customer_name}`, { duration: 5000, icon: '🛒' });
+    }, []);
+
+    const onStatusUpdate = useCallback((data) => {
+        setOrders(prev => prev.map(o => o.id === data.id ? { ...o, status: data.status } : o));
+        if (selectedOrder && selectedOrder.id === data.id) {
+            setSelectedOrder(prev => prev ? { ...prev, status: data.status } : null);
+        }
+    }, [selectedOrder]);
+
+    const onPaymentUpdate = useCallback((data) => {
+        setOrders(prev => prev.map(o => o.id === data.id ? { ...o, payment_status: data.payment_status } : o));
+        if (selectedOrder && selectedOrder.id === data.id) {
+            setSelectedOrder(prev => prev ? { ...prev, payment_status: data.payment_status } : null);
+        }
+    }, [selectedOrder]);
+
+    useAdminWebSocket({
+        onNewOrder,
+        onStatusUpdate,
+        onPaymentUpdate
+    });
 
     const tabs = ['All', 'Pending', 'Processing', 'Shipped', 'Delivered'];
 

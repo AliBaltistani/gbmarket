@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     ShoppingBag,
     DollarSign,
@@ -19,6 +19,7 @@ import { getOrders } from '../../api/orders';
 import { getProducts } from '../../api/products';
 import { useSettings } from '../../context/SettingsContext';
 import { useCurrency } from '../../hooks/useCurrency';
+import { useAdminWebSocket } from '../../hooks/useAdminWebSocket';
 
 export default function AdminDashboard() {
     const navigate = useNavigate();
@@ -68,6 +69,34 @@ export default function AdminDashboard() {
 
         fetchDashboardData();
     }, []);
+
+    // Real-time: refresh dashboard when a new order arrives
+    const onNewOrder = useCallback((order) => {
+        toast.success(`🆕 New Order #${order.id} from ${order.customer_name}`, { duration: 5000, icon: '🛒' });
+        // Re-fetch stats to update totals
+        Promise.all([getOrders(), getProducts()]).then(([ordersData, productsData]) => {
+            const totalOrders = ordersData.length;
+            const totalRevenue = ordersData.reduce((sum, o) => sum + (o.total || 0), 0);
+            const totalProducts = productsData.length;
+            const lowStockCount = productsData.filter(p => p.stock < 5).length;
+            setStats([
+                { title: 'Total Orders', value: totalOrders.toString(), change: 'Lifetime total', isPositive: true, icon: ShoppingBag, color: 'bg-[#F5A623]/20 text-[#D97706]' },
+                { title: 'Total Revenue', value: formatPrice(totalRevenue), change: 'Lifetime gross', isPositive: true, icon: DollarSign, color: 'bg-emerald-100 text-emerald-700' },
+                { title: 'Total Products', value: totalProducts.toString(), change: 'Active in catalog', isPositive: true, icon: Package, color: 'bg-blue-100 text-blue-700' },
+                { title: 'Low Stock Alert', value: `${lowStockCount} Items`, change: lowStockCount > 0 ? 'Action needed' : 'Stock healthy', isPositive: lowStockCount === 0, icon: AlertTriangle, color: lowStockCount > 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700' },
+            ]);
+            const latest5 = ordersData.slice(0, 5).map(o => ({
+                id: `${settings.order_id_prefix || 'ORD'}-${o.id}`,
+                customer: o.customer_name,
+                total: formatPrice(o.total),
+                status: o.status,
+                date: new Date(o.created_at).toLocaleDateString()
+            }));
+            setRecentOrders(latest5);
+        }).catch(() => { });
+    }, [formatPrice, settings.order_id_prefix]);
+
+    useAdminWebSocket({ onNewOrder });
 
     const getStatusBadge = (status) => {
         switch (status) {
