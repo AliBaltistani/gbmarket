@@ -58,6 +58,37 @@ export function useAdminWebSocket(handlers = {}) {
 
                     switch (eventType) {
                         case 'new_order':
+                            try {
+                                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                                if (AudioContext) {
+                                    const ctx = new AudioContext();
+                                    const osc1 = ctx.createOscillator();
+                                    const osc2 = ctx.createOscillator();
+                                    const gainNode = ctx.createGain();
+
+                                    osc1.connect(gainNode);
+                                    osc2.connect(gainNode);
+                                    gainNode.connect(ctx.destination);
+
+                                    // Chime frequencies (C6 + E6)
+                                    osc1.type = 'sine';
+                                    osc2.type = 'sine';
+                                    osc1.frequency.setValueAtTime(1046.50, ctx.currentTime);
+                                    osc2.frequency.setValueAtTime(1318.51, ctx.currentTime);
+
+                                    // Envelope
+                                    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+                                    gainNode.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.05);
+                                    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
+
+                                    osc1.start(ctx.currentTime);
+                                    osc2.start(ctx.currentTime);
+                                    osc1.stop(ctx.currentTime + 1);
+                                    osc2.stop(ctx.currentTime + 1);
+                                }
+                            } catch (e) {
+                                // Ignore audio creation errors
+                            }
                             handlersRef.current.onNewOrder?.(payload);
                             break;
                         case 'order_status_updated':

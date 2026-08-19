@@ -90,6 +90,8 @@ export default function Checkout() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (loading) return;
+
         if (cartItems.length === 0) {
             toast.error("Your cart is empty.");
             return;
