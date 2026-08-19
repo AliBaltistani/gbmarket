@@ -23,14 +23,16 @@ export function useAdminWebSocket(handlers = {}) {
 
         // Determine WebSocket URL from current location
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-
-        // In dev, API might be on a different port (5000)
         const apiUrl = import.meta.env.VITE_API_URL;
         let wsHost;
-        if (apiUrl) {
+
+        if (import.meta.env.DEV) {
+            // In dev mode, bypass Vite proxy and connect directly to backend to avoid ECONNABORTED
+            wsHost = 'ws://localhost:5000';
+        } else if (apiUrl && apiUrl.startsWith('http')) {
             try {
-                const url = new URL(apiUrl, window.location.origin);
-                wsHost = `${protocol}//${url.host}`;
+                const url = new URL(apiUrl);
+                wsHost = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}`;
             } catch {
                 wsHost = `${protocol}//${window.location.host}`;
             }
